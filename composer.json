@@ -1,0 +1,29 @@
+{
+  "name": "signalwire/signalwire-php",
+  "description": "Client library for connecting to SignalWire.",
+  "version": "1.0.0",
+  "type": "library",
+  "keywords": [
+    "signalwire",
+    "laml"
+  ],
+  "homepage": "https://github.com/signalwire/signalwire-php",
+  "license": "MIT",
+  "autoload": {
+    "psr-4": {
+      "SignalWire\\": "src/"
+    }
+  },
+  "authors": [
+    {
+      "name": "Edoardo Gallo",
+      "email": "edoardo@signalwire.com"
+    }
+  ],
+  "require": {
+    "twilio/sdk": "^5.21.3"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "^7"
+  }
+}
