@@ -1,0 +1,11 @@
+version: '3.4'
+services:
+  php:
+    build:
+      context: ../
+      dockerfile: provisioning/Dockerfile
+    volumes:
+      - ..:/app
+      - /app/vendor
+    env_file:
+      - ../.env

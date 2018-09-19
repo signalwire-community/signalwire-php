@@ -1,0 +1,1 @@
+docker-compose -f provisioning/docker-compose.yml --project-name signalwire-php "$@"

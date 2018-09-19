@@ -68,7 +68,7 @@ $message = $client->messages->create(
 echo "Message ID: " . $message->sid;
 ```
 
-#### Generating LaML
+### Generating LaML
 ```php
 $response = new SignalWire\LaML();
 $response->say("Welcome to SignalWire!");
@@ -88,7 +88,7 @@ LaML output:
 ```
 
 # Migration
-Do you want start using SignalWire in your current application? You can easily migrate the code with minimal changes!
+Do you want to start using SignalWire in your current application? You can easily migrate the code with minimal changes!
 
 To use the Rest client set the env variable `SIGNALWIRE_API_HOSTNAME` as described in [Usage](#usage) and then:
 ```php
@@ -117,6 +117,41 @@ use SignalWire\LaML;
 $response = new LaML;
 
 // Now use $response like you did before!
+```
+
+# Contribute
+
+You can try the library locally using Docker.
+
+Set your Host, Project and Token in `.env`
+```bash
+$ cp .env.example .env
+$ vim .env
+```
+
+Build the image
+```bash
+$ ./docker-dev build
+```
+
+To start using the Rest Client try out the `examples/index.php`:
+
+```bash
+$ ./docker-dev run --rm php php examples/index.php
+```
+
+To generate LaML `examples/laml.php`:
+
+```bash
+$ ./docker-dev run --rm php php examples/laml.php
+```
+
+## Tests
+
+Run tests using Docker:
+
+```bash
+$ ./docker-dev run --rm php php vendor/bin/phpunit tests
 ```
 
 # Copyright
