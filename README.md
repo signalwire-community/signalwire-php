@@ -68,7 +68,7 @@ $message = $client->messages->create(
 echo "Message ID: " . $message->sid;
 ```
 
-#### Generating LaML
+### Generating LaML
 ```php
 $response = new SignalWire\LaML();
 $response->say("Welcome to SignalWire!");
@@ -88,7 +88,7 @@ LaML output:
 ```
 
 # Migration
-Do you want start using SignalWire in your current application? You can easily migrate the code with minimal changes!
+Do you want to start using SignalWire in your current application? You can easily migrate the code with minimal changes!
 
 To use the Rest client set the env variable `SIGNALWIRE_API_HOSTNAME` as described in [Usage](#usage) and then:
 ```php
