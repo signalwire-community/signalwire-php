@@ -119,6 +119,41 @@ $response = new LaML;
 // Now use $response like you did before!
 ```
 
+# Contribute
+
+You can try the library locally using Docker.
+
+Set your Host, Project and Token in `.env`
+```bash
+$ cp .env.example .env
+$ vim .env
+```
+
+Build the image
+```bash
+$ ./docker-dev build
+```
+
+To start using the Rest Client try out the `examples/index.php`:
+
+```bash
+$ ./docker-dev run --rm php php examples/index.php
+```
+
+To generate LaML `examples/laml.php`:
+
+```bash
+$ ./docker-dev run --rm php php examples/laml.php
+```
+
+## Tests
+
+Run tests using Docker:
+
+```bash
+$ ./docker-dev run --rm php php vendor/bin/phpunit tests
+```
+
 # Copyright
 
 Copyright (c) 2018 SignalWire Inc. See [LICENSE](https://github.com/signalwire/signalwire-php/blob/master/LICENSE) for
