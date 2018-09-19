@@ -87,10 +87,10 @@ LaML output:
 </Response>
 ```
 
-# MIGRATION
+# Migration
 Do you want start using SignalWire in your current application? You can easily migrate the code with minimal changes!
 
-To use the Rest client set the env variable `SIGNALWIRE_API_HOSTNAME` as described in [Usage](##usage) and then:
+To use the Rest client set the env variable `SIGNALWIRE_API_HOSTNAME` as described in [Usage](#usage) and then:
 ```php
 // Replace the namespace from:
 use Twilio\Rest\Client;
