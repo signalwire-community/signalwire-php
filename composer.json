@@ -1,7 +1,7 @@
 {
   "name": "signalwire/signalwire-php",
   "description": "Client library for connecting to SignalWire.",
-  "version": "1.0.0",
+  "version": "1.0.0-rc.1",
   "type": "library",
   "keywords": [
     "signalwire",
