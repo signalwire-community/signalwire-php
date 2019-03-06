@@ -3,9 +3,10 @@ namespace SignalWire\Rest;
 
 class Client extends \Twilio\Rest\Client {
   public function __construct(...$args) {
+    $domain = $args[2];
     parent::__construct(...$args);
 
-    $this->_api = new Api($this);
+    $this->_api = new Api($this, $domain);
   }
 
   public function getSignalwireDomain() {

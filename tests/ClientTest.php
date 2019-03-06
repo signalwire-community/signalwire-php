@@ -32,4 +32,12 @@ class ClientTest extends TestCase
     $this->expectException(Exception::class);
     $client = new Client($this->sid, $this->token);
   }
+
+  public function testTNoExceptionIfSetInConstructor(): void {
+    $domain = 'constructor.signalwire.com';
+    unset($_ENV['SIGNALWIRE_API_HOSTNAME']);
+    putenv("SIGNALWIRE_API_HOSTNAME");
+    $client = new Client($this->sid, $this->token, $domain);
+    $this->assertEquals($client->api->baseUrl, "https://" . $domain);
+  }
 }
