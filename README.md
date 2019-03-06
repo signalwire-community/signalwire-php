@@ -23,8 +23,7 @@ require 'path-to/vendor/autoload.php';
 
 # Usage
 
-In order to use the `SignalWire\Rest\Client` namespace you must set the environment variable `SIGNALWIRE_API_HOSTNAME` that point to your SignalWire host!
-
+In order to use the `SignalWire\Rest\Client` namespace you must set the environment variable `SIGNALWIRE_API_HOSTNAME` that point to your SignalWire host, or you can alternatively pass the value into the Client constructor.
 Using [$_ENV](http://php.net/manual/it/reserved.variables.environment.php):
 ```php
 $_ENV['SIGNALWIRE_API_HOSTNAME'] = "example.signalwire.com";
@@ -41,7 +40,7 @@ Under Apache you can use [SetEnv](https://httpd.apache.org/docs/2.4/mod/mod_env.
 ```php
 use SignalWire\Rest\Client;
 // You can retrieve Project and Token from your SignalWire Space!
-$client = new Client($project, $token);
+$client = new Client($project, $token, "example.signalwire.com");
 
 // See the examples below to use $client ..
 ```
