@@ -1,11 +1,11 @@
 <?php
 require dirname(__FILE__) . '/../vendor/autoload.php';
 
-if (!isset($_ENV['SIGNALWIRE_API_PROJECT']) || !isset($_ENV['SIGNALWIRE_API_TOKEN'])) {
-  throw new \Exception('Missing SIGNALWIRE_API_PROJECT or SIGNALWIRE_API_TOKEN environment variables.');
+if (!isset($_ENV['SIGNALWIRE_PROJECT']) || !isset($_ENV['SIGNALWIRE_TOKEN'])) {
+  throw new \Exception('Missing SIGNALWIRE_PROJECT or SIGNALWIRE_TOKEN environment variables.');
 }
 
-$client = new SignalWire\Rest\Client($_ENV['SIGNALWIRE_API_PROJECT'], $_ENV['SIGNALWIRE_API_TOKEN']);
+$client = new SignalWire\Rest\Client($_ENV['SIGNALWIRE_PROJECT'], $_ENV['SIGNALWIRE_TOKEN']);
 
 $calls = $client->calls->read();
 echo "Total calls: " . count($calls) . chr(10);
