@@ -28,7 +28,7 @@ class Client extends \Twilio\Rest\Client {
   }
 
   private function _getHost(Array $options = array()) {
-    if (array_key_exists("signalwireSpaceUrl", $options)) {
+    if (array_key_exists("signalwireSpaceUrl", $options) && trim($options["signalwireSpaceUrl"]) !== "") {
       return trim($options["signalwireSpaceUrl"]);
     } elseif ($this->_checkEnv(self::ENV_SW_SPACE)) {
       return $this->_checkEnv(self::ENV_SW_SPACE);
