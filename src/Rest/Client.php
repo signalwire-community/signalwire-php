@@ -6,7 +6,12 @@ class Client extends \Twilio\Rest\Client {
   const ENV_SW_HOSTNAME = "SIGNALWIRE_API_HOSTNAME";
 
   public function __construct($project, $token, Array $options = array()) {
-    parent::__construct($project, $token, $accountSid = null, $region = null, $httpClient = null, $environment = null);
+    $accountSid = null;
+    $region = null;
+    $httpClient = isset($options["httpClient"]) ? $options["httpClient"] : null;
+    $environment = null;
+    parent::__construct($project, $token, $accountSid, $region, $httpClient, $environment);
+
     $domain = $this->_getHost($options);
     $this->_api = new Api($this, $domain);
   }
