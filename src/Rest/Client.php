@@ -36,7 +36,7 @@ class Client extends \Twilio\Rest\Client {
       return $this->_checkEnv(self::ENV_SW_HOSTNAME);
     }
 
-    throw new \Exception("Missing SIGNALWIRE_API_HOSTNAME environment variable.");
+    throw new \Exception("SignalWire Space URL is not configured.\nEnter your SignalWire Space domain via the SIGNALWIRE_SPACE_URL or SIGNALWIRE_API_HOSTNAME environment variables, or specifying the property \"signalwireSpaceUrl\" in the init options.");
   }
 
   private function _checkEnv(String $key) {
