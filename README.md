@@ -1,12 +1,11 @@
+[![Latest Stable Version](https://poser.pugx.org/signalwire/signalwire/v/stable)](https://packagist.org/packages/signalwire/signalwire)
+![Drone CI](https://ci.signalwire.com/api/badges/signalwire/signalwire-php/status.svg)
+
 # SignalWire PHP
 
 This library provides a client for the Signalwire LaML and REST services.
 
 It allows you to create calls, send messages, and generate LAML responses.
-
-[![Latest Stable Version](https://poser.pugx.org/signalwire/signalwire/v/stable)](https://packagist.org/packages/signalwire/signalwire)
-
-![Drone CI](https://ci.signalwire.com/api/badges/signalwire/signalwire-php/status.svg)
 
 # Installation
 
