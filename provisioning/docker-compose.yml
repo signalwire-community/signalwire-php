@@ -7,5 +7,3 @@ services:
     volumes:
       - ..:/app
       - /app/vendor
-    env_file:
-      - ../.env

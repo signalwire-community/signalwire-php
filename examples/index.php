@@ -1,11 +1,16 @@
 <?php
 require dirname(__FILE__) . '/../vendor/autoload.php';
 
-if (!isset($_ENV['SIGNALWIRE_PROJECT']) || !isset($_ENV['SIGNALWIRE_TOKEN'])) {
-  throw new \Exception('Missing SIGNALWIRE_PROJECT or SIGNALWIRE_TOKEN environment variables.');
+$space_url = "your-space.signalwire.com";
+$project = "";
+$token = "";
+if (empty($project) || empty($token)) {
+  throw new \Exception('Set your SignalWire project and token before run the example.');
 }
 
-$client = new SignalWire\Rest\Client($_ENV['SIGNALWIRE_PROJECT'], $_ENV['SIGNALWIRE_TOKEN']);
+$client = new SignalWire\Rest\Client($project, $token, array(
+  "signalwireSpaceUrl" => $space_url
+));
 
 $calls = $client->calls->read();
 echo "Total calls: " . count($calls) . chr(10);
