@@ -1,12 +1,11 @@
+[![Latest Stable Version](https://poser.pugx.org/signalwire/signalwire/v/stable)](https://packagist.org/packages/signalwire/signalwire)
+![Drone CI](https://ci.signalwire.com/api/badges/signalwire/signalwire-php/status.svg)
+
 # SignalWire PHP
 
 This library provides a client for the Signalwire LaML and REST services.
 
 It allows you to create calls, send messages, and generate LAML responses.
-
-[![Latest Stable Version](https://poser.pugx.org/signalwire/signalwire/v/stable)](https://packagist.org/packages/signalwire/signalwire)
-
-![Drone CI](https://ci.signalwire.com/api/badges/signalwire/signalwire-php/status.svg)
 
 # Installation
 
@@ -21,29 +20,31 @@ If your environment does not handle autoloading you must `require` the autoload 
 require 'path-to/vendor/autoload.php';
 ```
 
-# Usage
+# Setup the Client
 
-In order to use the `SignalWire\Rest\Client` namespace you must set the environment variable `SIGNALWIRE_API_HOSTNAME` that point to your SignalWire host, or you can alternatively pass the value into the Client constructor.
+To setup a new Client you need your SignalWire `Project`, `Token` and `Space URL`.
+
+```php
+use SignalWire\Rest\Client;
+
+$client = new Client('your-project', 'your-token', array(
+  "signalwireSpaceUrl" => "example.signalwire.com"
+));
+// See the examples below to use $client ..
+```
+
+You can alternatively use the environment variables to set the Space URL:\
 Using [$_ENV](http://php.net/manual/it/reserved.variables.environment.php):
 ```php
-$_ENV['SIGNALWIRE_API_HOSTNAME'] = "example.signalwire.com";
+$_ENV['SIGNALWIRE_SPACE_URL'] = "example.signalwire.com";
 ```
 
 Using [putenv](http://php.net/manual/it/function.putenv.php):
 
 ```php
-putenv("SIGNALWIRE_API_HOSTNAME=example.signalwire.com");
+putenv("SIGNALWIRE_SPACE_URL=example.signalwire.com");
 ```
-
-Under Apache you can use [SetEnv](https://httpd.apache.org/docs/2.4/mod/mod_env.html#setenv) directive.
-### Setup the client
-```php
-use SignalWire\Rest\Client;
-// You can retrieve Project and Token from your SignalWire Space!
-$client = new Client($project, $token, "example.signalwire.com");
-
-// See the examples below to use $client ..
-```
+> Under Apache you can also use [SetEnv](https://httpd.apache.org/docs/2.4/mod/mod_env.html#setenv) directive.
 
 ### Make Call
 ```php
@@ -93,7 +94,7 @@ LaML output:
 # Migration
 Do you want to start using SignalWire in your current application? You can easily migrate the code with minimal changes!
 
-To use the Rest client set the env variable `SIGNALWIRE_API_HOSTNAME` as described in [Usage](#usage) and then:
+To use the Rest client set the env variable `SIGNALWIRE_SPACE_URL` as described in [Usage](#usage) and then:
 ```php
 // Replace the namespace from:
 use Twilio\Rest\Client;
@@ -126,7 +127,7 @@ $response = new LaML;
 
 You can try the library locally using Docker.
 
-Set your Host, Project and Token in `.env`
+Set your Space URL, Project and Token in `.env`
 ```bash
 $ cp .env.example .env
 $ vim .env

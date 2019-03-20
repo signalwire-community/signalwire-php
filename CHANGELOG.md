@@ -1,8 +1,9 @@
 # Changelog
 
-## master
+## 1.1.1
 
-- Allow passing in domain via constructor
+- Ability to set SignalWire Space URL in `SignalWire\Rest\Client` constructor via `signalwireSpaceUrl` key.
+- Support SIGNALWIRE_SPACE_URL env variable.
 
 ## 1.1.0
 
