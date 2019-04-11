@@ -1,5 +1,6 @@
 <?php
 namespace SignalWire\Relay;
+use SignalWire\Messages\Connect;
 
 class Client {
   /**
@@ -38,15 +39,30 @@ class Client {
     $this->connection->connect();
   }
 
-  public function _onWsOpen() {
-    echo "OPEN" . PHP_EOL;
-    $bladeConnect = '{"jsonrpc":"2.0","id":"f037ccd0-8e62-4269-a944-ae3ea1c716fe","method":"blade.connect","params":{"version":{"major":2,"minor":1,"revision":0},"authentication":{"project":"'.$this->project.'","token":"'.$this->token.'"}}}';
-    $this->connection->send($bladeConnect);
+  public function execute(\SignalWire\Messages\BaseMessage $msg) {
+    return $this->connection->send($msg);
   }
 
-  public function _onWsError($error) {
-    echo "Not Connected with error";
-    // print_r($error->message);
-    echo $error->getMessage();
+  public function _onSocketOpen() {
+    $bladeConnect = new Connect($this->project, $this->token); // $this->sessionId
+    $this->execute($bladeConnect)->then(
+      function($result) {
+        \SignalWire\Log::warning('Connect result:', [$result]);
+      }, function($error) {
+        \SignalWire\Log::warning('Connect error:', [$error]);
+      }
+    );
+  }
+
+  public function _onSocketClose() {
+
+  }
+
+  public function _onSocketError($error) {
+    \SignalWire\Log::error('Socket Error:', [$error->getMessage()]);
+  }
+
+  public function _onSocketMessage($msg) {
+
   }
 }

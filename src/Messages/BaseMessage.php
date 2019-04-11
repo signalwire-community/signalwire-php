@@ -17,7 +17,7 @@ abstract class BaseMessage {
     );
   }
 
-  public function toJson(){
-    return json_encode($this->request);
+  public function toJson(Bool $pretty = false){
+    return $pretty ? json_encode($this->request, JSON_PRETTY_PRINT) : json_encode($this->request);
   }
 }

@@ -46,11 +46,11 @@ class Handler {
     }
   }
 
-  static public function trigger(String $evt, Array $params, String $uniqueId = self::GLOBAL){
+  static public function trigger(String $evt, $params, String $uniqueId = self::GLOBAL){
     $event = self::_cleanEventName($evt, $uniqueId);
     if (isset(self::$queue[$event])) {
       foreach (self::$queue[$event] as $callable){
-        call_user_func_array($callable, $params);
+        call_user_func_array($callable, [$params]);
       }
     }
   }
