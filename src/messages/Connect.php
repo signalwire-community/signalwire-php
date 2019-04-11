@@ -8,7 +8,7 @@ class Connect extends BaseMessage {
 
   protected $method = 'blade.connect';
 
-  public function __construct(String $project, String $token){
+  public function __construct(String $project, String $token, String $sessionid = ''){
     $params = array(
       'version' => array(
         'major' => self::VERSION_MAJOR,
@@ -20,6 +20,9 @@ class Connect extends BaseMessage {
         'token' => $token
       )
     );
+    if ($sessionid) {
+      $params['sessionid'] = $sessionid;
+    }
 
     $this->buildRequest(array(
       'method' => $this->method,
