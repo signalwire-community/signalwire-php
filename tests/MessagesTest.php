@@ -8,15 +8,6 @@ use SignalWire\Messages\Subscription;
 class MessagesTest extends TestCase
 {
   const UUID = '6118cfc7-9192-4869-884a-052d53434e4c';
-  // public function noop(): void {}
-
-  // protected function setUp() {
-
-  // }
-
-  // protected function tearDown() {
-    // SignalWire\Handler::clear();
-  // }
 
   public function testBladeConnectWithoutSessionId(): void {
     $msg = new Connect('project', 'token');
