@@ -62,6 +62,12 @@ class Client {
    */
   private $_idle = false;
 
+  /**
+   * Queue of the execute messages that must be sent when the session turns up
+   * @var Boolean
+   */
+  private $_executeQueue = array();
+
   public function __construct(Array $options) {
     $this->host = $options['host'];
     $this->project = $options['project'];
@@ -77,11 +83,17 @@ class Client {
   }
 
   public function execute(BaseMessage $msg) {
-    // TODO: handle _idle state
+    if ($this->_idle) {
+      return new \React\Promise\Promise(function (callable $resolve) use ($msg) {
+        array_push($this->_executeQueue, array('resolve' => $resolve, 'msg' => $msg));
+      });
+    }
+
     return $this->connection->send($msg);
   }
 
   public function _onSocketOpen() {
+    $this->_idle = false;
     $bladeConnect = new Connect($this->project, $this->token, $this->sessionid);
     $this->execute($bladeConnect)->then(
       function($result) {
@@ -90,6 +102,7 @@ class Client {
         $this->nodeid = $result->nodeid;
         // if ($result->session_restored) { TODO: }
 
+        $this->_emptyExecuteQueue();
         Handler::trigger(Events::Ready, $this, $this->uuid);
       }, function($error) {
         Handler::trigger(Events::Error, $error, $this->uuid);
@@ -101,10 +114,9 @@ class Client {
     if ($this->_autoReconnect === false) {
       return;
     }
-    $self = $this;
     $loop = \React\EventLoop\Factory::create();
-    $loop->addTimer(1.0, function() use ($loop, $self) {
-      $self->connect();
+    $loop->addTimer(1.0, function() use ($loop) {
+      $this->connect();
       $loop->stop();
     });
     $loop->run();
@@ -154,5 +166,15 @@ class Client {
     $this->off(Events::SocketClose, [$this, "_onSocketClose"], $this->uuid);
     $this->off(Events::SocketError, [$this, "_onSocketError"], $this->uuid);
     $this->off(Events::SocketMessage, [$this, "_onSocketMessage"], $this->uuid);
+  }
+
+  private function _emptyExecuteQueue() {
+    if ($this->_idle) {
+      return;
+    }
+    foreach ($this->_executeQueue as $queue) {
+      $promise = $this->execute($queue['msg']);
+      call_user_func($queue['resolve'], $promise);
+    }
   }
 }
