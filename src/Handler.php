@@ -13,9 +13,13 @@ class Handler {
     self::$queue[$event][] = $callable;
   }
 
-  // static public function registerOnce(String $evt, Callable $callable, String $uniqueId = self::GLOBAL){
-  //   $event = self::_cleanEventName($evt, $uniqueId);
-  // }
+  static public function registerOnce(String $evt, Callable $callable, String $uniqueId = self::GLOBAL){
+    $wrapper = function($params) use ($evt, $callable, $uniqueId, &$wrapper) {
+      self::deRegister($evt, $wrapper, $uniqueId);
+      call_user_func_array($callable, func_get_args());
+    };
+    self::register($evt, $wrapper, $uniqueId);
+  }
 
   static public function deRegister(String $evt, Callable $callable = null, String $uniqueId = self::GLOBAL){
     if (!self::isQueued($evt, $uniqueId)) {

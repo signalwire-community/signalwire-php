@@ -37,6 +37,37 @@ class HandlerTest extends TestCase
     $this->assertEquals(SignalWire\Handler::queueCount(self::EVENT_NAME, self::UNIQUE_ID), 1);
   }
 
+  // registerOnce()
+  public function testRegisterOnceWithoutUniqueId(): void {
+    SignalWire\Handler::registerOnce(self::EVENT_NAME, [$this->mock, 'noop']);
+
+    $this->assertTrue(SignalWire\Handler::isQueued(self::EVENT_NAME));
+    $this->assertFalse(SignalWire\Handler::isQueued(self::EVENT_NAME, self::UNIQUE_ID));
+    $this->assertEquals(SignalWire\Handler::queueCount(self::EVENT_NAME), 1);
+
+    $this->mock->expects($this->exactly(1))->method('noop')->with('once');
+
+    SignalWire\Handler::trigger(self::EVENT_NAME, 'once');
+    SignalWire\Handler::trigger(self::EVENT_NAME, 'once');
+
+    $this->assertFalse(SignalWire\Handler::isQueued(self::EVENT_NAME));
+  }
+
+  public function testRegisterOnceWithUniqueId(): void {
+    SignalWire\Handler::registerOnce(self::EVENT_NAME, [$this->mock, 'noop'], self::UNIQUE_ID);
+
+    $this->assertTrue(SignalWire\Handler::isQueued(self::EVENT_NAME, self::UNIQUE_ID));
+    $this->assertFalse(SignalWire\Handler::isQueued(self::EVENT_NAME));
+    $this->assertEquals(SignalWire\Handler::queueCount(self::EVENT_NAME, self::UNIQUE_ID), 1);
+
+    $this->mock->expects($this->exactly(1))->method('noop')->with('once');
+
+    SignalWire\Handler::trigger(self::EVENT_NAME, 'once', self::UNIQUE_ID);
+    SignalWire\Handler::trigger(self::EVENT_NAME, 'once', self::UNIQUE_ID);
+
+    $this->assertFalse(SignalWire\Handler::isQueued(self::EVENT_NAME, self::UNIQUE_ID));
+  }
+
   // deRegister()
   public function testDeRegisterWithoutUniqueId(): void {
     SignalWire\Handler::register(self::EVENT_NAME, [$this->mock, 'noop']);
@@ -70,8 +101,8 @@ class HandlerTest extends TestCase
 
     $this->mock->expects($this->exactly(2))->method('noop')->with('hello');
 
-    SignalWire\Handler::trigger(self::EVENT_NAME, ['hello']);
-    SignalWire\Handler::trigger(self::EVENT_NAME, ['hello']);
+    SignalWire\Handler::trigger(self::EVENT_NAME, 'hello');
+    SignalWire\Handler::trigger(self::EVENT_NAME, 'hello');
   }
 
   public function testTriggerWithUniqueId(): void {
@@ -79,7 +110,7 @@ class HandlerTest extends TestCase
 
     $this->mock->expects($this->exactly(2))->method('noop')->with('unique');
 
-    SignalWire\Handler::trigger(self::EVENT_NAME, ['unique'], self::UNIQUE_ID);
-    SignalWire\Handler::trigger(self::EVENT_NAME, ['unique'], self::UNIQUE_ID);
+    SignalWire\Handler::trigger(self::EVENT_NAME, 'unique', self::UNIQUE_ID);
+    SignalWire\Handler::trigger(self::EVENT_NAME, 'unique', self::UNIQUE_ID);
   }
 }
