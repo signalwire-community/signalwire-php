@@ -55,12 +55,16 @@ class Handler {
   }
 
   static public function trigger(String $evt, $params, String $uniqueId = self::GLOBAL){
+    if (!self::isQueued($evt, $uniqueId)) {
+      return false;
+    }
     $event = self::_cleanEventName($evt, $uniqueId);
     if (isset(self::$queue[$event])) {
       foreach (self::$queue[$event] as $callable){
         call_user_func_array($callable, [$params]);
       }
     }
+    return true;
   }
 
   static public function isQueued(String $evt, String $uniqueId = self::GLOBAL){

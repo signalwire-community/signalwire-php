@@ -63,7 +63,6 @@ class Client {
     $this->uuid = \SignalWire\Util\UUID::v4();
     $this->connection = new Connection($this);
     $this->_attachListeners();
-    Handler::view();
   }
 
   public function connect() {
@@ -90,16 +89,17 @@ class Client {
     );
   }
 
-  public function _onSocketClose() {
+  public function _onSocketClose(Array $param = array()) {
     if ($this->_autoReconnect === false) {
       return;
     }
     $self = $this;
-    $loop = React\EventLoop\Factory::create();
+    $loop = \React\EventLoop\Factory::create();
     $loop->addTimer(1.0, function() use ($loop, $self) {
       $self->connect();
       $loop->stop();
     });
+    $loop->run();
   }
 
   public function _onSocketError($error) {

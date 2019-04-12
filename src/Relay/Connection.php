@@ -21,14 +21,25 @@ class Connection {
 
   public function onConnectSuccess(\Ratchet\Client\WebSocket $webSocket) {
     $this->_ws = $webSocket;
-    $webSocket->on('message', function($msg) {
+    $uuid = $this->client->uuid;
+    $webSocket->on('message', function($msg) use ($webSocket, $uuid) {
       echo PHP_EOL . "RECV:" . PHP_EOL . $msg->getPayload() . PHP_EOL;
-      // TODO: safe json_decode here
-      $json = json_decode($msg->getPayload());
-      Handler::trigger($json->id, $json);
+      $obj = json_decode($msg->getPayload());
+      if (!is_object($obj) || !isset($obj->id)) {
+        // Invalid message from the socket
+        return;
+      }
+      if (Handler::trigger($obj->id, $obj) === false) {
+        Handler::trigger(Events::SocketMessage, $obj, $uuid);
+      }
     });
 
-    Handler::trigger(Events::SocketOpen, null, $this->client->uuid);
+    $webSocket->on('close', function($code = null, $reason = null) use ($uuid) {
+      $param = array('code' => $code, 'reason' => $reason);
+      Handler::trigger(Events::SocketClose, $param, $uuid);
+    });
+
+    Handler::trigger(Events::SocketOpen, null, $uuid);
   }
 
   public function onConnectError(\Exception $error) {
@@ -45,7 +56,7 @@ class Connection {
     };
 
     $canceller = function () {
-      // Cancel/abort any running operations like network connections, streams etc.
+      // TODO: Cancel/abort any running operations like network connections, streams etc.
       throw new Exception('Promise cancelled');
     };
 
