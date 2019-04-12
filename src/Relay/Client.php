@@ -51,6 +51,12 @@ class Client {
   protected $connection;
 
   /**
+   * Relay Calling service
+   * @var SignalWire\Relay\Service\Calling
+   */
+  protected $_calling = null;
+
+  /**
    * Check to auto reconnect when the socket goes down
    * @var Boolean
    */
@@ -79,7 +85,8 @@ class Client {
   }
 
   public function connect() {
-    $this->connection->connect();
+    $this->calling->newCall();
+    // $this->connection->connect();
   }
 
   public function disconnect() {
@@ -160,6 +167,13 @@ class Client {
     return $this;
   }
 
+  protected function getCalling() {
+    if (!$this->_calling) {
+      $this->_calling = new \SignalWire\Relay\Calling\Calling($this);
+    }
+    return $this->_calling;
+  }
+
   private function _attachListeners() {
     $this->_detachListeners();
     $this->on(Events::SocketOpen, [$this, "_onSocketOpen"], $this->uuid);
@@ -183,5 +197,20 @@ class Client {
       $promise = $this->execute($queue['msg']);
       call_user_func($queue['resolve'], $promise);
     }
+  }
+
+  /**
+   * Dynamic getter for the services we provide
+   *
+   * @param string $service to return
+   * @return \Relay\Service The requested service object
+   * @throws Exception For unknown context
+   */
+  public function __get($name) {
+    $method = 'get' . ucfirst($name);
+    if (method_exists($this, $method)) {
+      return $this->$method();
+    }
+    throw new \Exception('Unknown service ' . $name);
   }
 }

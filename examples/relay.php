@@ -1,4 +1,6 @@
 <?php
+error_reporting(E_ALL);
+
 require dirname(__FILE__) . '/../vendor/autoload.php';
 
 $space_url = $_ENV['HOST'];
@@ -26,8 +28,8 @@ $client->on('signalwire.socket.close', function($session) {
 
 $client->on('signalwire.ready', function($session) {
   echo PHP_EOL . "signalwire.ready" . PHP_EOL;
-  sleep(5);
-  $session->disconnect();
+
+  $session->calling->newCall();
 });
 
 $client->on('signalwire.error', function($error) {
