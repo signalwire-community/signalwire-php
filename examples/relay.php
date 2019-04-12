@@ -14,8 +14,20 @@ $client = new SignalWire\Relay\Client(array(
   "token" => $token
 ));
 
+$client->on('signalwire.socket.open', function($session) {
+  echo PHP_EOL . "signalwire.socket.open" . PHP_EOL;
+});
+$client->on('signalwire.socket.error', function($session) {
+  echo PHP_EOL . "signalwire.socket.error" . PHP_EOL;
+});
+$client->on('signalwire.socket.close', function($session) {
+  echo PHP_EOL . "signalwire.socket.close" . PHP_EOL;
+});
+
 $client->on('signalwire.ready', function($session) {
-  echo "Here bitch! signalwire.ready FTW";
+  echo PHP_EOL . "signalwire.ready" . PHP_EOL;
+  sleep(5);
+  $session->disconnect();
 });
 
 $client->on('signalwire.error', function($error) {

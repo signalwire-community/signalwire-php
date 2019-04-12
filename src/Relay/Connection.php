@@ -18,6 +18,13 @@ class Connection {
     );
   }
 
+  public function close() {
+    if (isset($this->_ws)) {
+      $this->_ws->close();
+      unset($this->_ws);
+    }
+  }
+
   public function onConnectSuccess(\Ratchet\Client\WebSocket $webSocket) {
     $this->_ws = $webSocket;
     $uuid = $this->client->uuid;

@@ -82,6 +82,17 @@ class Client {
     $this->connection->connect();
   }
 
+  public function disconnect() {
+    $this->_idle = true;
+    $this->_autoReconnect = false;
+    if ($this->connection) {
+      $this->connection->close();
+    }
+    unset($this->connection);
+    $this->_executeQueue = array();
+    $this->_detachListeners();
+  }
+
   public function execute(BaseMessage $msg) {
     if ($this->_idle) {
       return new \React\Promise\Promise(function (callable $resolve) use ($msg) {
