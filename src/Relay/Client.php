@@ -114,12 +114,8 @@ class Client {
     if ($this->_autoReconnect === false) {
       return;
     }
-    $loop = \React\EventLoop\Factory::create();
-    $loop->addTimer(1.0, function() use ($loop) {
-      $this->connect();
-      $loop->stop();
-    });
-    $loop->run();
+    sleep(1);
+    $this->connect();
   }
 
   public function _onSocketError($error) {
