@@ -2,7 +2,6 @@
 namespace SignalWire\Relay;
 use SignalWire\Messages\BaseMessage;
 use SignalWire\Handler;
-use SignalWire\Log;
 use SignalWire\Util\Events;
 
 class Connection {

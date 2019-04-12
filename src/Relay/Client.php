@@ -3,6 +3,7 @@ namespace SignalWire\Relay;
 use SignalWire\Messages\BaseMessage;
 use SignalWire\Messages\Connect;
 use SignalWire\Util\Events;
+use SignalWire\Util\BladeMethod;
 use SignalWire\Handler;
 use SignalWire\Log;
 
@@ -55,6 +56,12 @@ class Client {
    */
   private $_autoReconnect = false;
 
+  /**
+   * Session idle state. If true we've to save every execute and dispatch them when a new connection will be active
+   * @var Boolean
+   */
+  private $_idle = false;
+
   public function __construct(Array $options) {
     $this->host = $options['host'];
     $this->project = $options['project'];
@@ -70,6 +77,7 @@ class Client {
   }
 
   public function execute(BaseMessage $msg) {
+    // TODO: handle _idle state
     return $this->connection->send($msg);
   }
 
@@ -107,7 +115,20 @@ class Client {
   }
 
   public function _onSocketMessage($msg) {
-
+    switch ($msg->method) {
+      case BladeMethod::Broadcast:
+        $protocol = $msg->params->protocol;
+        $event = $msg->params->event;
+        $channel = $msg->params->channel;
+        $params = $msg->params->params;
+        if (Handler::trigger($protocol, $params, $channel) === false) {
+          Log::warning('Unknown broadcast message', [$protocol, $event, $channel, $params]);
+        }
+        break;
+      case BladeMethod::Disconnect:
+        $this->_idle = true;
+        break;
+    }
   }
 
   public function on(String $event, Callable $fn) {
@@ -129,7 +150,7 @@ class Client {
   }
 
   private function _detachListeners() {
-    $this->off(Events::SocketOpen, [$this, "_onSocketOpen"], $this->uuid );
+    $this->off(Events::SocketOpen, [$this, "_onSocketOpen"], $this->uuid);
     $this->off(Events::SocketClose, [$this, "_onSocketClose"], $this->uuid);
     $this->off(Events::SocketError, [$this, "_onSocketError"], $this->uuid);
     $this->off(Events::SocketMessage, [$this, "_onSocketMessage"], $this->uuid);
