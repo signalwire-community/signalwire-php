@@ -5,6 +5,10 @@ class Handler {
   const GLOBAL = 'GLOBAL';
   static protected $queue = array();
 
+  static public function view(){
+    print_r(array_keys(self::$queue));
+  }
+
   static public function register(String $evt, Callable $callable, String $uniqueId = self::GLOBAL){
     $event = self::_cleanEventName($evt, $uniqueId);
     if (!isset(self::$queue[$event])) {

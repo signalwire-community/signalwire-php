@@ -1,8 +1,12 @@
 <?php
 namespace SignalWire\Relay;
+use SignalWire\Messages\BaseMessage;
+use SignalWire\Handler;
+use SignalWire\Log;
+use SignalWire\Util\Events;
 
 class Connection {
-  private $wsClient;
+  private $_ws;
 
   public function __construct(Client $client) {
     $this->client = $client;
@@ -15,30 +19,29 @@ class Connection {
     );
   }
 
-  public function onConnectSuccess(\Ratchet\Client\WebSocket $client) {
-    $this->wsClient = $client;
-    $client->on('message', function($msg) {
+  public function onConnectSuccess(\Ratchet\Client\WebSocket $webSocket) {
+    $this->_ws = $webSocket;
+    $webSocket->on('message', function($msg) {
+      echo PHP_EOL . "RECV:" . PHP_EOL . $msg->getPayload() . PHP_EOL;
       // TODO: safe json_decode here
       $json = json_decode($msg->getPayload());
-      \SignalWire\Handler::trigger($json->id, $json);
+      Handler::trigger($json->id, $json);
     });
 
-    $this->client->_onSocketOpen();
+    Handler::trigger(Events::SocketOpen, null, $this->client->uuid);
   }
 
   public function onConnectError(\Exception $error) {
-    \SignalWire\Log::warning('Connect error...');
-    $this->client->_onSocketError();
+    Handler::trigger(Events::SocketError, $error, $this->client->uuid);
   }
 
-  public function send(\SignalWire\Messages\BaseMessage $msg) {
+  public function send(BaseMessage $msg) {
     $resolver = function (callable $resolve, callable $reject) use ($msg) {
       $callback = function($msg) use ($resolve, $reject) {
-        \SignalWire\Log::warning('Handle response:', [$msg]);
         isset($msg->error) ? $reject($msg->error) : $resolve($msg->result);
       };
 
-      \SignalWire\Handler::registerOnce($msg->id, $callback);
+      Handler::registerOnce($msg->id, $callback);
     };
 
     $canceller = function () {
@@ -48,8 +51,8 @@ class Connection {
 
     $promise = new \React\Promise\Promise($resolver, $canceller);
 
-    \SignalWire\Log::warning($msg->toJson(true));
-    $this->wsClient->send($msg->toJson());
+    echo PHP_EOL . "SEND:" . PHP_EOL . $msg->toJson(true) . PHP_EOL;
+    $this->_ws->send($msg->toJson());
 
     return $promise;
   }

@@ -8,7 +8,7 @@ class Connect extends BaseMessage {
 
   protected $method = 'blade.connect';
 
-  public function __construct(String $project, String $token, String $sessionid = ''){
+  public function __construct(String $project, String $token, String $sessionid = null){
     $params = array(
       'version' => array(
         'major' => self::VERSION_MAJOR,

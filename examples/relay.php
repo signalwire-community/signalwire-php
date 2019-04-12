@@ -14,4 +14,15 @@ $client = new SignalWire\Relay\Client(array(
   "token" => $token
 ));
 
+$client->on('signalwire.ready', function($session) {
+  echo "Here bitch! signalwire.ready FTW";
+});
+
+$client->on('signalwire.error', function($error) {
+  echo PHP_EOL;
+  echo "SignalWire Error:";
+  echo $error->getMessage();
+  echo PHP_EOL;
+});
+
 $client->connect();
