@@ -12,7 +12,10 @@
   "autoload": {
     "psr-4": {
       "SignalWire\\": "src/"
-    }
+    },
+    "files": [
+      "src/functions.php"
+    ]
   },
   "authors": [
     {
