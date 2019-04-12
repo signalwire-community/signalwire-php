@@ -20,7 +20,7 @@ class Connection {
     $client->on('message', function($msg) {
       // TODO: safe json_decode here
       $json = json_decode($msg->getPayload());
-      \SignalWire\Handler::trigger("wsMessage", $json, $json->id);
+      \SignalWire\Handler::trigger($json->id, $json);
     });
 
     $this->client->_onSocketOpen();
@@ -38,8 +38,7 @@ class Connection {
         isset($msg->error) ? $reject($msg->error) : $resolve($msg->result);
       };
 
-      // TODO: use registerOnce instead of register!
-      \SignalWire\Handler::register("wsMessage", $callback, $msg->id);
+      \SignalWire\Handler::registerOnce($msg->id, $callback);
     };
 
     $canceller = function () {
