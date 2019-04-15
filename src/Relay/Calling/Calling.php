@@ -1,6 +1,5 @@
 <?php
 namespace SignalWire\Relay\Calling;
-// use SignalWire\Relay;
 
 class Calling extends \SignalWire\Relay\BaseRelay {
   const Service = 'calling';
@@ -9,11 +8,16 @@ class Calling extends \SignalWire\Relay\BaseRelay {
     return self::Service;
   }
 
-  public function newCall() {
+  public function notificationHandler($notification): void {
+    echo PHP_EOL . "Calling notificationHandler" . PHP_EOL;
+    print_r($notification);
+  }
+
+  public function newCall(Array $params) {
     echo PHP_EOL . "NewCall start...";
     $this->ready->then(
       function($protocol) {
-        echo PHP_EOL . "NewCall Ready to rock!";
+        echo PHP_EOL . "NewCall Ready to rock on proto: " . $protocol;
       },
       function($error) {
         echo PHP_EOL . "NewCall Error!";
