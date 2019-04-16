@@ -8,8 +8,9 @@ abstract class BaseRelay {
   const SetupMethod = 'setup';
   const SetupChannels = array('notifications');
 
+  public $ready;
+
   protected $protocol;
-  protected $ready;
   protected $client;
 
   abstract function getServiceName(): String;

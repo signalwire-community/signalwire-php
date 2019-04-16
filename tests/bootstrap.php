@@ -7,15 +7,16 @@ require dirname(__FILE__) . '/../vendor/autoload.php';
 \VCR\VCR::turnOn();
 
 
-function mockConnectionSend($response) {
-  $promise = new \React\Promise\Promise(function (callable $resolve, callable $reject) use ($response) {
-    isset($response->error) ? $reject($response->error) : $resolve($response->result);
-  });
+function mockConnectionSend(Array $responses) {
+  $promises = array();
+  foreach($responses as $r) {
+    $promises[] = new \React\Promise\Promise(function (callable $resolve, callable $reject) use ($r) {
+      isset($r->error) ? $reject($r->error) : $resolve($r->result);
+    });
+  }
 
   $mock = Mockery::mock('overload:\SignalWire\Relay\Connection');
-  $mock->shouldReceive('send')
-    ->once()
-    ->andReturn($promise);
+  $mock->shouldReceive('send')->andReturn(...$promises);
 
   return $mock;
 }
