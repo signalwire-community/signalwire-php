@@ -267,6 +267,10 @@ class Client {
     if (method_exists($this, $method)) {
       return $this->$method();
     }
+    $property = '_' . $name;
+    if (property_exists($this, $property)) {
+      return $this->$property;
+    }
     throw new \Exception('Unknown service ' . $name);
   }
 }
