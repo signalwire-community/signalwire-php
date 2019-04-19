@@ -10,17 +10,11 @@ require dirname(__FILE__) . '/../vendor/autoload.php';
 function mockConnectionSend(Array $responses) {
   $promises = array();
   foreach($responses as $r) {
-    $promises[] = new \React\Promise\Promise(function (callable $resolve, callable $reject) use ($r) {
-      isset($r->error) ? $reject($r->error) : $resolve($r->result);
-    });
+    $promises[] = \React\Promise\resolve($r);
   }
 
   $mock = Mockery::mock('overload:\SignalWire\Relay\Connection');
   $mock->shouldReceive('send')->andReturn(...$promises);
 
   return $mock;
-}
-
-function getLoop() {
-  return React\EventLoop\Factory::create();
 }
