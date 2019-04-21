@@ -177,6 +177,51 @@ class Call {
     return $this->_execute($msg);
   }
 
+  public function playAudioAndCollect(Array $collect, String $url) {
+    $params = ['type' => 'audio', 'params' => ['url' => $url]];
+    return $this->playAndCollect($collect, $params);
+  }
+
+  public function playSilenceAndCollect(Array $collect, String $duration) {
+    $params = ['type' => 'silence', 'params' => ['duration' => $duration]];
+    return $this->playAndCollect($collect, $params);
+  }
+
+  public function playTTSAndCollect(Array $collect, Array $options) {
+    $params = ['type' => 'tts', 'params' => $options];
+    return $this->playAndCollect($collect, $params);
+  }
+
+  public function playAndCollect(Array $collect, ...$play) {
+    $msg = new Execute(array(
+      'protocol' => $this->relayInstance->protocol,
+      'method' => 'call.play_and_collect',
+      'params' => array(
+        'node_id' => $this->nodeId,
+        'call_id' => $this->id,
+        'control_id' => \SignalWire\Util\UUID::v4(),
+        'collect' => $collect,
+        'play' => $play
+      )
+    ));
+
+    return $this->_execute($msg);
+  }
+
+  public function stopPlayAndCollect(String $control_id) {
+    $msg = new Execute(array(
+      'protocol' => $this->relayInstance->protocol,
+      'method' => 'call.play_and_collect.stop',
+      'params' => array(
+        'node_id' => $this->nodeId,
+        'call_id' => $this->id,
+        'control_id' => $control_id
+      )
+    ));
+
+    return $this->_execute($msg);
+  }
+
   public function _addControlParams($params) {
     if (!isset($params->control_id) || !isset($params->event_type)) {
       return;
