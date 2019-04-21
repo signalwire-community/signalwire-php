@@ -103,6 +103,68 @@ class Call {
     return $this->_execute($msg);
   }
 
+  public function playAudio(String $url) {
+    $params = ['type' => 'audio', 'params' => ['url' => $url]];
+    return $this->playMedia($params);
+  }
+
+  public function playSilence(String $duration) {
+    $params = ['type' => 'silence', 'params' => ['duration' => $duration]];
+    return $this->playMedia($params);
+  }
+
+  public function playTTS(Array $options) {
+    $params = ['type' => 'tts', 'params' => $options];
+    return $this->playMedia($params);
+  }
+
+  public function playMedia(...$play) {
+    $msg = new Execute(array(
+      'protocol' => $this->relayInstance->protocol,
+      'method' => 'call.play',
+      'params' => array(
+        'node_id' => $this->nodeId,
+        'call_id' => $this->id,
+        'control_id' => \SignalWire\Util\UUID::v4(),
+        'play' => $play
+      )
+    ));
+
+    return $this->_execute($msg);
+  }
+
+  public function stopMedia(String $control_id) {
+    $msg = new Execute(array(
+      'protocol' => $this->relayInstance->protocol,
+      'method' => 'call.play.stop',
+      'params' => array(
+        'node_id' => $this->nodeId,
+        'call_id' => $this->id,
+        'control_id' => $control_id
+      )
+    ));
+
+    return $this->_execute($msg);
+  }
+
+  public function _addControlParams($params) {
+    if (!isset($params->control_id) || !isset($params->event_type)) {
+      return;
+    }
+    $index = null;
+    foreach ($this->_controls as $i => $c) {
+      if ($params->control_id === $c->control_id) {
+        $index = $i;
+        break;
+      }
+    }
+    if ($index !== null) {
+      $this->_controls[$index] = $params;
+    } else {
+      array_push($this->_controls, $params);
+    }
+  }
+
   private function _attachListeners() {
     foreach (self::STATES as $index => $state) {
       Handler::registerOnce($this->id, function() use ($index, $state) {
