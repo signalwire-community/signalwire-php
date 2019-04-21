@@ -10,8 +10,8 @@ abstract class BaseRelay {
 
   public $ready;
 
-  protected $protocol;
-  protected $client;
+  public $protocol;
+  public $client;
 
   abstract function getServiceName(): String;
   abstract function notificationHandler($notification): void;
