@@ -37,6 +37,9 @@ class Call {
     if (isset($options->call_id) && isset($options->node_id)) {
       $this->setup($options->call_id, $options->node_id);
     }
+    if (isset($options->context)) {
+      $this->context = $options->context;
+    }
 
     $this->relayInstance->addCall($this);
   }
