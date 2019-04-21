@@ -22,10 +22,13 @@ class Calling extends \SignalWire\Relay\BaseRelay {
       case 'calling.call.connect':
         break;
       case 'calling.call.record':
+        $this->_onRecord($notification->params);
         break;
       case 'calling.call.play':
+        $this->_onPlay($notification->params);
         break;
       case 'calling.call.collect':
+        $this->_onCollect($notification->params);
         break;
       case 'calling.call.receive':
         $call = new Call($this, $notification->params);
@@ -136,5 +139,31 @@ class Calling extends \SignalWire\Relay\BaseRelay {
       return;
     }
     Log::error('Unknown call', (array)$params);
+  }
+
+  private function _onRecord($params) {
+    $call = $this->getCallById($params->call_id);
+    if ($call) {
+      $call._addControlParams($params);
+      $event = 'record.' . $params->state;
+      Handler::trigger($params->call_id, json_decode(json_encode($params), true), $event);
+    }
+  }
+
+  private function _onPlay($params) {
+    $call = $this->getCallById($params->call_id);
+    if ($call) {
+      $call._addControlParams($params);
+      $event = 'play.' . $params->state;
+      Handler::trigger($params->call_id, json_decode(json_encode($params), true), $event);
+    }
+  }
+
+  private function _onCollect($params) {
+    $call = $this->getCallById($params->call_id);
+    if ($call) {
+      $call._addControlParams($params);
+      Handler::trigger($params->call_id, json_decode(json_encode($params), true), 'collect');
+    }
   }
 }
