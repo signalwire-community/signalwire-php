@@ -87,6 +87,19 @@ class Call {
     return $this->_execute($msg);
   }
 
+  public function answer() {
+    $msg = new Execute(array(
+      'protocol' => $this->relayInstance->protocol,
+      'method' => 'call.answer',
+      'params' => array(
+        'node_id' => $this->nodeId,
+        'call_id' => $this->id
+      )
+    ));
+
+    return $this->_execute($msg);
+  }
+
   private function _attachListeners() {
     foreach (self::STATES as $index => $state) {
       Handler::registerOnce($this->id, function() use ($index, $state) {
