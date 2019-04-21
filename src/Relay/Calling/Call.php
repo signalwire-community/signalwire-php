@@ -1,9 +1,13 @@
 <?php
 namespace SignalWire\Relay\Calling;
 use SignalWire\Messages\Execute;
+use SignalWire\Handler;
 
 class Call {
   const DefaultTimeout = 30;
+  public $id = false;
+  public $nodeId = false;
+  public $relayInstance;
   public $ready = false;
   public $prevState = '';
   public $state = '';
@@ -17,6 +21,8 @@ class Call {
   public $to = '';
   public $timeout = self::DefaultTimeout;
 
+  private $_cbQueue = array();
+
   public function __construct(Calling $relayInstance, Object $options) {
     $this->device = $options->device;
     $this->type = $this->device->type;
@@ -29,12 +35,15 @@ class Call {
   }
 
   public function on(String $event, Callable $fn) {
-    // TODO:
+    $this->_cbQueue[$event] = $fn;
     return $this;
   }
 
   public function off(String $event, Callable $fn = null) {
-    // TODO:
+    if ($this->id) {
+      Handler::deRegister($this->id, $fn, $event);
+    }
+    unset($this->_cbQueue[$event]);
     return $this;
   }
 
@@ -50,6 +59,14 @@ class Call {
   }
 
   public function hangup() {
+
+  }
+
+  private function _attachListeners() {
+
+  }
+
+  private function _detachListeners() {
 
   }
 }
