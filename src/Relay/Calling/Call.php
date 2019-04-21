@@ -147,6 +147,36 @@ class Call {
     return $this->_execute($msg);
   }
 
+  public function startRecord(Array $options) {
+    $msg = new Execute(array(
+      'protocol' => $this->relayInstance->protocol,
+      'method' => 'call.record',
+      'params' => array(
+        'node_id' => $this->nodeId,
+        'call_id' => $this->id,
+        'control_id' => \SignalWire\Util\UUID::v4(),
+        'type' => 'audio',
+        'params' => $options
+      )
+    ));
+
+    return $this->_execute($msg);
+  }
+
+  public function stopRecord(String $control_id) {
+    $msg = new Execute(array(
+      'protocol' => $this->relayInstance->protocol,
+      'method' => 'call.record.stop',
+      'params' => array(
+        'node_id' => $this->nodeId,
+        'call_id' => $this->id,
+        'control_id' => $control_id
+      )
+    ));
+
+    return $this->_execute($msg);
+  }
+
   public function _addControlParams($params) {
     if (!isset($params->control_id) || !isset($params->event_type)) {
       return;
