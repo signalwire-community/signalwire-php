@@ -147,7 +147,7 @@ class Call {
     return $this->_execute($msg);
   }
 
-  public function startRecord(Array $options) {
+  public function startRecord(String $type = 'audio', Array $options = array()) {
     $msg = new Execute(array(
       'protocol' => $this->relayInstance->protocol,
       'method' => 'call.record',
@@ -155,7 +155,7 @@ class Call {
         'node_id' => $this->nodeId,
         'call_id' => $this->id,
         'control_id' => \SignalWire\Util\UUID::v4(),
-        'type' => 'audio',
+        'type' => $type,
         'params' => $options
       )
     ));
