@@ -133,7 +133,7 @@ class Call {
     return $this->_execute($msg);
   }
 
-  public function stopMedia(String $control_id) {
+  public function stopPlay(String $control_id) {
     $msg = new Execute(array(
       'protocol' => $this->relayInstance->protocol,
       'method' => 'call.play.stop',
