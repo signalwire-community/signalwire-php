@@ -12,14 +12,4 @@ function mockUuidV4() {
   $mock->shouldReceive('v4')->andReturn('mocked-uuid');
 }
 
-function mockConnectionSend(Array $responses) {
-  $promises = array();
-  foreach($responses as $r) {
-    $promises[] = \React\Promise\resolve($r);
-  }
-
-  $mock = Mockery::mock('overload:\SignalWire\Relay\Connection');
-  $mock->shouldReceive('send')->andReturn(...$promises);
-
-  return $mock;
-}
+mockUuidV4();

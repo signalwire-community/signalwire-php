@@ -9,24 +9,32 @@ class RelayClientTest extends TestCase
   protected $client;
   private $_opts = array("host" => "host", "project" => "project", "token" => "token");
 
-  // protected function setUp() {
-  //   mockUuid();
-  // }
+  protected function setUp() {
+    $this->client = new Client(array('host' => 'host', 'project' => 'project', 'token' => 'token'));
+  }
 
   public function tearDown() {
-    \Mockery::close();
     unset($this->client);
   }
 
-  private function initClient() {
-    $this->client = new Client($this->_opts);
+  private function _mockResponse($responses) {
+    $stub = $this->createMock(SignalWire\Relay\Connection::class, ['send']);
+    if (!is_array($responses)) {
+      $responses = [$responses];
+    }
+    foreach ($responses as $i => $r) {
+      $stub->expects($this->at($i))
+        ->method('send')
+        ->will($this->returnValue(\React\Promise\resolve($r)));
+    }
+
+    $this->client->connection = $stub;
   }
 
   // Testing Subscribe
   public function testSubscribeWithSuccessResponse(): void {
-    $response = json_decode('{"protocol":"proto","command":"add","subscribe_channels":["c1","c2"]}');
-    mockConnectionSend([$response]);
-    $this->initClient();
+    $this->_mockResponse(json_decode('{"protocol":"proto","command":"add","subscribe_channels":["c1","c2"]}'));
+
     $this->client->subscribe('proto', array('c1', 'c2'));
 
     $this->assertArrayHasKey('protoc1', $this->client->subscriptions);
@@ -34,18 +42,14 @@ class RelayClientTest extends TestCase
   }
 
   public function testSubscribeWithFailedResponse(): void {
-    $response = json_decode('{"protocol":"proto","command":"add","failed_channels":["c1","c2"]}');
-    mockConnectionSend([$response]);
-    $this->initClient();
+    $this->_mockResponse(json_decode('{"protocol":"proto","command":"add","failed_channels":["c1","c2"]}'));
     $this->client->subscribe('proto', array('c1', 'c2'));
 
     $this->assertCount(0, $this->client->subscriptions);
   }
 
   public function testSubscribeWithBothResponse(): void {
-    $response = json_decode('{"protocol":"proto","command":"add","subscribe_channels":["c1"],"failed_channels":["c2"]}');
-    mockConnectionSend([$response]);
-    $this->initClient();
+    $this->_mockResponse(json_decode('{"protocol":"proto","command":"add","subscribe_channels":["c1"],"failed_channels":["c2"]}'));
     $this->client->subscribe('proto', array('c1', 'c2'));
 
     $this->assertArrayHasKey('protoc1', $this->client->subscriptions);
@@ -53,9 +57,7 @@ class RelayClientTest extends TestCase
   }
 
   public function testSubscribeWithHandler(): void {
-    $response = json_decode('{"protocol":"proto","command":"add","subscribe_channels":["notifications"]}');
-    mockConnectionSend([$response]);
-    $this->initClient();
+    $this->_mockResponse(json_decode('{"protocol":"proto","command":"add","subscribe_channels":["notifications"]}'));
     $fn = function($data) {};
     $this->client->subscribe('proto', array('notifications'), $fn);
 
@@ -67,8 +69,7 @@ class RelayClientTest extends TestCase
   public function testCallingSetup(): void {
     $responseProto = json_decode('{"requester_nodeid":"ad490dc4-550a-4742-929d-b86fdf8958ef","responder_nodeid":"b0007713-071d-45f9-88aa-302d14e1251c","result":{"protocol":"signalwire_calling_proto"}}');
     $responseSubscr = json_decode('{"protocol":"signalwire_calling_proto","command":"add","subscribe_channels":["notifications"]}');
-    mockConnectionSend([$responseProto, $responseSubscr]);
-    $this->initClient();
+    $this->_mockResponse([$responseProto, $responseSubscr]);
     $relayInstance = $this->client->calling;
 
     $this->assertArrayHasKey('signalwire_calling_protonotifications', $this->client->subscriptions);

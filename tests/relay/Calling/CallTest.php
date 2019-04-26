@@ -11,7 +11,6 @@ class RelayCallingCallTest extends TestCase
   protected $stub;
 
   protected function setUp() {
-    mockUuidV4();
     $responseProto = json_decode('{"requester_nodeid":"ad490dc4-550a-4742-929d-b86fdf8958ef","responder_nodeid":"b0007713-071d-45f9-88aa-302d14e1251c","result":{"protocol":"signalwire_calling_proto"}}');
     $responseSubscr = json_decode('{"protocol":"signalwire_calling_proto","command":"add","subscribe_channels":["notifications"]}');
     $methodResponse = json_decode('{"requester_nodeid":"0ff2d880-c420-48c4-89b8-6d9d540d3b80","responder_nodeid":"1a9c9e34-892c-435c-9749-1f9e584bdae1","result":{"code":"200","message":"message"}}');
