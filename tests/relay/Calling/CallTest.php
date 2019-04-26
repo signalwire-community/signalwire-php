@@ -7,10 +7,12 @@ use SignalWire\Messages\Execute;
 
 class RelayCallingCallTest extends TestCase
 {
+  const UUID = 'e36f227c-2946-11e8-b467-0ed5f89f718b';
   protected $call;
   protected $stub;
 
   protected function setUp() {
+    $this->_mockUuid();
     $responseProto = json_decode('{"requester_nodeid":"ad490dc4-550a-4742-929d-b86fdf8958ef","responder_nodeid":"b0007713-071d-45f9-88aa-302d14e1251c","result":{"protocol":"signalwire_calling_proto"}}');
     $responseSubscr = json_decode('{"protocol":"signalwire_calling_proto","command":"add","subscribe_channels":["notifications"]}');
     $methodResponse = json_decode('{"requester_nodeid":"0ff2d880-c420-48c4-89b8-6d9d540d3b80","responder_nodeid":"1a9c9e34-892c-435c-9749-1f9e584bdae1","result":{"code":"200","message":"message"}}');
@@ -39,6 +41,7 @@ class RelayCallingCallTest extends TestCase
   public function tearDown() {
     unset($this->call);
     SignalWire\Handler::deRegisterAll('signalwire_calling_proto');
+    \Ramsey\Uuid\Uuid::setFactory(new \Ramsey\Uuid\UuidFactory());
   }
 
   public function _setCallReady() {
@@ -46,12 +49,19 @@ class RelayCallingCallTest extends TestCase
     $this->call->nodeId = 'node-id';
   }
 
+  public function _mockUuid() {
+    $factory = $this->createMock(\Ramsey\Uuid\UuidFactoryInterface::class);
+    $factory->method('uuid4')
+      ->will($this->returnValue(\Ramsey\Uuid\Uuid::fromString(self::UUID)));
+    \Ramsey\Uuid\Uuid::setFactory($factory);
+  }
+
   public function testBegin(): void {
     $msg = new Execute([
       'protocol' => 'signalwire_calling_proto',
       'method' => 'call.begin',
       'params' => [
-        'tag' => 'mocked-uuid',
+        'tag' => self::UUID,
         'device' => [
           'type' => 'phone',
           'params' => ['from_number' => '234', 'to_number' => '456', 'timeout' => 20]
@@ -108,7 +118,7 @@ class RelayCallingCallTest extends TestCase
       'params' => [
         'call_id' => 'call-id',
         'node_id' => 'node-id',
-        'control_id' => 'mocked-uuid',
+        'control_id' => self::UUID,
         'play' => [
           ['type' => 'audio', 'params' => ['url' => 'url-to-audio.mp3']]
         ]
@@ -129,7 +139,7 @@ class RelayCallingCallTest extends TestCase
       'params' => [
         'call_id' => 'call-id',
         'node_id' => 'node-id',
-        'control_id' => 'mocked-uuid',
+        'control_id' => self::UUID,
         'play' => [
           ['type' => 'silence', 'params' => ['duration' => 5]]
         ]
@@ -150,7 +160,7 @@ class RelayCallingCallTest extends TestCase
       'params' => [
         'call_id' => 'call-id',
         'node_id' => 'node-id',
-        'control_id' => 'mocked-uuid',
+        'control_id' => self::UUID,
         'play' => [
           ['type' => 'tts', 'params' => ['text' => 'Welcome', 'gender' => 'male']]
         ]
@@ -171,7 +181,7 @@ class RelayCallingCallTest extends TestCase
       'params' => [
         'call_id' => 'call-id',
         'node_id' => 'node-id',
-        'control_id' => 'mocked-uuid',
+        'control_id' => self::UUID,
         'play' => [
           ['type' => 'audio', 'params' => ['url' => 'audio.mp3']],
           ['type' => 'tts', 'params' => ['text' => 'Welcome', 'gender' => 'male']],
@@ -216,7 +226,7 @@ class RelayCallingCallTest extends TestCase
       'params' => [
         'call_id' => 'call-id',
         'node_id' => 'node-id',
-        'control_id' => 'mocked-uuid',
+        'control_id' => self::UUID,
         'type' => 'audio',
         'params' => ["beep" => true, "stereo" => false]
       ]
@@ -255,7 +265,7 @@ class RelayCallingCallTest extends TestCase
       'params' => [
         'call_id' => 'call-id',
         'node_id' => 'node-id',
-        'control_id' => 'mocked-uuid',
+        'control_id' => self::UUID,
         'collect' => $collect,
         'play' => [
           ['type' => 'audio', 'params' => ['url' => 'url-to-audio.mp3']]
@@ -278,7 +288,7 @@ class RelayCallingCallTest extends TestCase
       'params' => [
         'call_id' => 'call-id',
         'node_id' => 'node-id',
-        'control_id' => 'mocked-uuid',
+        'control_id' => self::UUID,
         'collect' => $collect,
         'play' => [
           ['type' => 'silence', 'params' => ['duration' => 5]]
@@ -301,7 +311,7 @@ class RelayCallingCallTest extends TestCase
       'params' => [
         'call_id' => 'call-id',
         'node_id' => 'node-id',
-        'control_id' => 'mocked-uuid',
+        'control_id' => self::UUID,
         'collect' => $collect,
         'play' => [
           ['type' => 'tts', 'params' => ['text' => 'Welcome', 'gender' => 'male']]
@@ -324,7 +334,7 @@ class RelayCallingCallTest extends TestCase
       'params' => [
         'call_id' => 'call-id',
         'node_id' => 'node-id',
-        'control_id' => 'mocked-uuid',
+        'control_id' => self::UUID,
         'collect' => $collect,
         'play' => [
           ['type' => 'audio', 'params' => ['url' => 'audio.mp3']],
