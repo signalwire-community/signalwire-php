@@ -1,6 +1,7 @@
 <?php
 namespace SignalWire\Relay\Calling;
 use SignalWire\Messages\Execute;
+use Ramsey\Uuid\Uuid;
 
 class Call {
   const DefaultTimeout = 30;
@@ -35,7 +36,7 @@ class Call {
     $this->id = isset($options->call_id) ? $options->call_id : $this->id;
     $this->nodeId = isset($options->node_id) ? $options->node_id : $this->nodeId;
     $this->context = isset($options->context) ? $options->context : $this->context;
-    $this->tag = \SignalWire\Util\UUID::v4();
+    $this->tag = Uuid::uuid4()->toString();
 
     $this->relayInstance->addCall($this);
   }
@@ -112,7 +113,7 @@ class Call {
       'params' => array(
         'node_id' => $this->nodeId,
         'call_id' => $this->id,
-        'control_id' => \SignalWire\Util\UUID::v4(),
+        'control_id' => Uuid::uuid4()->toString(),
         'play' => $play
       )
     ));
@@ -141,7 +142,7 @@ class Call {
       'params' => array(
         'node_id' => $this->nodeId,
         'call_id' => $this->id,
-        'control_id' => \SignalWire\Util\UUID::v4(),
+        'control_id' => Uuid::uuid4()->toString(),
         'type' => $type,
         'params' => $options
       )
@@ -186,7 +187,7 @@ class Call {
       'params' => array(
         'node_id' => $this->nodeId,
         'call_id' => $this->id,
-        'control_id' => \SignalWire\Util\UUID::v4(),
+        'control_id' => Uuid::uuid4()->toString(),
         'collect' => $collect,
         'play' => $play
       )

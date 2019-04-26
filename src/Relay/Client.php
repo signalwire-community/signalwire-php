@@ -1,5 +1,6 @@
 <?php
 namespace SignalWire\Relay;
+use Ramsey\Uuid\Uuid;
 use SignalWire\Messages\BaseMessage;
 use SignalWire\Messages\Connect;
 use SignalWire\Messages\Subscription;
@@ -86,7 +87,7 @@ class Client {
     $this->project = $options['project'];
     $this->token = $options['token'];
 
-    $this->uuid = \SignalWire\Util\UUID::v4();
+    $this->uuid = Uuid::uuid4()->toString();
     $this->connection = new Connection($this);
     $this->_attachListeners();
   }

@@ -5,11 +5,3 @@ require dirname(__FILE__) . '/../vendor/autoload.php';
   ->setMode('once')
   ->enableRequestMatchers(array('method', 'url', 'host'));
 \VCR\VCR::turnOn();
-
-
-function mockUuidV4() {
-  $mock = Mockery::mock('alias:SignalWire\Util\UUID');
-  $mock->shouldReceive('v4')->andReturn('mocked-uuid');
-}
-
-mockUuidV4();

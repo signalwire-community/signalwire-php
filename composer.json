@@ -32,11 +32,11 @@
   "require": {
     "twilio/sdk": "^5.21.3",
     "ratchet/pawl": "^0.3.4",
-    "monolog/monolog": "^1.24"
+    "monolog/monolog": "^1.24",
+    "ramsey/uuid": "^3.8"
   },
   "require-dev": {
     "phpunit/phpunit": "^7",
-    "php-vcr/php-vcr": "dev-master",
-    "mockery/mockery": "^1.2"
+    "php-vcr/php-vcr": "dev-master"
   }
 }
