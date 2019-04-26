@@ -53,8 +53,7 @@ class Calling extends \SignalWire\Relay\BaseRelay {
         return new Call($this, $options);
       },
       function($error) {
-        echo PHP_EOL . "NewCall Error!";
-        print_r($error);
+        throw new \Exception($error->message, $error->code);
       }
     );
   }
@@ -63,26 +62,25 @@ class Calling extends \SignalWire\Relay\BaseRelay {
     if (!$context || !is_callable($handler)) {
       throw new Exception("Invalid parameters");
     }
-    $this->ready->then(
+    return $this->ready->then(
       function($protocol) use ($context, $handler) {
         $msg = new Execute([
           'protocol' => $protocol,
           'method' => 'call.receive',
           'params' => [ 'context' => $context ]
         ]);
-        $this->client->execute($msg)->then(
+        return $this->client->execute($msg)->then(
           function($response) use ($protocol, $context, $handler) {
             Handler::register($protocol, $handler, $this->_prefixCtx($context));
-          }, function($error) {
-            // TODO: throw exception
-            Log::warning('onInbound error:');
-            print_r($error);
+            return $response->result;
+          },
+          function($error) {
+            throw new \Exception($error->message, $error->code);
           }
         );
       },
       function($error) {
-        echo PHP_EOL . "NewCall Error!";
-        print_r($error);
+        throw new \Exception($error->message, $error->code);
       }
     );
   }

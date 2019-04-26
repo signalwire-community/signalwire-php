@@ -192,10 +192,6 @@ class Client {
         }
 
         return $result;
-      }, function($error) {
-        Log::warning('Subscribe error:');
-        print_r($error);
-        return $error;
       }
     );
   }
