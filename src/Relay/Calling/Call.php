@@ -224,13 +224,13 @@ class Call {
   public function _recordStateChange($params) {
     $this->_addControlParams($params);
     $this->_dispatchCallback('record.stateChange', $params);
-    $this->_dispatchCallback("record.$state", $params);
+    $this->_dispatchCallback("record.$params->state", $params);
   }
 
   public function _playStateChange($params) {
     $this->_addControlParams($params);
     $this->_dispatchCallback('play.stateChange', $params);
-    $this->_dispatchCallback("play.$state", $params);
+    $this->_dispatchCallback("play.$params->state", $params);
   }
 
   public function _collectStateChange($params) {

@@ -29,7 +29,7 @@ class Connection {
     $this->_ws = $webSocket;
     $uuid = $this->client->uuid;
     $webSocket->on('message', function($msg) use ($uuid) {
-      echo PHP_EOL . "RECV:" . PHP_EOL . $msg->getPayload() . PHP_EOL;
+      // echo PHP_EOL . "RECV:" . PHP_EOL . $msg->getPayload() . PHP_EOL;
       $obj = json_decode($msg->getPayload());
       if (!is_object($obj) || !isset($obj->id)) {
         // Invalid message from the socket
@@ -61,7 +61,7 @@ class Connection {
       Handler::registerOnce($msg->id, $callback);
     });
 
-    echo PHP_EOL . "SEND:" . PHP_EOL . $msg->toJson(true) . PHP_EOL;
+    // echo PHP_EOL . "SEND:" . PHP_EOL . $msg->toJson(true) . PHP_EOL;
     $this->_ws->send($msg->toJson());
 
     return \React\Promise\Timer\timeout($promise, 10, \React\EventLoop\Factory::create());

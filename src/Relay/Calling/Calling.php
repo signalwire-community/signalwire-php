@@ -121,7 +121,10 @@ class Calling extends \SignalWire\Relay\BaseRelay {
   }
 
   private function _onState($params) {
-    $call = $this->getCallById($params->call_id) || $this->getCallByTag($params->tag);
+    $call = $this->getCallById($params->call_id);
+    if (!$call && isset($params->tag)) {
+      $call = $this->getCallByTag($params->tag);
+    }
     if ($call) {
       if (!$call->id && isset($params->call_id) && isset($params->node_id)) {
         $call->id = $params->call_id;
