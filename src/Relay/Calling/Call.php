@@ -1,7 +1,6 @@
 <?php
 namespace SignalWire\Relay\Calling;
 use SignalWire\Messages\Execute;
-use SignalWire\Handler;
 
 class Call {
   const DefaultTimeout = 30;
@@ -14,7 +13,7 @@ class Call {
   public $state = '';
   public $prevConnectState = '';
   public $connectState = '';
-  public $context;
+  public $context = '';
   public $peer;
   public $device = array();
   public $type = '';
@@ -33,21 +32,12 @@ class Call {
     $this->to = isset($this->device->params->to_number) ? $this->device->params->to_number : $this->to;
     $this->timeout = isset($this->device->params->timeout) ? $this->device->params->timeout : $this->timeout;
 
+    $this->id = isset($options->call_id) ? $options->call_id : $this->id;
+    $this->nodeId = isset($options->node_id) ? $options->node_id : $this->nodeId;
+    $this->context = isset($options->context) ? $options->context : $this->context;
     $this->tag = \SignalWire\Util\UUID::v4();
-    if (isset($options->call_id) && isset($options->node_id)) {
-      $this->setup($options->call_id, $options->node_id);
-    }
-    if (isset($options->context)) {
-      $this->context = $options->context;
-    }
 
     $this->relayInstance->addCall($this);
-  }
-
-  public function setup(String $callId, String $nodeId) {
-    $this->id = $callId;
-    $this->nodeId = $nodeId;
-    $this->_attachListeners();
   }
 
   public function on(String $event, Callable $fn) {
@@ -56,9 +46,6 @@ class Call {
   }
 
   public function off(String $event, Callable $fn = null) {
-    if ($this->id) {
-      Handler::deRegister($this->id, $fn, $event);
-    }
     unset($this->_cbQueue[$event]);
     return $this;
   }
@@ -222,7 +209,52 @@ class Call {
     return $this->_execute($msg);
   }
 
-  public function _addControlParams($params) {
+  public function _stateChange(String $state) {
+    $this->prevState = $this->state;
+    $this->state = $state;
+    $this->_dispatchCallback('stateChange');
+    $this->_dispatchCallback($state);
+    $last = count(self::STATES) - 1;
+    if ($state === self::STATES[$last]) {
+      $this->relayInstance->removeCall($this);
+    }
+  }
+
+  public function _recordStateChange($params) {
+    $this->_addControlParams($params);
+    $this->_dispatchCallback('record.stateChange', $params);
+    $this->_dispatchCallback("record.$state", $params);
+  }
+
+  public function _playStateChange($params) {
+    $this->_addControlParams($params);
+    $this->_dispatchCallback('play.stateChange', $params);
+    $this->_dispatchCallback("play.$state", $params);
+  }
+
+  public function _collectStateChange($params) {
+    $this->_addControlParams($params);
+    $this->_dispatchCallback('collect', $params);
+  }
+
+  private function _dispatchCallback(string $key, ...$params) {
+    if (isset($this->_cbQueue[$key]) && is_callable($this->_cbQueue[$key])) {
+      call_user_func($this->_cbQueue[$key], $this, ...$params);
+    }
+  }
+
+  private function _execute(Execute $msg) {
+    return $this->relayInstance->client->execute($msg)->then(
+      function($result) {
+        return $result->result;
+      },
+      function($error) {
+        return isset($error->result) ? $error->result : $error;
+      }
+    );
+  }
+
+  private function _addControlParams($params) {
     if (!isset($params->control_id) || !isset($params->event_type)) {
       return;
     }
@@ -238,45 +270,5 @@ class Call {
     } else {
       array_push($this->_controls, $params);
     }
-  }
-
-  private function _attachListeners() {
-    foreach (self::STATES as $index => $state) {
-      Handler::registerOnce($this->id, function() use ($index, $state) {
-        $this->prevState = $this->state;
-        $this->state = $state;
-        if (isset($this->_cbQueue[$state])) {
-          call_user_func($this->_cbQueue[$state], $this);
-        }
-        if ($index === (count(self::STATES) - 1)) {
-          $this->_detachListeners();
-        }
-      }, $state);
-    }
-
-    $eventNames = array_keys($this->_cbQueue);
-    foreach ($eventNames as $event) {
-      if (preg_match("/^(?:record\.|play\.|collect$)/", $event) === 1) {
-        Handler::registerOnce($this->id, $this->_cbQueue[$event], $event);
-      }
-    }
-  }
-
-  private function _detachListeners() {
-    if ($this->id) {
-      Handler::deRegisterAll($this->id);
-    }
-    $this->relayInstance->removeCall($this);
-  }
-
-  private function _execute(Execute $msg) {
-    return $this->relayInstance->client->execute($msg)->then(
-      function($result) {
-        return $result->result;
-      },
-      function($error) {
-        return isset($error->result) ? $error->result : $error;
-      }
-    );
   }
 }

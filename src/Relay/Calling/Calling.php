@@ -121,47 +121,38 @@ class Calling extends \SignalWire\Relay\BaseRelay {
   }
 
   private function _onState($params) {
-    $call = $this->getCallById($params->call_id);
+    $call = $this->getCallById($params->call_id) || $this->getCallByTag($params->tag);
     if ($call) {
-      return Handler::trigger($params->call_id, $call, $params->call_state);
-    }
-    $call = $this->getCallByTag($params->tag);
-    if ($call) {
-      if (!$call->id) {
-        $call->setup($params->call_id, $params->node_id);
+      if (!$call->id && isset($params->call_id) && isset($params->node_id)) {
+        $call->id = $params->call_id;
+        $call->nodeId = $params->node_id;
       }
-      return Handler::trigger($params->call_id, $call, $params->call_state);
-    }
-    if ($params->call_id && $params->peer) {
+      $call->_stateChange($params->call_state);
+    } elseif (isset($params->call_id) && isset($params->peer)) {
       $call = new Call($this, $params);
-      return;
+    } else {
+      Log::error('Unknown call', $params);
     }
-    Log::error('Unknown call', (array)$params);
   }
 
   private function _onRecord($params) {
     $call = $this->getCallById($params->call_id);
     if ($call) {
-      $call._addControlParams($params);
-      $event = 'record.' . $params->state;
-      Handler::trigger($params->call_id, json_decode(json_encode($params), true), $event);
+      $call->_recordStateChange($params);
     }
   }
 
   private function _onPlay($params) {
     $call = $this->getCallById($params->call_id);
     if ($call) {
-      $call._addControlParams($params);
-      $event = 'play.' . $params->state;
-      Handler::trigger($params->call_id, json_decode(json_encode($params), true), $event);
+      $call->_playStateChange($params);
     }
   }
 
   private function _onCollect($params) {
     $call = $this->getCallById($params->call_id);
     if ($call) {
-      $call._addControlParams($params);
-      Handler::trigger($params->call_id, json_decode(json_encode($params), true), 'collect');
+      $call->_collectStateChange($params);
     }
   }
 }
