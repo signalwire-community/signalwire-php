@@ -1,5 +1,6 @@
 <?php
 namespace SignalWire\Messages;
+use Ramsey\Uuid\Uuid;
 
 abstract class BaseMessage {
   public $request = array();
@@ -8,7 +9,7 @@ abstract class BaseMessage {
 
   protected function buildRequest($params){
     if (!$this->id) {
-      $this->id = \SignalWire\Util\UUID::v4();
+      $this->id = Uuid::uuid4()->toString();
     }
 
     $this->request = array_merge(
