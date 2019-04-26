@@ -1,7 +1,7 @@
 {
   "name": "signalwire/signalwire",
   "description": "Client library for connecting to SignalWire.",
-  "version": "1.1.1",
+  "version": "1.2.0",
   "type": "library",
   "keywords": [
     "signalwire",
@@ -12,7 +12,10 @@
   "autoload": {
     "psr-4": {
       "SignalWire\\": "src/"
-    }
+    },
+    "files": [
+      "src/functions.php"
+    ]
   },
   "authors": [
     {
@@ -27,7 +30,10 @@
     }
   ],
   "require": {
-    "twilio/sdk": "^5.21.3"
+    "twilio/sdk": "^5.21.3",
+    "ratchet/pawl": "^0.3.4",
+    "monolog/monolog": "^1.24",
+    "ramsey/uuid": "^3.8"
   },
   "require-dev": {
     "phpunit/phpunit": "^7",
