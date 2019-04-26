@@ -3,12 +3,12 @@ error_reporting(E_ALL);
 
 require dirname(__FILE__) . '/../vendor/autoload.php';
 
-$space_url = $_ENV['HOST'];
-$project = $_ENV['PROJECT'];
-$token = $_ENV['TOKEN'];
-// if (empty($project) || empty($token)) {
-//   throw new \Exception('Set your SignalWire project and token before run the example.');
-// }
+$space_url = isset($_ENV['HOST']) ? $_ENV['HOST'] : '';
+$project = isset($_ENV['PROJECT']) ? $_ENV['PROJECT'] : '';
+$token = isset($_ENV['TOKEN']) ? $_ENV['TOKEN'] : '';
+if (empty($project) || empty($token)) {
+  throw new \Exception('Set your SignalWire project and token before run the example!');
+}
 
 $client = new SignalWire\Relay\Client(array(
   "host" => $space_url,
@@ -29,14 +29,48 @@ $client->on('signalwire.socket.close', function($session) {
 $client->on('signalwire.ready', function($session) {
   echo PHP_EOL . "signalwire.ready" . PHP_EOL;
 
+  // Test onInbound
+  $session->calling->onInbound('home', function($call) use ($session) {
+    $call->on('answered', function ($call) {
+      echo PHP_EOL . $call->id . " state changed from " . $call->prevState . " to " . $call->state . PHP_EOL;
+      $call->playAudio('https://sample-videos.com/audio/mp3/crowd-cheering.mp3');
+      // $call->hangup();
+    })
+    ->on('ended', function ($call) use ($session) {
+      echo PHP_EOL . "Disconnect..." . PHP_EOL;
+      $session->disconnect();
+    })
+    ->answer();
+
+  })->then(
+    function($response) {
+      echo PHP_EOL . $response->message . PHP_EOL;
+    },
+    function($error) {
+      echo PHP_EOL . $error->message . PHP_EOL;
+    }
+  );
+
+  return;
+
+  // Test newCall()
   $options = array(
     'type' => 'phone',
-    'from' => '+12014296600',
-    'to' => '+12083660792'
+    'from' => '+1XXX',
+    'to' => '+1YYY'
   );
   $session->calling->newCall($options)->then(
     function($call) {
-      $call->on('created', function ($call) {
+      $call->on('stateChange', function ($call) {
+        echo PHP_EOL . $call->id . " GLOBAL state changed to " . $call->state . PHP_EOL;
+      })
+      ->on('play.stateChange', function ($call, $params) {
+        echo PHP_EOL . $call->id . " GLOBAL play changed to " . $params->state . PHP_EOL;
+      })
+      ->on('record.stateChange', function ($call, $params) {
+        echo PHP_EOL . $call->id . " GLOBAL record changed to " . $params->state . PHP_EOL;
+      })
+      ->on('created', function ($call) {
         echo PHP_EOL . $call->id . " state changed from " . $call->prevState . " to " . $call->state . PHP_EOL;
       })
       ->on('ringing', function ($call) {
@@ -44,8 +78,8 @@ $client->on('signalwire.ready', function($session) {
       })
       ->on('answered', function ($call) {
         echo PHP_EOL . $call->id . " state changed from " . $call->prevState . " to " . $call->state . PHP_EOL;
-        // $call->playAudio('https://sample-videos.com/audio/mp3/crowd-cheering.mp3');
-        $call->hangup();
+        $call->playAudio('https://sample-videos.com/audio/mp3/crowd-cheering.mp3');
+        // $call->hangup();
       })
       ->on('ending', function ($call) {
         echo PHP_EOL . $call->id . " state changed from " . $call->prevState . " to " . $call->state . PHP_EOL;
@@ -55,10 +89,10 @@ $client->on('signalwire.ready', function($session) {
       })
       ->begin()->then(
         function($response) {
-          print_r($response);
+          echo PHP_EOL . $response->message . PHP_EOL;
         },
         function($error) {
-          print_r($error);
+          echo PHP_EOL . $error->message . PHP_EOL;
         }
       );
     },
@@ -66,20 +100,10 @@ $client->on('signalwire.ready', function($session) {
       print_r($error);
     }
   );
-
-
-  // $session->calling->onInbound('home', function($call) {
-  //   echo PHP_EOL . "onInbound - 1" . PHP_EOL;
-  //   print_r($call);
-  //   echo PHP_EOL . "onInbound - 2" . PHP_EOL;
-  // });
 });
 
 $client->on('signalwire.error', function($error) {
-  echo PHP_EOL;
-  echo "SignalWire Error:";
-  echo $error->getMessage();
-  echo PHP_EOL;
+  echo PHP_EOL . $error->getMessage() . PHP_EOL;
 });
 
 $client->connect();
