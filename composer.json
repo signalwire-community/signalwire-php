@@ -36,7 +36,6 @@
   },
   "require-dev": {
     "phpunit/phpunit": "^7",
-    "php-vcr/php-vcr": "dev-master",
-    "mockery/mockery": "^1.2"
+    "php-vcr/php-vcr": "dev-master"
   }
 }
