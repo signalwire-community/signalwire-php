@@ -7,6 +7,11 @@ require dirname(__FILE__) . '/../vendor/autoload.php';
 \VCR\VCR::turnOn();
 
 
+function mockUuidV4() {
+  $mock = Mockery::mock('alias:SignalWire\Util\UUID');
+  $mock->shouldReceive('v4')->andReturn('mocked-uuid');
+}
+
 function mockConnectionSend(Array $responses) {
   $promises = array();
   foreach($responses as $r) {

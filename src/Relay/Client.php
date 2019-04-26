@@ -49,7 +49,7 @@ class Client {
    * WebSocket connection
    * @var SignalWire\Relay\Connection
    */
-  protected $connection;
+  public $connection;
 
   /**
    * Relay Calling service
@@ -112,7 +112,6 @@ class Client {
         array_push($this->_executeQueue, array('resolve' => $resolve, 'msg' => $msg));
       });
     }
-
     return $this->connection->send($msg);
   }
 
