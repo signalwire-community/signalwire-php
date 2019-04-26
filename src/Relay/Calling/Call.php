@@ -69,7 +69,7 @@ class Call {
       'method' => 'call.begin',
       'params' => array(
         'tag' => $this->tag,
-        'device' => $this->device
+        'device' => json_decode(json_encode($this->device), true)
       )
     ));
 
@@ -179,20 +179,20 @@ class Call {
 
   public function playAudioAndCollect(Array $collect, String $url) {
     $params = ['type' => 'audio', 'params' => ['url' => $url]];
-    return $this->playAndCollect($collect, $params);
+    return $this->playMediaAndCollect($collect, $params);
   }
 
   public function playSilenceAndCollect(Array $collect, String $duration) {
     $params = ['type' => 'silence', 'params' => ['duration' => $duration]];
-    return $this->playAndCollect($collect, $params);
+    return $this->playMediaAndCollect($collect, $params);
   }
 
   public function playTTSAndCollect(Array $collect, Array $options) {
     $params = ['type' => 'tts', 'params' => $options];
-    return $this->playAndCollect($collect, $params);
+    return $this->playMediaAndCollect($collect, $params);
   }
 
-  public function playAndCollect(Array $collect, ...$play) {
+  public function playMediaAndCollect(Array $collect, ...$play) {
     $msg = new Execute(array(
       'protocol' => $this->relayInstance->protocol,
       'method' => 'call.play_and_collect',
