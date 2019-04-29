@@ -20,6 +20,7 @@ class Calling extends \SignalWire\Relay\BaseRelay {
         $this->_onState($notification->params);
         break;
       case 'calling.call.connect':
+        $this->_onConnect($notification->params);
         break;
       case 'calling.call.record':
         $this->_onRecord($notification->params);
@@ -155,6 +156,16 @@ class Calling extends \SignalWire\Relay\BaseRelay {
   private function _onCollect($params) {
     $call = $this->getCallById($params->call_id);
     if ($call) {
+      $call->_collectStateChange($params);
+    }
+  }
+
+  private function _onConnect($params) {
+    $call = $this->getCallById($params->call_id);
+    if ($call) {
+      if (isset($params->peer) && isset($params->peer->call_id)) {
+        $call->peer = $this->getCallById($params->peer->call_id);
+      }
       $call->_collectStateChange($params);
     }
   }

@@ -210,6 +210,20 @@ class Call {
     return $this->_execute($msg);
   }
 
+  public function connect(...$devices) {
+    $msg = new Execute(array(
+      'protocol' => $this->relayInstance->protocol,
+      'method' => 'call.connect',
+      'params' => array(
+        'node_id' => $this->nodeId,
+        'call_id' => $this->id,
+        'devices' => \SignalWire\reduceConnectParams($devices, $this->from, $this->timeout)
+      )
+    ));
+
+    return $this->_execute($msg);
+  }
+
   public function _stateChange(String $state) {
     $this->prevState = $this->state;
     $this->state = $state;
@@ -219,6 +233,13 @@ class Call {
     if ($state === self::STATES[$last]) {
       $this->relayInstance->removeCall($this);
     }
+  }
+
+  public function _connectStateChange(String $state) {
+    $this->prevConnectState = $this->connectState;
+    $this->connectState = $state;
+    $this->_dispatchCallback("connect.stateChange");
+    $this->_dispatchCallback("connect.$state");
   }
 
   public function _recordStateChange($params) {
