@@ -372,4 +372,100 @@ class RelayCallingCallTest extends TestCase
     $res = $this->call->stopPlayAndCollect('uuid');
     $this->assertInstanceOf('React\Promise\PromiseInterface', $res);
   }
+
+  public function testConnectDevicesInSeries(): void {
+    $this->_setCallReady();
+    $msg = new Execute([
+      'protocol' => 'signalwire_calling_proto',
+      'method' => 'call.connect',
+      'params' => [
+        'call_id' => 'call-id',
+        'node_id' => 'node-id',
+        'devices' => [
+          [
+            [ "type" => "phone", "params" => [ "to_number" => "999", "from_number" => "231", "timeout" => 10 ] ],
+          ],
+          [
+            [ "type" => "phone", "params" => [ "to_number" => "888", "from_number" => "234", "timeout" => 20 ] ]
+          ]
+        ]
+      ]
+    ]);
+
+    $this->stub->expects($this->once())->method('send')->with($msg);
+
+    $res = $this->call->connect(
+      [ "type" => "phone", "to" => "999", "from" => "231", "timeout" => 10 ],
+      [ "type" => "phone", "to" => "888" ]
+    );
+    $this->assertInstanceOf('React\Promise\PromiseInterface', $res);
+  }
+
+  public function testConnectDevicesInParallel(): void {
+    $this->_setCallReady();
+    $msg = new Execute([
+      'protocol' => 'signalwire_calling_proto',
+      'method' => 'call.connect',
+      'params' => [
+        'call_id' => 'call-id',
+        'node_id' => 'node-id',
+        'devices' => [
+          [
+            [ "type" => "phone", "params" => [ "to_number" => "999", "from_number" => "231", "timeout" => 10 ] ],
+            [ "type" => "phone", "params" => [ "to_number" => "888", "from_number" => "234", "timeout" => 20 ] ]
+          ]
+        ]
+      ]
+    ]);
+
+    $this->stub->expects($this->once())->method('send')->with($msg);
+
+    $res = $this->call->connect(
+      [
+        [ "type" => "phone", "to" => "999", "from" => "231", "timeout" => 10 ],
+        [ "type" => "phone", "to" => "888" ]
+      ]
+    );
+    $this->assertInstanceOf('React\Promise\PromiseInterface', $res);
+  }
+
+  public function testConnectDevicesInBothSeriesAndParallel(): void {
+    $this->_setCallReady();
+    $msg = new Execute([
+      'protocol' => 'signalwire_calling_proto',
+      'method' => 'call.connect',
+      'params' => [
+        'call_id' => 'call-id',
+        'node_id' => 'node-id',
+        'devices' => [
+          [
+            [ "type" => "phone", "params" => [ "to_number" => "999", "from_number" => "234", "timeout" => 20 ] ]
+          ],
+          [
+            [ "type" => "phone", "params" => [ "to_number" => "555", "from_number" => "234", "timeout" => 20 ] ]
+          ],
+          [
+            [ "type" => "phone", "params" => [ "to_number" => "999", "from_number" => "231", "timeout" => 10 ] ],
+            [ "type" => "phone", "params" => [ "to_number" => "888", "from_number" => "234", "timeout" => 20 ] ]
+          ]
+        ]
+      ]
+    ]);
+
+    $this->stub->expects($this->once())->method('send')->with($msg);
+
+    $res = $this->call->connect(
+      [
+        [ "type" => "phone", "to" => "999" ],
+      ],
+      [
+        [ "type" => "phone", "to" => "555" ],
+      ],
+      [
+        [ "type" => "phone", "to" => "999", "from" => "231", "timeout" => 10 ],
+        [ "type" => "phone", "to" => "888" ]
+      ]
+    );
+    $this->assertInstanceOf('React\Promise\PromiseInterface', $res);
+  }
 }
