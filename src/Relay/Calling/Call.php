@@ -114,7 +114,7 @@ class Call {
         'node_id' => $this->nodeId,
         'call_id' => $this->id,
         'control_id' => Uuid::uuid4()->toString(),
-        'play' => $play
+        'playaa' => $play
       )
     ));
 
@@ -266,14 +266,12 @@ class Call {
   }
 
   private function _execute(Execute $msg) {
-    return $this->relayInstance->client->execute($msg)->then(
-      function($result) {
-        return $result->result;
-      },
-      function($error) {
-        return isset($error->result) ? $error->result : $error;
-      }
-    );
+    return $this->relayInstance->client->execute($msg)->then(function($result) {
+      return $result->result;
+    })->otherwise(function($error) {
+      $e = isset($error->result) ? $error->result : $error;
+      throw new \Exception($e->message, $e->code);
+    });
   }
 
   private function _addControlParams($params) {

@@ -49,41 +49,30 @@ class Calling extends \SignalWire\Relay\BaseRelay {
         ]
       ]
     ];
-    return $this->ready->then(
-      function($protocol) use ($options) {
-        return new Call($this, $options);
-      },
-      function($error) {
-        throw new \Exception($error->message, $error->code);
-      }
-    );
+    return $this->ready->then(function($protocol) use ($options) {
+      return new Call($this, $options);
+    })->otherwise([$this, '_onError']);
   }
 
   public function onInbound(String $context, Callable $handler) {
     if (!$context || !is_callable($handler)) {
       throw new Exception("Invalid parameters");
     }
-    return $this->ready->then(
-      function($protocol) use ($context, $handler) {
-        $msg = new Execute([
-          'protocol' => $protocol,
-          'method' => 'call.receive',
-          'params' => [ 'context' => $context ]
-        ]);
-        return $this->client->execute($msg)->then(
-          function($response) use ($protocol, $context, $handler) {
-            Handler::register($protocol, $handler, $this->_prefixCtx($context));
-            return $response->result;
-          },
-          function($error) {
-            throw new \Exception($error->message, $error->code);
-          }
-        );
-      },
-      function($error) {
-        throw new \Exception($error->message, $error->code);
-      }
-    );
+    return $this->ready->then(function($protocol) use ($context, $handler) {
+      $msg = new Execute([
+        'protocol' => $protocol,
+        'method' => 'call.receive',
+        'params' => [ 'context' => $context ]
+      ]);
+      return $this->client->execute($msg)->then(function($response) use ($protocol, $context, $handler) {
+        Handler::register($protocol, $handler, $this->_prefixCtx($context));
+        return $response->result;
+      })->otherwise([$this, '_onError']);
+    })->otherwise([$this, '_onError']);
+  }
+
+  public function _onError($error) {
+    throw new \Exception($error->message, $error->code);
   }
 
   private function _prefixCtx(String $context) {
