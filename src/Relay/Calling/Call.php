@@ -150,7 +150,9 @@ class Call {
       )
     ));
 
-    return $this->_execute($msg);
+    return $this->_execute($msg)->then(function($result){
+      return new RecordAction($this, $result->control_id);
+    });
   }
 
   public function playAudioAndCollect(Array $collect, String $url) {
