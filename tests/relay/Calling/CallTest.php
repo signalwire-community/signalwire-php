@@ -227,32 +227,16 @@ class RelayCallingCallTest extends TestCase
         'call_id' => 'call-id',
         'node_id' => 'node-id',
         'control_id' => self::UUID,
-        'type' => 'audio',
-        'params' => ["beep" => true, "stereo" => false]
+        'record' => [
+          'type' => 'audio',
+          'params' => ["beep" => true, "stereo" => false]
+        ]
       ]
     ]);
 
     $this->stub->expects($this->once())->method('send')->with($msg);
 
     $res = $this->call->startRecord('audio', ["beep" => true, "stereo" => false]);
-    $this->assertInstanceOf('React\Promise\PromiseInterface', $res);
-  }
-
-  public function testStopRecord(): void {
-    $this->_setCallReady();
-    $msg = new Execute([
-      'protocol' => 'signalwire_calling_proto',
-      'method' => 'call.record.stop',
-      'params' => [
-        'call_id' => 'call-id',
-        'node_id' => 'node-id',
-        'control_id' => 'uuid'
-      ]
-    ]);
-
-    $this->stub->expects($this->once())->method('send')->with($msg);
-
-    $res = $this->call->stopRecord('uuid');
     $this->assertInstanceOf('React\Promise\PromiseInterface', $res);
   }
 
