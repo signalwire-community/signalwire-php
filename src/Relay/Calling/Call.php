@@ -265,7 +265,7 @@ class Call {
     }
   }
 
-  private function _execute(Execute $msg) {
+  public function _execute(Execute $msg) {
     return $this->relayInstance->client->execute($msg)->then(function($result) {
       return $result->result;
     })->otherwise(function($error) {
