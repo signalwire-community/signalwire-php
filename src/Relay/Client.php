@@ -179,22 +179,20 @@ class Client {
       'protocol' => $protocol,
       'channels' => $channels
     ));
-    return $this->execute($msg)->then(
-      function($result) use ($protocol, $handler) {
-        if (isset($result->failed_channels) && is_array($result->failed_channels)) {
-          foreach($result->failed_channels as $channel) {
-            $this->_removeSubscription($protocol, $channel);
-          }
+    return $this->execute($msg)->then(function($result) use ($protocol, $handler) {
+      if (isset($result->failed_channels) && is_array($result->failed_channels)) {
+        foreach($result->failed_channels as $channel) {
+          $this->_removeSubscription($protocol, $channel);
         }
-        if (isset($result->subscribe_channels) && is_array($result->subscribe_channels)) {
-          foreach($result->subscribe_channels as $channel) {
-            $this->_addSubscription($protocol, $channel, $handler);
-          }
-        }
-
-        return $result;
       }
-    );
+      if (isset($result->subscribe_channels) && is_array($result->subscribe_channels)) {
+        foreach($result->subscribe_channels as $channel) {
+          $this->_addSubscription($protocol, $channel, $handler);
+        }
+      }
+
+      return $result;
+    });
   }
 
   private function _existsSubscription(String $protocol, String $channel) {

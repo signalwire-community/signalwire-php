@@ -24,8 +24,8 @@ abstract class BaseRelay {
         'method' => self::SetupMethod,
         'params' => array('service' => $this->getServiceName())
       ));
-      $client->execute($msg)->then(function($response) use ($client, $resolve, $reject) {
-        $client->subscribe($response->result->protocol, self::SetupChannels, [$this, "notificationHandler"])->then(function($response) use ($resolve) {
+      $client->execute($msg)->done(function($response) use ($client, $resolve, $reject) {
+        $client->subscribe($response->result->protocol, self::SetupChannels, [$this, "notificationHandler"])->done(function($response) use ($resolve) {
           $this->protocol = $response->protocol;
           call_user_func($resolve, $this->protocol);
         }, $reject);
