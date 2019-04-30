@@ -114,7 +114,7 @@ class Call {
         'node_id' => $this->nodeId,
         'call_id' => $this->id,
         'control_id' => Uuid::uuid4()->toString(),
-        'playaa' => $play
+        'play' => $play
       )
     ));
 
