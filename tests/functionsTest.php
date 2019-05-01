@@ -165,4 +165,11 @@ class FunctionsTest extends TestCase
     $result = \SignalWire\reduceConnectParams($input, "222", 30);
     $this->assertEquals($result, $final);
   }
+
+  public function testCheckWebSocketHost(): void {
+    $this->assertEquals(\SignalWire\checkWebSocketHost('ws://test.com'), 'ws://test.com');
+    $this->assertEquals(\SignalWire\checkWebSocketHost('example.signalwire.com'), 'wss://example.signalwire.com:443/api/relay/wss');
+    $this->assertEquals(\SignalWire\checkWebSocketHost('ws://example.signalwire.com'), 'ws://example.signalwire.com:443/api/relay/wss');
+    $this->assertEquals(\SignalWire\checkWebSocketHost('example.sw.com'), 'wss://example.sw.com');
+  }
 }
