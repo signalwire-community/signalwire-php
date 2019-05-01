@@ -342,27 +342,6 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
     });
   }
 
-  public function testStopPlayAndCollect(): void {
-    $this->_setCallReady();
-    $msg = new Execute([
-      'protocol' => 'signalwire_calling_proto',
-      'method' => 'call.play_and_collect.stop',
-      'params' => [
-        'call_id' => 'call-id',
-        'node_id' => 'node-id',
-        'control_id' => 'uuid'
-      ]
-    ]);
-
-    $this->client->connection->expects($this->once())
-      ->method('send')
-      ->with($msg)
-      ->willReturn(\React\Promise\resolve(json_decode('{"result":{"code":"200","message":"message"}}')));
-
-    $res = $this->call->stopPlayAndCollect('uuid');
-    $this->assertInstanceOf('React\Promise\PromiseInterface', $res);
-  }
-
   public function testConnectDevicesInSeries(): void {
     $this->_setCallReady();
     $msg = new Execute([

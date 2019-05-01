@@ -183,20 +183,6 @@ class Call {
     });
   }
 
-  public function stopPlayAndCollect(String $control_id) {
-    $msg = new Execute(array(
-      'protocol' => $this->relayInstance->protocol,
-      'method' => 'call.play_and_collect.stop',
-      'params' => array(
-        'node_id' => $this->nodeId,
-        'call_id' => $this->id,
-        'control_id' => $control_id
-      )
-    ));
-
-    return $this->_execute($msg);
-  }
-
   public function connect(...$devices) {
     $msg = new Execute(array(
       'protocol' => $this->relayInstance->protocol,
