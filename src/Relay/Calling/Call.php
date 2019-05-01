@@ -6,6 +6,10 @@ use SignalWire\Relay\Calling\PlayMediaAction;
 use SignalWire\Relay\Calling\PlayAudioAction;
 use SignalWire\Relay\Calling\PlaySilenceAction;
 use SignalWire\Relay\Calling\PlayTTSAction;
+use SignalWire\Relay\Calling\PlayAudioAndCollectAction;
+use SignalWire\Relay\Calling\PlaySilenceAndCollectAction;
+use SignalWire\Relay\Calling\PlayTTSAndCollectAction;
+use SignalWire\Relay\Calling\PlayMediaAndCollectAction;
 
 class Call {
   const DefaultTimeout = 30;
@@ -154,47 +158,29 @@ class Call {
 
   public function playAudioAndCollect(Array $collect, String $url) {
     $params = ['type' => 'audio', 'params' => ['url' => $url]];
-    return $this->playMediaAndCollect($collect, $params);
+    return $this->_playAndCollect($collect, [$params])->then(function($result) {
+      return new PlayAudioAndCollectAction($this, $result->control_id);
+    });
   }
 
   public function playSilenceAndCollect(Array $collect, String $duration) {
     $params = ['type' => 'silence', 'params' => ['duration' => $duration]];
-    return $this->playMediaAndCollect($collect, $params);
+    return $this->_playAndCollect($collect, [$params])->then(function($result) {
+      return new PlaySilenceAndCollectAction($this, $result->control_id);
+    });
   }
 
   public function playTTSAndCollect(Array $collect, Array $options) {
     $params = ['type' => 'tts', 'params' => $options];
-    return $this->playMediaAndCollect($collect, $params);
+    return $this->_playAndCollect($collect, [$params])->then(function($result) {
+      return new PlayTTSAndCollectAction($this, $result->control_id);
+    });
   }
 
   public function playMediaAndCollect(Array $collect, ...$play) {
-    $msg = new Execute(array(
-      'protocol' => $this->relayInstance->protocol,
-      'method' => 'call.play_and_collect',
-      'params' => array(
-        'node_id' => $this->nodeId,
-        'call_id' => $this->id,
-        'control_id' => Uuid::uuid4()->toString(),
-        'collect' => $collect,
-        'play' => $play
-      )
-    ));
-
-    return $this->_execute($msg);
-  }
-
-  public function stopPlayAndCollect(String $control_id) {
-    $msg = new Execute(array(
-      'protocol' => $this->relayInstance->protocol,
-      'method' => 'call.play_and_collect.stop',
-      'params' => array(
-        'node_id' => $this->nodeId,
-        'call_id' => $this->id,
-        'control_id' => $control_id
-      )
-    ));
-
-    return $this->_execute($msg);
+    return $this->_playAndCollect($collect, $play)->then(function($result) {
+      return new PlayMediaAndCollectAction($this, $result->control_id);
+    });
   }
 
   public function connect(...$devices) {
@@ -287,6 +273,22 @@ class Call {
         'node_id' => $this->nodeId,
         'call_id' => $this->id,
         'control_id' => Uuid::uuid4()->toString(),
+        'play' => $play
+      )
+    ));
+
+    return $this->_execute($msg);
+  }
+
+  private function _playAndCollect(Array $collect, Array $play) {
+    $msg = new Execute(array(
+      'protocol' => $this->relayInstance->protocol,
+      'method' => 'call.play_and_collect',
+      'params' => array(
+        'node_id' => $this->nodeId,
+        'call_id' => $this->id,
+        'control_id' => Uuid::uuid4()->toString(),
+        'collect' => $collect,
         'play' => $play
       )
     ));

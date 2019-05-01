@@ -247,10 +247,11 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
     $this->client->connection->expects($this->once())
       ->method('send')
       ->with($msg)
-      ->willReturn(\React\Promise\resolve(json_decode('{"result":{"code":"200","message":"message"}}')));
+      ->willReturn(\React\Promise\resolve(json_decode('{"result":{"code":"200","message":"message","control_id":"control-id"}}')));
 
-    $res = $this->call->playAudioAndCollect($collect, 'url-to-audio.mp3');
-    $this->assertInstanceOf('React\Promise\PromiseInterface', $res);
+    $this->call->playAudioAndCollect($collect, 'url-to-audio.mp3')->done(function($action) {
+      $this->assertInstanceOf('SignalWire\Relay\Calling\PlayAudioAndCollectAction', $action);
+    });
   }
 
   public function testPlaySilenceAndCollect(): void {
@@ -273,10 +274,11 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
     $this->client->connection->expects($this->once())
       ->method('send')
       ->with($msg)
-      ->willReturn(\React\Promise\resolve(json_decode('{"result":{"code":"200","message":"message"}}')));
+      ->willReturn(\React\Promise\resolve(json_decode('{"result":{"code":"200","message":"message","control_id":"control-id"}}')));
 
-    $res = $this->call->playSilenceAndCollect($collect, 5);
-    $this->assertInstanceOf('React\Promise\PromiseInterface', $res);
+    $this->call->playSilenceAndCollect($collect, 5)->done(function($action) {
+      $this->assertInstanceOf('SignalWire\Relay\Calling\PlaySilenceAndCollectAction', $action);
+    });
   }
 
   public function testPlayTTSAndCollect(): void {
@@ -299,10 +301,11 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
     $this->client->connection->expects($this->once())
       ->method('send')
       ->with($msg)
-      ->willReturn(\React\Promise\resolve(json_decode('{"result":{"code":"200","message":"message"}}')));
+      ->willReturn(\React\Promise\resolve(json_decode('{"result":{"code":"200","message":"message","control_id":"control-id"}}')));
 
-    $res = $this->call->playTTSAndCollect($collect, ['text' => 'Welcome', 'gender' => 'male']);
-    $this->assertInstanceOf('React\Promise\PromiseInterface', $res);
+    $this->call->playTTSAndCollect($collect, ['text' => 'Welcome', 'gender' => 'male'])->done(function($action) {
+      $this->assertInstanceOf('SignalWire\Relay\Calling\PlayTTSAndCollectAction', $action);
+    });
   }
 
   public function testPlayMediaAndCollect(): void {
@@ -327,36 +330,16 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
     $this->client->connection->expects($this->once())
       ->method('send')
       ->with($msg)
-      ->willReturn(\React\Promise\resolve(json_decode('{"result":{"code":"200","message":"message"}}')));
+      ->willReturn(\React\Promise\resolve(json_decode('{"result":{"code":"200","message":"message","control_id":"control-id"}}')));
 
-    $res = $this->call->playMediaAndCollect(
+    $this->call->playMediaAndCollect(
       $collect,
       ['type' => 'audio', 'params' => ['url' => 'audio.mp3']],
       ['type' => 'tts', 'params' => ['text' => 'Welcome', 'gender' => 'male']],
       ['type' => 'silence', 'params' => ['duration' => 5]]
-    );
-    $this->assertInstanceOf('React\Promise\PromiseInterface', $res);
-  }
-
-  public function testStopPlayAndCollect(): void {
-    $this->_setCallReady();
-    $msg = new Execute([
-      'protocol' => 'signalwire_calling_proto',
-      'method' => 'call.play_and_collect.stop',
-      'params' => [
-        'call_id' => 'call-id',
-        'node_id' => 'node-id',
-        'control_id' => 'uuid'
-      ]
-    ]);
-
-    $this->client->connection->expects($this->once())
-      ->method('send')
-      ->with($msg)
-      ->willReturn(\React\Promise\resolve(json_decode('{"result":{"code":"200","message":"message"}}')));
-
-    $res = $this->call->stopPlayAndCollect('uuid');
-    $this->assertInstanceOf('React\Promise\PromiseInterface', $res);
+    )->done(function($action) {
+      $this->assertInstanceOf('SignalWire\Relay\Calling\PlayMediaAndCollectAction', $action);
+    });
   }
 
   public function testConnectDevicesInSeries(): void {
