@@ -2,6 +2,10 @@
 namespace SignalWire\Relay\Calling;
 use SignalWire\Messages\Execute;
 use Ramsey\Uuid\Uuid;
+use SignalWire\Relay\Calling\PlayMediaAction;
+use SignalWire\Relay\Calling\PlayAudioAction;
+use SignalWire\Relay\Calling\PlaySilenceAction;
+use SignalWire\Relay\Calling\PlayTTSAction;
 
 class Call {
   const DefaultTimeout = 30;
@@ -93,46 +97,29 @@ class Call {
 
   public function playAudio(String $url) {
     $params = ['type' => 'audio', 'params' => ['url' => $url]];
-    return $this->playMedia($params);
+    return $this->_play([$params])->then(function($result) {
+      return new PlayAudioAction($this, $result->control_id);
+    });
   }
 
   public function playSilence(String $duration) {
     $params = ['type' => 'silence', 'params' => ['duration' => $duration]];
-    return $this->playMedia($params);
+    return $this->_play([$params])->then(function($result) {
+      return new PlaySilenceAction($this, $result->control_id);
+    });
   }
 
   public function playTTS(Array $options) {
     $params = ['type' => 'tts', 'params' => $options];
-    return $this->playMedia($params);
+    return $this->_play([$params])->then(function($result) {
+      return new PlayTTSAction($this, $result->control_id);
+    });
   }
 
   public function playMedia(...$play) {
-    $msg = new Execute(array(
-      'protocol' => $this->relayInstance->protocol,
-      'method' => 'call.play',
-      'params' => array(
-        'node_id' => $this->nodeId,
-        'call_id' => $this->id,
-        'control_id' => Uuid::uuid4()->toString(),
-        'play' => $play
-      )
-    ));
-
-    return $this->_execute($msg);
-  }
-
-  public function stopPlay(String $control_id) {
-    $msg = new Execute(array(
-      'protocol' => $this->relayInstance->protocol,
-      'method' => 'call.play.stop',
-      'params' => array(
-        'node_id' => $this->nodeId,
-        'call_id' => $this->id,
-        'control_id' => $control_id
-      )
-    ));
-
-    return $this->_execute($msg);
+    return $this->_play($play)->then(function($result) {
+      return new PlayMediaAction($this, $result->control_id);
+    });
   }
 
   public function startRecord(String $type = 'audio', Array $options = array()) {
@@ -265,7 +252,7 @@ class Call {
     }
   }
 
-  private function _execute(Execute $msg) {
+  public function _execute(Execute $msg) {
     return $this->relayInstance->client->execute($msg)->then(function($result) {
       return $result->result;
     })->otherwise(function($error) {
@@ -290,5 +277,20 @@ class Call {
     } else {
       array_push($this->_controls, $params);
     }
+  }
+
+  private function _play(Array $play) {
+    $msg = new Execute(array(
+      'protocol' => $this->relayInstance->protocol,
+      'method' => 'call.play',
+      'params' => array(
+        'node_id' => $this->nodeId,
+        'call_id' => $this->id,
+        'control_id' => Uuid::uuid4()->toString(),
+        'play' => $play
+      )
+    ));
+
+    return $this->_execute($msg);
   }
 }
