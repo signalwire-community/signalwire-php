@@ -56,7 +56,13 @@ class Connection {
   public function send(BaseMessage $msg) {
     $promise = new \React\Promise\Promise(function (callable $resolve, callable $reject) use ($msg) {
       $callback = function($msg) use ($resolve, $reject) {
-        isset($msg->error) ? $reject($msg->error) : $resolve($msg->result);
+        if (isset($msg->error)) {
+          return $reject($msg->error);
+        }
+        if (isset($msg->result->result->code) && $msg->result->result->code !== "200") {
+          return $reject($msg->result);
+        }
+        $resolve($msg->result);
       };
 
       Handler::registerOnce($msg->id, $callback);
