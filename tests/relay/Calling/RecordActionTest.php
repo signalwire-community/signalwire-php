@@ -7,6 +7,11 @@ use SignalWire\Messages\Execute;
 
 class RelayCallingRecordActionTest extends RelayCallingBaseActionCase
 {
+  protected function setUp() {
+    parent::setUp();
+    $this->_setCallReady();
+  }
+
   public function testStop(): void {
     $msg = new Execute([
       'protocol' => 'signalwire_calling_proto',

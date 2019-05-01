@@ -10,6 +10,11 @@ use SignalWire\Messages\Execute;
 
 class RelayCallingPlayActionTest extends RelayCallingBaseActionCase
 {
+  protected function setUp() {
+    parent::setUp();
+    $this->_setCallReady();
+  }
+
   public function testPlayMediaActionStop(): void {
     $msg = new Execute([
       'protocol' => 'signalwire_calling_proto',

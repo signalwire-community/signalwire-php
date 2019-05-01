@@ -46,6 +46,9 @@ abstract class RelayCallingBaseActionCase extends TestCase
       ]
     ];
     $this->call = new Call($calling, $options);
+  }
+
+  protected function _setCallReady() {
     $this->call->id = 'call-id';
     $this->call->nodeId = 'node-id';
   }
