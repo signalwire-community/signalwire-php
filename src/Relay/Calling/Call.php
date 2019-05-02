@@ -2,6 +2,7 @@
 namespace SignalWire\Relay\Calling;
 use SignalWire\Messages\Execute;
 use Ramsey\Uuid\Uuid;
+use SignalWire\Relay\Calling\RecordAction;
 use SignalWire\Relay\Calling\PlayMediaAction;
 use SignalWire\Relay\Calling\PlayAudioAction;
 use SignalWire\Relay\Calling\PlaySilenceAction;
@@ -126,7 +127,7 @@ class Call {
     });
   }
 
-  public function startRecord(String $type = 'audio', Array $options = array()) {
+  public function record(Array $record) {
     $msg = new Execute(array(
       'protocol' => $this->relayInstance->protocol,
       'method' => 'call.record',
@@ -134,12 +135,13 @@ class Call {
         'node_id' => $this->nodeId,
         'call_id' => $this->id,
         'control_id' => Uuid::uuid4()->toString(),
-        'type' => $type,
-        'params' => $options
+        'record' => $record
       )
     ));
 
-    return $this->_execute($msg);
+    return $this->_execute($msg)->then(function($result) {
+      return new RecordAction($this, $result->control_id);
+    });
   }
 
   public function playAudioAndCollect(Array $collect, String $url) {
