@@ -3,9 +3,13 @@ All notable changes to this project will be documented in this file.
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [1.3.0]
 ### Added
-- Support calling `connect()` method.
+- Call `connect()` method.
+- Call `record()` method.
+- Call `playMedia()`, `playAudio()`, `playTTS()`, `playSilence()` methods.
+- Call `playMediaAndCollect()`, `playAudioAndCollect()`, `playTTSAndCollect()`, `playSilenceAndCollect()` methods.
+- Expose Call `play.*`, `record.*`, `collect` events.
 
 ## [1.2.1]
 ### Fixed
