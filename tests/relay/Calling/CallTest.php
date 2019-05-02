@@ -183,7 +183,7 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
     });
   }
 
-  public function testStartRecord(): void {
+  public function testRecord(): void {
     $this->_setCallReady();
     $msg = new Execute([
       'protocol' => 'signalwire_calling_proto',
@@ -192,39 +192,19 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
         'call_id' => 'call-id',
         'node_id' => 'node-id',
         'control_id' => self::UUID,
-        'type' => 'audio',
-        'params' => ["beep" => true, "stereo" => false]
+        'record' => ["beep" => true, "stereo" => false]
       ]
     ]);
 
     $this->client->connection->expects($this->once())
       ->method('send')
       ->with($msg)
-      ->willReturn(\React\Promise\resolve(json_decode('{"result":{"code":"200","message":"message"}}')));
+      ->willReturn(\React\Promise\resolve(json_decode('{"result":{"code":"200","message":"message","control_id":"control-id"}}')));
 
-    $res = $this->call->startRecord('audio', ["beep" => true, "stereo" => false]);
-    $this->assertInstanceOf('React\Promise\PromiseInterface', $res);
-  }
-
-  public function testStopRecord(): void {
-    $this->_setCallReady();
-    $msg = new Execute([
-      'protocol' => 'signalwire_calling_proto',
-      'method' => 'call.record.stop',
-      'params' => [
-        'call_id' => 'call-id',
-        'node_id' => 'node-id',
-        'control_id' => 'uuid'
-      ]
-    ]);
-
-    $this->client->connection->expects($this->once())
-      ->method('send')
-      ->with($msg)
-      ->willReturn(\React\Promise\resolve(json_decode('{"result":{"code":"200","message":"message"}}')));
-
-    $res = $this->call->stopRecord('uuid');
-    $this->assertInstanceOf('React\Promise\PromiseInterface', $res);
+    $record = ["beep" => true, "stereo" => false];
+    $this->call->record($record)->done(function($action) {
+      $this->assertInstanceOf('SignalWire\Relay\Calling\RecordAction', $action);
+    });
   }
 
   public function testPlayAudioAndCollect(): void {
