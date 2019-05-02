@@ -206,27 +206,6 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
     $this->assertInstanceOf('React\Promise\PromiseInterface', $res);
   }
 
-  public function testStopRecord(): void {
-    $this->_setCallReady();
-    $msg = new Execute([
-      'protocol' => 'signalwire_calling_proto',
-      'method' => 'call.record.stop',
-      'params' => [
-        'call_id' => 'call-id',
-        'node_id' => 'node-id',
-        'control_id' => 'uuid'
-      ]
-    ]);
-
-    $this->client->connection->expects($this->once())
-      ->method('send')
-      ->with($msg)
-      ->willReturn(\React\Promise\resolve(json_decode('{"result":{"code":"200","message":"message"}}')));
-
-    $res = $this->call->stopRecord('uuid');
-    $this->assertInstanceOf('React\Promise\PromiseInterface', $res);
-  }
-
   public function testPlayAudioAndCollect(): void {
     $this->_setCallReady();
     $collect = ["initial_timeout" => 10, "digits" => [ "max" => 3 ]];

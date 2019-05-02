@@ -142,20 +142,6 @@ class Call {
     return $this->_execute($msg);
   }
 
-  public function stopRecord(String $control_id) {
-    $msg = new Execute(array(
-      'protocol' => $this->relayInstance->protocol,
-      'method' => 'call.record.stop',
-      'params' => array(
-        'node_id' => $this->nodeId,
-        'call_id' => $this->id,
-        'control_id' => $control_id
-      )
-    ));
-
-    return $this->_execute($msg);
-  }
-
   public function playAudioAndCollect(Array $collect, String $url) {
     $params = ['type' => 'audio', 'params' => ['url' => $url]];
     return $this->_playAndCollect($collect, [$params])->then(function($result) {
