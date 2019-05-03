@@ -2,6 +2,7 @@
 error_reporting(E_ALL);
 
 require dirname(__FILE__) . '/../vendor/autoload.php';
+$loop = React\EventLoop\Factory::create();
 
 $space_url = isset($_ENV['HOST']) ? $_ENV['HOST'] : '';
 $project = isset($_ENV['PROJECT']) ? $_ENV['PROJECT'] : '';
@@ -13,7 +14,8 @@ if (empty($project) || empty($token)) {
 $client = new SignalWire\Relay\Client(array(
   "host" => $space_url,
   "project" => $project,
-  "token" => $token
+  "token" => $token,
+  "eventLoop" => $loop
 ));
 
 $client->on('signalwire.socket.open', function($session) {
@@ -26,8 +28,12 @@ $client->on('signalwire.socket.close', function($session) {
   echo PHP_EOL . "signalwire.socket.close" . PHP_EOL;
 });
 
-$client->on('signalwire.ready', function($session) {
+$client->on('signalwire.ready', function($session) use ($loop) {
   echo PHP_EOL . "signalwire.ready" . PHP_EOL;
+
+  $loop->addTimer(3, function () {
+    echo PHP_EOL . "I've been stopped for 3 seconds without block the process" . PHP_EOL;
+  });
 
   // Test onInbound
   $session->calling->onInbound('home', function($call) use ($session) {
