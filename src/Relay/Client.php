@@ -53,6 +53,12 @@ class Client {
   public $connection;
 
   /**
+   * EventLoop to use in WebSocket client
+   * @var React\EventLoop
+   */
+  public $eventLoop = null;
+
+  /**
    * Relay Calling service
    * @var SignalWire\Relay\Service\Calling
    */
@@ -86,6 +92,9 @@ class Client {
     $this->host = $options['host'];
     $this->project = $options['project'];
     $this->token = $options['token'];
+    if (isset($options['eventLoop']) && $options['eventLoop'] instanceof \React\EventLoop\LoopInterface) {
+      $this->eventLoop = $options['eventLoop'];
+    }
 
     $this->uuid = Uuid::uuid4()->toString();
     $this->connection = new Connection($this);
