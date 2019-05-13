@@ -1,7 +1,7 @@
 {
   "name": "signalwire/signalwire",
   "description": "Client library for connecting to SignalWire.",
-  "version": "1.4.0",
+  "version": "1.4.1",
   "type": "library",
   "keywords": [
     "signalwire",
@@ -30,6 +30,7 @@
     }
   ],
   "require": {
+    "php": "^7.1",
     "twilio/sdk": "^5.21.3",
     "ratchet/pawl": "^0.3.4",
     "monolog/monolog": "^1.24",
