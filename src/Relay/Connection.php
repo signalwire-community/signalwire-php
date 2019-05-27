@@ -20,37 +20,36 @@ class Connection {
   public function connect() {
     $host = \SignalWire\checkWebSocketHost($this->client->host);
     Log::debug("Connecting to: $host");
-    \Ratchet\Client\connect($host, [], [], $this->client->eventLoop)->done([$this, "onConnectSuccess"], [$this, "onConnectError"]);
-  }
 
-  public function onConnectSuccess(\Ratchet\Client\WebSocket $webSocket) {
-    $this->_ws = $webSocket;
-    $uuid = $this->client->uuid;
-    $webSocket->on('message', function($msg) use ($uuid) {
-      Log::debug("RECV " . str_replace(' ', '', $msg->getPayload()));
-      $obj = json_decode($msg->getPayload());
-      if (!is_object($obj) || !isset($obj->id)) {
-        return;
+    \Ratchet\Client\connect($host, [], [], $this->client->eventLoop)->done(
+      function(\Ratchet\Client\WebSocket $webSocket) {
+        $this->_ws = $webSocket;
+        $this->_ws->on('message', function($msg) {
+          Log::debug("RECV " . str_replace(' ', '', $msg->getPayload()));
+          $obj = json_decode($msg->getPayload());
+          if (!is_object($obj) || !isset($obj->id)) {
+            return;
+          }
+          if (Handler::trigger($obj->id, $obj) === false) {
+            Handler::trigger(Events::SocketMessage, $obj, $this->client->uuid);
+          }
+        });
+
+        $this->_ws->on('close', function($code = null, $reason = null) {
+          $this->_connected = false;
+          $this->client->eventLoop->cancelTimer($this->_keepAliveTimer);
+          $param = array('code' => $code, 'reason' => $reason);
+          Handler::trigger(Events::SocketClose, $param, $this->client->uuid);
+        });
+
+        Handler::trigger(Events::SocketOpen, null, $this->client->uuid);
+
+        $this->_keepAlive();
+      },
+      function(\Exception $error) {
+        Handler::trigger(Events::SocketError, $error, $this->client->uuid);
       }
-      if (Handler::trigger($obj->id, $obj) === false) {
-        Handler::trigger(Events::SocketMessage, $obj, $uuid);
-      }
-    });
-
-    $webSocket->on('close', function($code = null, $reason = null) use ($uuid) {
-      $this->_connected = false;
-      $this->client->eventLoop->cancelTimer($this->_keepAliveTimer);
-      $param = array('code' => $code, 'reason' => $reason);
-      Handler::trigger(Events::SocketClose, $param, $uuid);
-    });
-
-    Handler::trigger(Events::SocketOpen, null, $uuid);
-
-    $this->_keepAlive();
-  }
-
-  public function onConnectError(\Throwable $error) {
-    Handler::trigger(Events::SocketError, $error, $this->client->uuid);
+    );
   }
 
   public function close() {
