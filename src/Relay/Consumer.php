@@ -3,11 +3,12 @@
 namespace SignalWire\Relay;
 
 use Generator as Coroutine;
+use Recoil\Recoil;
+use Recoil\React\ReactKernel;
+use React\EventLoop\LoopInterface;
+use React\EventLoop\Factory as ReactFactory;
 
 abstract class Consumer {
-
-  // abstract function setup(): Coroutine;
-  // abstract function tearDown(): Coroutine;
 
   protected $loop = null;
   protected $client = null;
@@ -25,13 +26,24 @@ abstract class Consumer {
     }
   }
 
+  public function setup(): Coroutine {
+    yield;
+  }
+
+  public function tearDown(): Coroutine {
+    yield;
+  }
+
   public final function run() {
-    $this->loop = \React\EventLoop\Factory::create();
-    $this->_kernel = \Recoil\React\ReactKernel::create($this->loop);
+    if (!($this->loop instanceof LoopInterface)) {
+      $this->loop = ReactFactory::create();
+    }
+    $this->_kernel = ReactKernel::create($this->loop);
     $this->_kernel->execute([$this, '_init']);
     $this->loop->run();
-
-    echo PHP_EOL . "TURN DOWN?" . PHP_EOL;
+    ReactKernel::start(function() {
+      yield $this->tearDown();
+    });
   }
 
   public function _init(): Coroutine {
@@ -43,16 +55,14 @@ abstract class Consumer {
     ]);
 
     $this->client->on('signalwire.error', function($error) {
-      print_r($error);
+      echo $error->getMessage();
     });
 
     $this->client->on('signalwire.ready', function($client) {
       $this->_kernel->execute(function(): Coroutine {
         try {
           yield $this->_registerCallingContexts();
-          if (method_exists($this, 'setup')) {
-            yield $this->setup();
-          }
+          yield $this->setup();
         } catch (\Throwable $th) {
           echo PHP_EOL . $th->getMessage() . PHP_EOL;
           throw $th;
@@ -72,7 +82,7 @@ abstract class Consumer {
     }
     $promises = [];
     foreach ((array)$this->contexts as $context) {
-      $promises[] = $this->client->calling->onInbound($context, yield \Recoil\Recoil::callback([$this, 'onIncomingCall']));
+      $promises[] = $this->client->calling->onInbound($context, yield Recoil::callback([$this, 'onIncomingCall']));
     }
     $results = yield $promises;
     foreach ($results as $res) {
