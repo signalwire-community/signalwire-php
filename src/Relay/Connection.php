@@ -4,9 +4,14 @@ use SignalWire\Messages\BaseMessage;
 use SignalWire\Handler;
 use SignalWire\Util\Events;
 use SignalWire\Log;
+use Ratchet\RFC6455\Messaging\Frame;
 
 class Connection {
-  private $_ws;
+  const PING_INTERVAL = 5.0;
+
+  private $_ws = null;
+  private $_connected = false;
+  private $_keepAliveTimer = null;
 
   public function __construct(Client $client) {
     $this->client = $client;
@@ -42,11 +47,15 @@ class Connection {
     });
 
     $webSocket->on('close', function($code = null, $reason = null) use ($uuid) {
+      $this->_connected = false;
+      $this->client->eventLoop->cancelTimer($this->_keepAliveTimer);
       $param = array('code' => $code, 'reason' => $reason);
       Handler::trigger(Events::SocketClose, $param, $uuid);
     });
 
     Handler::trigger(Events::SocketOpen, null, $uuid);
+
+    $this->_keepAlive();
   }
 
   public function onConnectError(\Exception $error) {
@@ -72,5 +81,22 @@ class Connection {
     $this->_ws->send($msg->toJson());
 
     return \React\Promise\Timer\timeout($promise, 10, \React\EventLoop\Factory::create());
+  }
+
+  private function _keepAlive() {
+    $this->_connected = true;
+
+    $this->_ws->on('pong', function() {
+      $this->_connected = true;
+    });
+
+    $this->_keepAliveTimer = $this->client->eventLoop->addPeriodicTimer(self::PING_INTERVAL, function () {
+      if ($this->_connected) {
+        $this->_connected = false;
+        $this->_ws->send(new Frame('', true, Frame::OP_PING));
+      } else {
+        $this->_ws->close();
+      }
+    });
   }
 }
