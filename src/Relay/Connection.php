@@ -80,7 +80,7 @@ class Connection {
     Log::debug("SEND {$msg->toJson()}");
     $this->_ws->send($msg->toJson());
 
-    return \React\Promise\Timer\timeout($promise, 10, \React\EventLoop\Factory::create());
+    return $promise;
   }
 
   private function _keepAlive() {
