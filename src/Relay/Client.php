@@ -137,6 +137,7 @@ class Client {
 
         $this->_emptyExecuteQueue();
         Handler::trigger(Events::Ready, $this, $this->uuid);
+        Log::info("Session Ready!");
       }, function($error) {
         Handler::trigger(Events::Error, $error, $this->uuid);
       }
