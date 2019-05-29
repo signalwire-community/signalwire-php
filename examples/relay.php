@@ -21,8 +21,8 @@ $client = new SignalWire\Relay\Client(array(
 $client->on('signalwire.socket.open', function($session) {
   echo PHP_EOL . "signalwire.socket.open" . PHP_EOL;
 });
-$client->on('signalwire.socket.error', function($session) {
-  echo PHP_EOL . "signalwire.socket.error" . PHP_EOL;
+$client->on('signalwire.error', function($error) {
+  echo PHP_EOL . $error->getMessage() . PHP_EOL;
 });
 $client->on('signalwire.socket.close', function($session) {
   echo PHP_EOL . "signalwire.socket.close" . PHP_EOL;
@@ -53,7 +53,7 @@ $client->on('signalwire.ready', function($session) use ($loop) {
       echo PHP_EOL . $response->message . PHP_EOL;
     },
     function($error) {
-      echo PHP_EOL . $error->message . PHP_EOL;
+      echo PHP_EOL . $error->getMessage() . PHP_EOL;
     }
   );
 
@@ -106,10 +106,6 @@ $client->on('signalwire.ready', function($session) use ($loop) {
       print_r($error);
     }
   );
-});
-
-$client->on('signalwire.error', function($error) {
-  echo PHP_EOL . $error->getMessage() . PHP_EOL;
 });
 
 $client->connect();

@@ -19,17 +19,7 @@ class Connection {
 
   public function connect() {
     $host = \SignalWire\checkWebSocketHost($this->client->host);
-    \Ratchet\Client\connect($host, [], [], $this->client->eventLoop)->then(
-      array($this, "onConnectSuccess"),
-      array($this, "onConnectError")
-    );
-  }
-
-  public function close() {
-    if (isset($this->_ws)) {
-      $this->_ws->close();
-      unset($this->_ws);
-    }
+    \Ratchet\Client\connect($host, [], [], $this->client->eventLoop)->done([$this, "onConnectSuccess"], [$this, "onConnectError"]);
   }
 
   public function onConnectSuccess(\Ratchet\Client\WebSocket $webSocket) {
@@ -58,8 +48,15 @@ class Connection {
     $this->_keepAlive();
   }
 
-  public function onConnectError(\Exception $error) {
+  public function onConnectError(\Throwable $error) {
     Handler::trigger(Events::SocketError, $error, $this->client->uuid);
+  }
+
+  public function close() {
+    if (isset($this->_ws)) {
+      $this->_ws->close();
+      unset($this->_ws);
+    }
   }
 
   public function send(BaseMessage $msg) {
