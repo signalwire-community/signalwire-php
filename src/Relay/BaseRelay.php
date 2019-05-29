@@ -2,6 +2,8 @@
 namespace SignalWire\Relay;
 use SignalWire\Messages\Execute;
 use SignalWire\Log;
+use SignalWire\Util\Events;
+use SignalWire\Handler;
 
 abstract class BaseRelay {
   const SetupProtocol = 'signalwire';
@@ -9,7 +11,6 @@ abstract class BaseRelay {
   const SetupChannels = array('notifications');
 
   public $ready;
-
   public $protocol;
   public $client;
 
@@ -28,8 +29,15 @@ abstract class BaseRelay {
         $client->subscribe($response->result->protocol, self::SetupChannels, [$this, "notificationHandler"])->done(function($response) use ($resolve) {
           $this->protocol = $response->protocol;
           call_user_func($resolve, $this->protocol);
+          Handler::registerOnce(Events::SocketClose, [$this, "_cleanup"], $this->client->uuid);
         }, $reject);
       }, $reject);
     });
+  }
+
+  public function _cleanup() {
+    if ($this->protocol) {
+      Handler::deRegisterAll($this->protocol);
+    }
   }
 }

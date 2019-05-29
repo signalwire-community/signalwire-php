@@ -145,14 +145,15 @@ class Client {
   }
 
   public function _onSocketClose(Array $param = array()) {
-    if ($this->_autoReconnect === false) {
-      return;
+    if ($this->_autoReconnect) {
+      unset($this->_calling);
+      $this->_calling = null;
+      $this->eventLoop->addTimer(1, [$this, 'connect']);
     }
-    sleep(1);
-    $this->connect();
   }
 
   public function _onSocketError($error) {
+    Log::error($error->getMessage());
     Handler::trigger(Events::Error, $error, $this->uuid);
   }
 

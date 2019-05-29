@@ -67,8 +67,8 @@ class Calling extends \SignalWire\Relay\BaseRelay {
       return $this->client->execute($msg)->then(function($response) use ($protocol, $context, $handler) {
         Handler::register($protocol, $handler, $this->_prefixCtx($context));
         return $response->result;
-      })->otherwise([$this, '_onError']);
-    })->otherwise([$this, '_onError']);
+      }, [$this, '_onError']);
+    }, [$this, '_onError']);
   }
 
   public function _onError($error) {
