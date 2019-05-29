@@ -3,6 +3,7 @@ namespace SignalWire\Relay;
 use SignalWire\Messages\BaseMessage;
 use SignalWire\Handler;
 use SignalWire\Util\Events;
+use SignalWire\Log;
 
 class Connection {
   private $_ws;
@@ -30,10 +31,9 @@ class Connection {
     $this->_ws = $webSocket;
     $uuid = $this->client->uuid;
     $webSocket->on('message', function($msg) use ($uuid) {
-      // echo PHP_EOL . "RECV:" . PHP_EOL . $msg->getPayload() . PHP_EOL;
+      Log::debug("RECV " . str_replace(' ', '', $msg->getPayload()));
       $obj = json_decode($msg->getPayload());
       if (!is_object($obj) || !isset($obj->id)) {
-        // Invalid message from the socket
         return;
       }
       if (Handler::trigger($obj->id, $obj) === false) {
@@ -68,7 +68,7 @@ class Connection {
       Handler::registerOnce($msg->id, $callback);
     });
 
-    // echo PHP_EOL . "SEND:" . PHP_EOL . $msg->toJson(true) . PHP_EOL;
+    Log::debug("SEND {$msg->toJson()}");
     $this->_ws->send($msg->toJson());
 
     return \React\Promise\Timer\timeout($promise, 10, \React\EventLoop\Factory::create());

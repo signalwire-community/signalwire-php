@@ -1,6 +1,8 @@
 <?php
 namespace SignalWire;
 use Monolog\Logger;
+use Monolog\Formatter\LineFormatter;
+use Monolog\Handler\StreamHandler;
 
 class Log {
   protected static $instance;
@@ -20,18 +22,26 @@ class Log {
   }
 
   /**
-	 * Configure Monolog to use a rotating files system.
+	 * Configure Monolog.
 	 *
 	 * @return Logger
 	 */
 	protected static function configureInstance()
 	{
-		$logger = new Logger('SignalWireLogger');
+		$output = "[%datetime%] %channel%.%level_name%: %message% \n";
+		$formatter = new LineFormatter($output);
+
+		$level = isset($_ENV['DEBUG']) ? Logger::DEBUG : Logger::INFO;
+		$streamHandler = new StreamHandler('php://stdout', $level);
+		$streamHandler->setFormatter($formatter);
+
+		$logger = new Logger('SignalWire');
+		$logger->pushHandler($streamHandler);
 		self::$instance = $logger;
 	}
 
 	public static function debug($message, array $context = []){
-		self::getLogger()->addDebug($message, $context);
+		self::getLogger()->debug($message, $context);
 	}
 
 	public static function info($message, array $context = []){
@@ -43,7 +53,7 @@ class Log {
 	}
 
 	public static function warning($message, array $context = []){
-		self::getLogger()->addWarning($message, $context);
+		self::getLogger()->warning($message, $context);
 	}
 
 	public static function error($message, array $context = []){
