@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.1]
+### Fixed
+- Fix bug handling connect notifications.
+
 ## [1.4.0]
 ### Added
 - Ability to set a custom `\React\EventLoop` in RelayClient.
