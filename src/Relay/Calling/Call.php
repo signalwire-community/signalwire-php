@@ -165,31 +165,50 @@ class Call {
     });
   }
 
+  public function playAudioAndCollectAsync(Array $collect, String $url) {
+    $params = ['type' => 'audio', 'params' => ['url' => $url]];
+    return $this->_playAndCollectAsync($collect, [$params])->then(function($result) {
+      return new PlayAudioAndCollectAction($this, $result->control_id);
+    });
+  }
+
   public function playAudioAndCollect(Array $collect, String $url) {
     $params = ['type' => 'audio', 'params' => ['url' => $url]];
-    return $this->_playAndCollect($collect, [$params])->then(function($result) {
-      return new PlayAudioAndCollectAction($this, $result->control_id);
+    return $this->_playAndCollect($collect, [$params]);
+  }
+
+  public function playSilenceAndCollectAsync(Array $collect, String $duration) {
+    $params = ['type' => 'silence', 'params' => ['duration' => $duration]];
+    return $this->_playAndCollectAsync($collect, [$params])->then(function($result) {
+      return new PlaySilenceAndCollectAction($this, $result->control_id);
     });
   }
 
   public function playSilenceAndCollect(Array $collect, String $duration) {
     $params = ['type' => 'silence', 'params' => ['duration' => $duration]];
-    return $this->_playAndCollect($collect, [$params])->then(function($result) {
-      return new PlaySilenceAndCollectAction($this, $result->control_id);
+    return $this->_playAndCollect($collect, [$params]);
+  }
+
+  public function playTTSAndCollectAsync(Array $collect, Array $options) {
+    $params = ['type' => 'tts', 'params' => $options];
+    return $this->_playAndCollectAsync($collect, [$params])->then(function($result) {
+      return new PlayTTSAndCollectAction($this, $result->control_id);
     });
   }
 
   public function playTTSAndCollect(Array $collect, Array $options) {
     $params = ['type' => 'tts', 'params' => $options];
-    return $this->_playAndCollect($collect, [$params])->then(function($result) {
-      return new PlayTTSAndCollectAction($this, $result->control_id);
+    return $this->_playAndCollect($collect, [$params]);
+  }
+
+  public function playMediaAndCollectAsync(Array $collect, ...$play) {
+    return $this->_playAndCollectAsync($collect, $play)->then(function($result) {
+      return new PlayMediaAndCollectAction($this, $result->control_id);
     });
   }
 
   public function playMediaAndCollect(Array $collect, ...$play) {
-    return $this->_playAndCollect($collect, $play)->then(function($result) {
-      return new PlayMediaAndCollectAction($this, $result->control_id);
-    });
+    return $this->_playAndCollect($collect, $play);
   }
 
   public function connect(...$devices) {
@@ -304,6 +323,19 @@ class Call {
   }
 
   private function _playAndCollect(Array $collect, Array $play) {
+    return $this->_playAndCollectAsync($collect, $play)->then(function($result) {
+      $blocker = new Blocker($result->control_id, Notification::Collect, function($params) use (&$blocker) {
+        $method = $params->result->type === 'error' ? 'reject' : 'resolve';
+        ($blocker->$method)($params->result);
+      });
+
+      array_push($this->_blockers, $blocker);
+
+      return $blocker->promise;
+    });
+  }
+
+  private function _playAndCollectAsync(Array $collect, Array $play) {
     $msg = new Execute(array(
       'protocol' => $this->relayInstance->protocol,
       'method' => 'call.play_and_collect',
