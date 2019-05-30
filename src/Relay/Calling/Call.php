@@ -2,6 +2,7 @@
 namespace SignalWire\Relay\Calling;
 use SignalWire\Messages\Execute;
 use Ramsey\Uuid\Uuid;
+use SignalWire\Relay\Calling\Notification;
 use SignalWire\Relay\Calling\RecordAction;
 use SignalWire\Relay\Calling\PlayMediaAction;
 use SignalWire\Relay\Calling\PlayAudioAction;
@@ -32,6 +33,7 @@ class Call {
   public $timeout = self::DefaultTimeout;
 
   private $_cbQueue = array();
+  private $_blockers = array();
 
   public function __construct(Calling $relayInstance, $options) {
     $this->relayInstance = $relayInstance;
@@ -102,9 +104,7 @@ class Call {
 
   public function playAudio(String $url) {
     $params = ['type' => 'audio', 'params' => ['url' => $url]];
-    return $this->_play([$params])->then(function($result) {
-      return new PlayAudioAction($this, $result->control_id);
-    });
+    return $this->_play([$params]);
   }
 
   public function playSilence(String $duration) {
@@ -239,21 +239,48 @@ class Call {
     if (!isset($params->control_id) || !isset($params->event_type)) {
       return;
     }
-    $index = null;
-    foreach ($this->_controls as $i => $c) {
-      if ($params->control_id === $c->control_id) {
-        $index = $i;
+    // $index = null;
+    // foreach ($this->_controls as $i => $c) {
+    //   if ($params->control_id === $c->control_id) {
+    //     $index = $i;
+    //     break;
+    //   }
+    // }
+    // if ($index !== null) {
+    //   $this->_controls[$index] = $params;
+    // } else {
+    //   array_push($this->_controls, $params);
+    // }
+
+    $blocker = null;
+    foreach ($this->_blockers as $b) {
+      if ($params->control_id === $b->controlId && $params->event_type === $b->eventType) {
+        $blocker = $b;
         break;
       }
     }
-    if ($index !== null) {
-      $this->_controls[$index] = $params;
-    } else {
-      array_push($this->_controls, $params);
+    if ($blocker) {
+      ($blocker->resolver)($params);
     }
   }
 
   private function _play(Array $play) {
+    return $this->_playAsync($play)->then(function($result) {
+      $blocker = new Blocker($result->control_id, Notification::Play, function($params) use (&$blocker) {
+        if ($params->state === 'finished') {
+          ($blocker->resolve)($this);
+        } elseif ($params->state === 'error') {
+          ($blocker->reject)();
+        }
+      });
+
+      array_push($this->_blockers, $blocker);
+
+      return $blocker->promise;
+    });
+  }
+
+  private function _playAsync(Array $play) {
     $msg = new Execute(array(
       'protocol' => $this->relayInstance->protocol,
       'method' => 'call.play',

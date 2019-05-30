@@ -15,6 +15,7 @@ class Calling extends \SignalWire\Relay\BaseRelay {
   }
 
   public function notificationHandler($notification): void {
+    $notification->params->event_type = $notification->event_type;
     switch ($notification->event_type)
     {
       case Notification::State:
