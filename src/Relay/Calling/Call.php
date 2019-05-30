@@ -102,9 +102,23 @@ class Call {
     return $this->_execute($msg);
   }
 
+  public function playAudioAsync(String $url) {
+    $params = ['type' => 'audio', 'params' => ['url' => $url]];
+    return $this->_playAsync([$params])->then(function($result) {
+      return new PlayAudioAction($this, $result->control_id);
+    });
+  }
+
   public function playAudio(String $url) {
     $params = ['type' => 'audio', 'params' => ['url' => $url]];
     return $this->_play([$params]);
+  }
+
+  public function playSilenceAsync(String $duration) {
+    $params = ['type' => 'silence', 'params' => ['duration' => $duration]];
+    return $this->_playAsync([$params])->then(function($result) {
+      return new PlaySilenceAction($this, $result->control_id);
+    });
   }
 
   public function playSilence(String $duration) {
@@ -112,9 +126,22 @@ class Call {
     return $this->_play([$params]);
   }
 
+  public function playTTSAsync(Array $options) {
+    $params = ['type' => 'tts', 'params' => $options];
+    return $this->_playAsync([$params])->then(function($result) {
+      return new PlayTTSAction($this, $result->control_id);
+    });
+  }
+
   public function playTTS(Array $options) {
     $params = ['type' => 'tts', 'params' => $options];
     return $this->_play([$params]);
+  }
+
+  public function playMediaAsync(...$play) {
+    return $this->_playAsync($play)->then(function($result) {
+      return new PlayMediaAction($this, $result->control_id);
+    });
   }
 
   public function playMedia(...$play) {
