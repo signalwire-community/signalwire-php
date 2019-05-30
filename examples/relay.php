@@ -31,10 +31,6 @@ $client->on('signalwire.socket.close', function($session) {
 $client->on('signalwire.ready', function($session) use ($loop) {
   echo PHP_EOL . "signalwire.ready" . PHP_EOL;
 
-  // $loop->addTimer(3, function () {
-  //   echo PHP_EOL . "I've been stopped for 3 seconds without block the process" . PHP_EOL;
-  // });
-
   // Test onInbound
   $session->calling->onInbound('office', function($call) use ($session) {
     $call->on('answered', function ($call) {

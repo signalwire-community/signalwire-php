@@ -109,22 +109,16 @@ class Call {
 
   public function playSilence(String $duration) {
     $params = ['type' => 'silence', 'params' => ['duration' => $duration]];
-    return $this->_play([$params])->then(function($result) {
-      return new PlaySilenceAction($this, $result->control_id);
-    });
+    return $this->_play([$params]);
   }
 
   public function playTTS(Array $options) {
     $params = ['type' => 'tts', 'params' => $options];
-    return $this->_play([$params])->then(function($result) {
-      return new PlayTTSAction($this, $result->control_id);
-    });
+    return $this->_play([$params]);
   }
 
   public function playMedia(...$play) {
-    return $this->_play($play)->then(function($result) {
-      return new PlayMediaAction($this, $result->control_id);
-    });
+    return $this->_play($play);
   }
 
   public function record(Array $record) {
@@ -239,19 +233,6 @@ class Call {
     if (!isset($params->control_id) || !isset($params->event_type)) {
       return;
     }
-    // $index = null;
-    // foreach ($this->_controls as $i => $c) {
-    //   if ($params->control_id === $c->control_id) {
-    //     $index = $i;
-    //     break;
-    //   }
-    // }
-    // if ($index !== null) {
-    //   $this->_controls[$index] = $params;
-    // } else {
-    //   array_push($this->_controls, $params);
-    // }
-
     $blocker = null;
     foreach ($this->_blockers as $b) {
       if ($params->control_id === $b->controlId && $params->event_type === $b->eventType) {
