@@ -20,7 +20,7 @@ class Client {
    * SignalWire Space Url
    * @var String
    */
-  public $host;
+  public $host = 'relay.signalwire.com';
 
   /**
    * SignalWire project
@@ -89,9 +89,15 @@ class Client {
   private $_subscriptions = array();
 
   public function __construct(Array $options) {
-    $this->host = $options['host'];
-    $this->project = $options['project'];
-    $this->token = $options['token'];
+    if (isset($options['host'])) {
+      $this->host = $options['host'];
+    }
+    if (isset($options['project']) && isset($options['token'])) {
+      $this->project = $options['project'];
+      $this->token = $options['token'];
+    } else {
+      throw new \Exception("Project and Token are required.");
+    }
     if (isset($options['eventLoop']) && $options['eventLoop'] instanceof \React\EventLoop\LoopInterface) {
       $this->eventLoop = $options['eventLoop'];
     }
