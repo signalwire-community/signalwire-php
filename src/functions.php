@@ -27,6 +27,5 @@ function reduceConnectParams(Array $devices, String $defaultFrom, Int $defaultTi
 
 function checkWebSocketHost(String $host): String {
   $protocol = preg_match("/^(ws|wss):\/\//", $host) ? '' : 'wss://';
-  $suffix = preg_match("/\.signalwire\.com$/", $host) ? ':443/api/relay/wss' : '';
-  return $protocol . $host . $suffix;
+  return $protocol . $host;
 }

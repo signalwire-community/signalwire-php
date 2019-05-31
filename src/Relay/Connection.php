@@ -19,6 +19,7 @@ class Connection {
 
   public function connect() {
     $host = \SignalWire\checkWebSocketHost($this->client->host);
+    Log::debug("Connecting to: $host");
     \Ratchet\Client\connect($host, [], [], $this->client->eventLoop)->done([$this, "onConnectSuccess"], [$this, "onConnectError"]);
   }
 
