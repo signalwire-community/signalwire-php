@@ -168,8 +168,8 @@ class FunctionsTest extends TestCase
 
   public function testCheckWebSocketHost(): void {
     $this->assertEquals(\SignalWire\checkWebSocketHost('ws://test.com'), 'ws://test.com');
-    $this->assertEquals(\SignalWire\checkWebSocketHost('example.signalwire.com'), 'wss://example.signalwire.com:443/api/relay/wss');
-    $this->assertEquals(\SignalWire\checkWebSocketHost('ws://example.signalwire.com'), 'ws://example.signalwire.com:443/api/relay/wss');
+    $this->assertEquals(\SignalWire\checkWebSocketHost('example.signalwire.com'), 'wss://example.signalwire.com');
+    $this->assertEquals(\SignalWire\checkWebSocketHost('ws://example.signalwire.com'), 'ws://example.signalwire.com');
     $this->assertEquals(\SignalWire\checkWebSocketHost('example.sw.com'), 'wss://example.sw.com');
   }
 }
