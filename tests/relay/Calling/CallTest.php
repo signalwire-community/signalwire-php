@@ -19,6 +19,7 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
     $this->collectNotification = json_decode('{"control_id":"'.self::UUID.'","call_id":"call-id","event_type":"'.Notification::Collect.'","result":{"type":"digit","params":{"digits":"12345","terminator":"#"}}}');
     $this->recordNotification = json_decode('{"state":"finished","call_id":"call-id","control_id":"'.self::UUID.'","event_type":"'.Notification::Record.'","url":"record-url","record":{"audio":{"type":"digit","params":{"digits":"12345","terminator":"#"}}}}');
     $this->connectNotification = json_decode('{"connect_state":"connected","call_id":"call-id","event_type":"'.Notification::Connect.'"}');
+    $this->detectNotification = json_decode('{"control_id":"'.self::UUID.'","call_id":"call-id","event_type":"'.Notification::Detect.'","detect":{"type":"fax","params":{"event":"CED"}}}');
   }
 
   public function testBegin(): void {
@@ -743,5 +744,55 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
       $this->assertInstanceOf('SignalWire\Relay\Calling\Call', $call);
     });
     $this->call->_connectStateChange($this->connectNotification);
+  }
+
+  public function testDetectAsync(): void {
+    $this->_setCallReady();
+    $msg = new Execute([
+      'protocol' => 'signalwire_calling_proto',
+      'method' => 'call.detect',
+      'params' => [
+        'call_id' => 'call-id',
+        'node_id' => 'node-id',
+        'control_id' => self::UUID,
+        'timeout' => null,
+        'detect' => ['type' => 'fax', 'params' => []]
+      ]
+    ]);
+
+    $this->client->connection->expects($this->once())
+      ->method('send')
+      ->with($msg)
+      ->willReturn(\React\Promise\resolve(json_decode('{"result":{"code":"200","message":"message","control_id":"control-id"}}')));
+
+    $this->call->detectAsync('fax', [])->done(function($action) {
+      $this->assertInstanceOf('SignalWire\Relay\Calling\DetectAction', $action);
+    });
+  }
+
+  public function testDetect(): void {
+    $this->_setCallReady();
+    $msg = new Execute([
+      'protocol' => 'signalwire_calling_proto',
+      'method' => 'call.detect',
+      'params' => [
+        'call_id' => 'call-id',
+        'node_id' => 'node-id',
+        'control_id' => self::UUID,
+        'timeout' => 20,
+        'detect' => ['type' => 'fax', 'params' => []]
+      ]
+    ]);
+
+    $this->client->connection->expects($this->once())
+      ->method('send')
+      ->with($msg)
+      ->willReturn(\React\Promise\resolve(json_decode('{"result":{"code":"200","message":"message","control_id":"'.self::UUID.'"}}')));
+
+    $this->call->detect('fax', [], 20)->done(function($params) {
+      $this->assertEquals($params->type, 'fax');
+    });
+
+    $this->call->_detectStateChange($this->detectNotification);
   }
 }
