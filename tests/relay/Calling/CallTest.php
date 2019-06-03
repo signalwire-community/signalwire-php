@@ -15,8 +15,9 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
     parent::setUp();
     $this->stateNotificationAnswered = json_decode('{"call_state":"answered","call_id":"call-id","event_type":"'.Notification::State.'"}');
     $this->stateNotificationEnded = json_decode('{"call_state":"ended","call_id":"call-id","event_type":"'.Notification::State.'"}');
-    $this->playNotification = json_decode('{"state":"finished","control_id":"control-id","event_type":"'.Notification::Play.'"}');
-    $this->collectNotification = json_decode('{"control_id":"control-id","event_type":"'.Notification::Collect.'","result":{"type":"digit","params":{"digits":"12345","terminator":"#"}}}');
+    $this->playNotification = json_decode('{"state":"finished","control_id":"'.self::UUID.'","event_type":"'.Notification::Play.'"}');
+    $this->collectNotification = json_decode('{"control_id":"'.self::UUID.'","event_type":"'.Notification::Collect.'","result":{"type":"digit","params":{"digits":"12345","terminator":"#"}}}');
+    $this->recordNotification = json_decode('{"state":"finished","control_id":"'.self::UUID.'","event_type":"'.Notification::Record.'","url":"record-url","record":{"audio":{"type":"digit","params":{"digits":"12345","terminator":"#"}}}}');
   }
 
   public function testBegin(): void {
@@ -345,7 +346,7 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
     $this->call->_playStateChange($this->playNotification);
   }
 
-  public function testRecord(): void {
+  public function testRecordAsync(): void {
     $this->_setCallReady();
     $msg = new Execute([
       'protocol' => 'signalwire_calling_proto',
@@ -364,9 +365,35 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
       ->willReturn(\React\Promise\resolve(json_decode('{"result":{"code":"200","message":"message","control_id":"control-id"}}')));
 
     $record = ["beep" => true, "stereo" => false];
-    $this->call->record($record)->done(function($action) {
+    $this->call->recordAsync($record)->done(function($action) {
       $this->assertInstanceOf('SignalWire\Relay\Calling\RecordAction', $action);
     });
+  }
+
+  public function testRecord(): void {
+    $this->_setCallReady();
+    $msg = new Execute([
+      'protocol' => 'signalwire_calling_proto',
+      'method' => 'call.record',
+      'params' => [
+        'call_id' => 'call-id',
+        'node_id' => 'node-id',
+        'control_id' => self::UUID,
+        'record' => ["beep" => true, "stereo" => false]
+      ]
+    ]);
+
+    $this->client->connection->expects($this->once())
+      ->method('send')
+      ->with($msg)
+      ->willReturn(\React\Promise\resolve(json_decode('{"result":{"code":"200","message":"message","control_id":"'.self::UUID.'"}}')));
+
+    $record = ["beep" => true, "stereo" => false];
+    $this->call->record($record)->done(function($params) {
+      $this->assertEquals($params->url, 'record-url');
+    });
+
+    $this->call->_recordStateChange($this->recordNotification);
   }
 
   public function testPlayAudioAndCollectAsync(): void {

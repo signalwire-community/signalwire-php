@@ -168,20 +168,23 @@ class Call {
     return $this->_play($play);
   }
 
-  public function record(Array $record) {
-    $msg = new Execute(array(
-      'protocol' => $this->relayInstance->protocol,
-      'method' => 'call.record',
-      'params' => array(
-        'node_id' => $this->nodeId,
-        'call_id' => $this->id,
-        'control_id' => Uuid::uuid4()->toString(),
-        'record' => $record
-      )
-    ));
-
-    return $this->_execute($msg)->then(function($result) {
+  public function recordAsync(Array $record) {
+    return $this->_record($record)->then(function($result) {
       return new RecordAction($this, $result->control_id);
+    });
+  }
+
+  public function record(Array $record) {
+    $controlId = Uuid::uuid4()->toString();
+    $blocker = new Blocker($controlId, Notification::Record, function($params) use (&$blocker) {
+      if ($params->state === 'finished' || $params->state === 'no_input') {
+        ($blocker->resolve)($params);
+      }
+    });
+
+    array_push($this->_blockers, $blocker);
+    return $this->_record($record, $controlId)->then(function($result) use (&$blocker) {
+      return $blocker->promise;
     });
   }
 
@@ -373,5 +376,24 @@ class Call {
     ));
 
     return $this->_execute($msg);
+  }
+
+  private function _record(Array $record, String $controlId = null) {
+    if (is_null($controlId)) {
+      $controlId = Uuid::uuid4()->toString();
+    }
+    $msg = new Execute(array(
+      'protocol' => $this->relayInstance->protocol,
+      'method' => 'call.record',
+      'params' => array(
+        'node_id' => $this->nodeId,
+        'call_id' => $this->id,
+        'control_id' => $controlId,
+        'record' => $record
+      )
+    ));
+
+    return $this->_execute($msg);
+
   }
 }
