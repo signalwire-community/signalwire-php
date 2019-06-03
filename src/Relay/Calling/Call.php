@@ -86,7 +86,17 @@ class Call {
       )
     ));
 
-    return $this->_execute($msg);
+    $blocker = new Blocker($this->id, Notification::State, function($params) use (&$blocker) {
+      if ($params->call_state === 'ended') {
+        ($blocker->resolve)($this);
+      }
+    });
+
+    array_push($this->_blockers, $blocker);
+
+    return $this->_execute($msg)->then(function($result) use (&$blocker) {
+      return $blocker->promise;
+    });
   }
 
   public function answer() {
@@ -107,9 +117,9 @@ class Call {
 
     array_push($this->_blockers, $blocker);
 
-    $this->_execute($msg)->done();
-
-    return $blocker->promise;
+    return $this->_execute($msg)->then(function($result) use (&$blocker) {
+      return $blocker->promise;
+    });
   }
 
   public function playAudioAsync(String $url) {

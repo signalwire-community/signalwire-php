@@ -41,7 +41,7 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
     $this->assertInstanceOf('React\Promise\PromiseInterface', $res);
   }
 
-  public function testHangup(): void {
+  public function testHangupSuccess(): void {
     $this->_setCallReady();
     $msg = new Execute([
       'protocol' => 'signalwire_calling_proto',
@@ -58,8 +58,32 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
       ->with($msg)
       ->willReturn(\React\Promise\resolve(json_decode('{"result":{"code":"200","message":"message"}}')));
 
-    $res = $this->call->hangup();
-    $this->assertInstanceOf('React\Promise\PromiseInterface', $res);
+    $this->call->hangup()->done(function($call) {
+      $this->assertEquals($call->state, 'ended');
+      $this->assertInstanceOf('SignalWire\Relay\Calling\Call', $call);
+    });
+    $this->call->_stateChange($this->stateNotificationEnded);
+  }
+
+  public function testHangupFail(): void {
+    $this->_setCallReady();
+    $msg = new Execute([
+      'protocol' => 'signalwire_calling_proto',
+      'method' => 'call.end',
+      'params' => [
+        'call_id' => 'call-id',
+        'node_id' => 'node-id',
+        'reason' => 'hangup'
+      ]
+    ]);
+
+    $this->client->connection->expects($this->once())
+      ->method('send')
+      ->with($msg)
+      ->willReturn(\React\Promise\reject(json_decode('{"result":{"code":"400","message":"some error"}}')));
+
+    $this->expectException(Exception::class);
+    $this->call->hangup()->done();
   }
 
   public function testAnswerSuccess(): void {
@@ -102,7 +126,7 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
       ->willReturn(\React\Promise\reject(json_decode('{"result":{"code":"400","message":"some error"}}')));
 
     $this->expectException(Exception::class);
-    $this->call->answer();
+    $this->call->answer()->done();
   }
 
   public function testPlayAudioAsync(): void {
