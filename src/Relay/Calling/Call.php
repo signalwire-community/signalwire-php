@@ -234,7 +234,7 @@ class Call {
     return $this->_playAndCollect($collect, $play);
   }
 
-  public function connect(...$devices) {
+  public function connectAsync(...$devices) {
     $msg = new Execute(array(
       'protocol' => $this->relayInstance->protocol,
       'method' => 'call.connect',
@@ -246,6 +246,22 @@ class Call {
     ));
 
     return $this->_execute($msg);
+  }
+
+  public function connect(...$devices) {
+    $blocker = new Blocker($this->id, Notification::Connect, function($params) use (&$blocker) {
+      if ($params->connect_state === 'connected') {
+        ($blocker->resolve)($this);
+      } elseif ($params->connect_state === 'failed') {
+        ($blocker->reject)($params);
+      }
+    });
+
+    array_push($this->_blockers, $blocker);
+
+    return $this->connectAsync(...$devices)->then(function($result) use (&$blocker) {
+      return $blocker->promise;
+    });
   }
 
   public function _stateChange($params) {
@@ -260,11 +276,12 @@ class Call {
     }
   }
 
-  public function _connectStateChange(String $state) {
+  public function _connectStateChange($params) {
     $this->prevConnectState = $this->connectState;
-    $this->connectState = $state;
+    $this->connectState = $params->connect_state;
+    $this->_addControlParams($params);
     $this->_dispatchCallback("connect.stateChange");
-    $this->_dispatchCallback("connect.$state");
+    $this->_dispatchCallback("connect.$params->connect_state");
   }
 
   public function _recordStateChange($params) {

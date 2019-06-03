@@ -15,9 +15,10 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
     parent::setUp();
     $this->stateNotificationAnswered = json_decode('{"call_state":"answered","call_id":"call-id","event_type":"'.Notification::State.'"}');
     $this->stateNotificationEnded = json_decode('{"call_state":"ended","call_id":"call-id","event_type":"'.Notification::State.'"}');
-    $this->playNotification = json_decode('{"state":"finished","control_id":"'.self::UUID.'","event_type":"'.Notification::Play.'"}');
-    $this->collectNotification = json_decode('{"control_id":"'.self::UUID.'","event_type":"'.Notification::Collect.'","result":{"type":"digit","params":{"digits":"12345","terminator":"#"}}}');
-    $this->recordNotification = json_decode('{"state":"finished","control_id":"'.self::UUID.'","event_type":"'.Notification::Record.'","url":"record-url","record":{"audio":{"type":"digit","params":{"digits":"12345","terminator":"#"}}}}');
+    $this->playNotification = json_decode('{"state":"finished","call_id":"call-id","control_id":"'.self::UUID.'","event_type":"'.Notification::Play.'"}');
+    $this->collectNotification = json_decode('{"control_id":"'.self::UUID.'","call_id":"call-id","event_type":"'.Notification::Collect.'","result":{"type":"digit","params":{"digits":"12345","terminator":"#"}}}');
+    $this->recordNotification = json_decode('{"state":"finished","call_id":"call-id","control_id":"'.self::UUID.'","event_type":"'.Notification::Record.'","url":"record-url","record":{"audio":{"type":"digit","params":{"digits":"12345","terminator":"#"}}}}');
+    $this->connectNotification = json_decode('{"connect_state":"connected","call_id":"call-id","event_type":"'.Notification::Connect.'"}');
   }
 
   public function testBegin(): void {
@@ -657,8 +658,11 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
     $res = $this->call->connect(
       [ "type" => "phone", "to" => "999", "from" => "231", "timeout" => 10 ],
       [ "type" => "phone", "to" => "888" ]
-    );
-    $this->assertInstanceOf('React\Promise\PromiseInterface', $res);
+    )->done(function($call) {
+      $this->assertEquals($call->connectState, 'connected');
+      $this->assertInstanceOf('SignalWire\Relay\Calling\Call', $call);
+    });
+    $this->call->_connectStateChange($this->connectNotification);
   }
 
   public function testConnectDevicesInParallel(): void {

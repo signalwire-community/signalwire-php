@@ -157,7 +157,7 @@ class Calling extends \SignalWire\Relay\BaseRelay {
       if (isset($params->peer) && isset($params->peer->call_id)) {
         $call->peer = $this->getCallById($params->peer->call_id);
       }
-      $call->_connectStateChange($params->connect_state);
+      $call->_connectStateChange($params);
     }
   }
 }
