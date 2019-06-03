@@ -276,12 +276,13 @@ class Call {
   }
 
   private function _addControlParams($params) {
-    if (!isset($params->control_id) || !isset($params->event_type)) {
+    if (!isset($params->event_type)) {
       return;
     }
+    $controlId = isset($params->control_id) ? $params->control_id : $params->call_id;
     $blocker = null;
     foreach ($this->_blockers as $b) {
-      if ($params->control_id === $b->controlId && $params->event_type === $b->eventType) {
+      if ($controlId === $b->controlId && $params->event_type === $b->eventType) {
         $blocker = $b;
         break;
       }
