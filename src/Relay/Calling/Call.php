@@ -2,6 +2,7 @@
 namespace SignalWire\Relay\Calling;
 use SignalWire\Messages\Execute;
 use Ramsey\Uuid\Uuid;
+use SignalWire\Relay\Calling\Notification;
 use SignalWire\Relay\Calling\RecordAction;
 use SignalWire\Relay\Calling\PlayMediaAction;
 use SignalWire\Relay\Calling\PlayAudioAction;
@@ -32,6 +33,7 @@ class Call {
   public $timeout = self::DefaultTimeout;
 
   private $_cbQueue = array();
+  private $_blockers = array();
 
   public function __construct(Calling $relayInstance, $options) {
     $this->relayInstance = $relayInstance;
@@ -100,31 +102,50 @@ class Call {
     return $this->_execute($msg);
   }
 
+  public function playAudioAsync(String $url) {
+    $params = ['type' => 'audio', 'params' => ['url' => $url]];
+    return $this->_playAsync([$params])->then(function($result) {
+      return new PlayAudioAction($this, $result->control_id);
+    });
+  }
+
   public function playAudio(String $url) {
     $params = ['type' => 'audio', 'params' => ['url' => $url]];
-    return $this->_play([$params])->then(function($result) {
-      return new PlayAudioAction($this, $result->control_id);
+    return $this->_play([$params]);
+  }
+
+  public function playSilenceAsync(String $duration) {
+    $params = ['type' => 'silence', 'params' => ['duration' => $duration]];
+    return $this->_playAsync([$params])->then(function($result) {
+      return new PlaySilenceAction($this, $result->control_id);
     });
   }
 
   public function playSilence(String $duration) {
     $params = ['type' => 'silence', 'params' => ['duration' => $duration]];
-    return $this->_play([$params])->then(function($result) {
-      return new PlaySilenceAction($this, $result->control_id);
+    return $this->_play([$params]);
+  }
+
+  public function playTTSAsync(Array $options) {
+    $params = ['type' => 'tts', 'params' => $options];
+    return $this->_playAsync([$params])->then(function($result) {
+      return new PlayTTSAction($this, $result->control_id);
     });
   }
 
   public function playTTS(Array $options) {
     $params = ['type' => 'tts', 'params' => $options];
-    return $this->_play([$params])->then(function($result) {
-      return new PlayTTSAction($this, $result->control_id);
+    return $this->_play([$params]);
+  }
+
+  public function playMediaAsync(...$play) {
+    return $this->_playAsync($play)->then(function($result) {
+      return new PlayMediaAction($this, $result->control_id);
     });
   }
 
   public function playMedia(...$play) {
-    return $this->_play($play)->then(function($result) {
-      return new PlayMediaAction($this, $result->control_id);
-    });
+    return $this->_play($play);
   }
 
   public function record(Array $record) {
@@ -144,31 +165,50 @@ class Call {
     });
   }
 
+  public function playAudioAndCollectAsync(Array $collect, String $url) {
+    $params = ['type' => 'audio', 'params' => ['url' => $url]];
+    return $this->_playAndCollectAsync($collect, [$params])->then(function($result) {
+      return new PlayAudioAndCollectAction($this, $result->control_id);
+    });
+  }
+
   public function playAudioAndCollect(Array $collect, String $url) {
     $params = ['type' => 'audio', 'params' => ['url' => $url]];
-    return $this->_playAndCollect($collect, [$params])->then(function($result) {
-      return new PlayAudioAndCollectAction($this, $result->control_id);
+    return $this->_playAndCollect($collect, [$params]);
+  }
+
+  public function playSilenceAndCollectAsync(Array $collect, String $duration) {
+    $params = ['type' => 'silence', 'params' => ['duration' => $duration]];
+    return $this->_playAndCollectAsync($collect, [$params])->then(function($result) {
+      return new PlaySilenceAndCollectAction($this, $result->control_id);
     });
   }
 
   public function playSilenceAndCollect(Array $collect, String $duration) {
     $params = ['type' => 'silence', 'params' => ['duration' => $duration]];
-    return $this->_playAndCollect($collect, [$params])->then(function($result) {
-      return new PlaySilenceAndCollectAction($this, $result->control_id);
+    return $this->_playAndCollect($collect, [$params]);
+  }
+
+  public function playTTSAndCollectAsync(Array $collect, Array $options) {
+    $params = ['type' => 'tts', 'params' => $options];
+    return $this->_playAndCollectAsync($collect, [$params])->then(function($result) {
+      return new PlayTTSAndCollectAction($this, $result->control_id);
     });
   }
 
   public function playTTSAndCollect(Array $collect, Array $options) {
     $params = ['type' => 'tts', 'params' => $options];
-    return $this->_playAndCollect($collect, [$params])->then(function($result) {
-      return new PlayTTSAndCollectAction($this, $result->control_id);
+    return $this->_playAndCollect($collect, [$params]);
+  }
+
+  public function playMediaAndCollectAsync(Array $collect, ...$play) {
+    return $this->_playAndCollectAsync($collect, $play)->then(function($result) {
+      return new PlayMediaAndCollectAction($this, $result->control_id);
     });
   }
 
   public function playMediaAndCollect(Array $collect, ...$play) {
-    return $this->_playAndCollect($collect, $play)->then(function($result) {
-      return new PlayMediaAndCollectAction($this, $result->control_id);
-    });
+    return $this->_playAndCollect($collect, $play);
   }
 
   public function connect(...$devices) {
@@ -239,21 +279,35 @@ class Call {
     if (!isset($params->control_id) || !isset($params->event_type)) {
       return;
     }
-    $index = null;
-    foreach ($this->_controls as $i => $c) {
-      if ($params->control_id === $c->control_id) {
-        $index = $i;
+    $blocker = null;
+    foreach ($this->_blockers as $b) {
+      if ($params->control_id === $b->controlId && $params->event_type === $b->eventType) {
+        $blocker = $b;
         break;
       }
     }
-    if ($index !== null) {
-      $this->_controls[$index] = $params;
-    } else {
-      array_push($this->_controls, $params);
+    if ($blocker) {
+      ($blocker->resolver)($params);
     }
   }
 
   private function _play(Array $play) {
+    return $this->_playAsync($play)->then(function($result) {
+      $blocker = new Blocker($result->control_id, Notification::Play, function($params) use (&$blocker) {
+        if ($params->state === 'finished') {
+          ($blocker->resolve)($this);
+        } elseif ($params->state === 'error') {
+          ($blocker->reject)();
+        }
+      });
+
+      array_push($this->_blockers, $blocker);
+
+      return $blocker->promise;
+    });
+  }
+
+  private function _playAsync(Array $play) {
     $msg = new Execute(array(
       'protocol' => $this->relayInstance->protocol,
       'method' => 'call.play',
@@ -269,6 +323,19 @@ class Call {
   }
 
   private function _playAndCollect(Array $collect, Array $play) {
+    return $this->_playAndCollectAsync($collect, $play)->then(function($result) {
+      $blocker = new Blocker($result->control_id, Notification::Collect, function($params) use (&$blocker) {
+        $method = $params->result->type === 'error' ? 'reject' : 'resolve';
+        ($blocker->$method)($params->result);
+      });
+
+      array_push($this->_blockers, $blocker);
+
+      return $blocker->promise;
+    });
+  }
+
+  private function _playAndCollectAsync(Array $collect, Array $play) {
     $msg = new Execute(array(
       'protocol' => $this->relayInstance->protocol,
       'method' => 'call.play_and_collect',

@@ -3,6 +3,7 @@ namespace SignalWire\Relay\Calling;
 use SignalWire\Messages\Execute;
 use SignalWire\Handler;
 use SignalWire\Log;
+use SignalWire\Relay\Calling\Notification;
 
 class Calling extends \SignalWire\Relay\BaseRelay {
   const Service = 'calling';
@@ -14,24 +15,25 @@ class Calling extends \SignalWire\Relay\BaseRelay {
   }
 
   public function notificationHandler($notification): void {
+    $notification->params->event_type = $notification->event_type;
     switch ($notification->event_type)
     {
-      case 'calling.call.state':
+      case Notification::State:
         $this->_onState($notification->params);
         break;
-      case 'calling.call.connect':
+      case Notification::Connect:
         $this->_onConnect($notification->params);
         break;
-      case 'calling.call.record':
+      case Notification::Record:
         $this->_onRecord($notification->params);
         break;
-      case 'calling.call.play':
+      case Notification::Play:
         $this->_onPlay($notification->params);
         break;
-      case 'calling.call.collect':
+      case Notification::Collect:
         $this->_onCollect($notification->params);
         break;
-      case 'calling.call.receive':
+      case Notification::Receive:
         $call = new Call($this, $notification->params);
         Handler::trigger($this->protocol, $call, $this->_prefixCtx($call->context));
         break;

@@ -31,15 +31,22 @@ $client->on('signalwire.socket.close', function($session) {
 $client->on('signalwire.ready', function($session) use ($loop) {
   echo PHP_EOL . "signalwire.ready" . PHP_EOL;
 
-  $loop->addTimer(3, function () {
-    echo PHP_EOL . "I've been stopped for 3 seconds without block the process" . PHP_EOL;
-  });
-
   // Test onInbound
-  $session->calling->onInbound('home', function($call) use ($session) {
+  $session->calling->onInbound('office', function($call) use ($session) {
     $call->on('answered', function ($call) {
       echo PHP_EOL . $call->id . " state changed from " . $call->prevState . " to " . $call->state . PHP_EOL;
-      $call->playAudio('https://sample-videos.com/audio/mp3/crowd-cheering.mp3');
+      $collect = [ "initial_timeout" => 10, "digits" => [ "max" => 3, "digit_timeout" => 5 ] ];
+      $params = [ "text" => "Welcome at SignalWire!" ];
+      $call->playTTSAndCollect($collect, $params)->done(function($result) use ($call) {
+        $params = [ "text" => "You pressed: " . (string)$result->params->digits ];
+        $call->playTTS($params)->done(function($call) {
+          echo PHP_EOL . "playTTS Done!" . PHP_EOL;
+        }, function() {
+          echo PHP_EOL . "playTTS ERROR???" . PHP_EOL;
+        });
+      }, function() {
+        echo PHP_EOL . "playTTSAndCollect ERROR???" . PHP_EOL;
+      });
       // $call->hangup();
     })
     ->on('ended', function ($call) use ($session) {
