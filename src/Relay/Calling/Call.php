@@ -102,8 +102,6 @@ class Call {
     $blocker = new Blocker($this->id, Notification::State, function($params) use (&$blocker) {
       if ($params->call_state === 'answered') {
         ($blocker->resolve)($this);
-      } elseif ($params->call_state === 'ended') {
-        ($blocker->reject)($this);
       }
     });
 
@@ -282,7 +280,7 @@ class Call {
   public function _execute(Execute $msg) {
     return $this->relayInstance->client->execute($msg)->then(function($result) {
       return $result->result;
-    })->otherwise(function($error) {
+    }, function($error) {
       $e = isset($error->result) ? $error->result : $error;
       throw new \Exception($e->message, $e->code);
     });
@@ -293,15 +291,10 @@ class Call {
       return;
     }
     $controlId = isset($params->control_id) ? $params->control_id : $params->call_id;
-    $blocker = null;
     foreach ($this->_blockers as $b) {
       if ($controlId === $b->controlId && $params->event_type === $b->eventType) {
-        $blocker = $b;
-        break;
+        ($b->resolver)($params);
       }
-    }
-    if ($blocker) {
-      ($blocker->resolver)($params);
     }
   }
 
