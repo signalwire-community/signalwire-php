@@ -12,6 +12,7 @@ use SignalWire\Relay\Calling\PlayAudioAndCollectAction;
 use SignalWire\Relay\Calling\PlaySilenceAndCollectAction;
 use SignalWire\Relay\Calling\PlayTTSAndCollectAction;
 use SignalWire\Relay\Calling\PlayMediaAndCollectAction;
+use SignalWire\Relay\Calling\DetectAction;
 
 class Call {
   const DefaultTimeout = 30;
@@ -264,6 +265,26 @@ class Call {
     });
   }
 
+  public function detectAsync(String $type, Array $params, Float $timeout = null) {
+    return $this->_detect($type, $params, $timeout)->then(function($result) {
+      return new DetectAction($this, $result->control_id);
+    });
+  }
+
+  public function detect(String $type, Array $params, Float $timeout = null) {
+    $controlId = Uuid::uuid4()->toString();
+    $blocker = new Blocker($controlId, Notification::Detect, function($params) use (&$blocker) {
+      // FIXME: check $params->detect->params->event
+      $method = $params->detect->params->event === 'error' ? 'reject' : 'resolve';
+      ($blocker->$method)($params->detect);
+    });
+
+    array_push($this->_blockers, $blocker);
+    return $this->_detect($type, $params, $timeout, $controlId)->then(function($result) use (&$blocker) {
+      return $blocker->promise;
+    });
+  }
+
   public function _stateChange($params) {
     $this->prevState = $this->state;
     $this->state = $params->call_state;
@@ -299,6 +320,11 @@ class Call {
   public function _collectStateChange($params) {
     $this->_addControlParams($params);
     $this->_dispatchCallback('collect', $params);
+  }
+
+  public function _detectStateChange($params) {
+    $this->_addControlParams($params);
+    $this->_dispatchCallback('detect', $params);
   }
 
   private function _dispatchCallback(string $key, ...$params) {
@@ -411,6 +437,24 @@ class Call {
     ));
 
     return $this->_execute($msg);
+  }
 
+  private function _detect(String $type, Array $params, Float $timeout = null, String $controlId = null) {
+    if (is_null($controlId)) {
+      $controlId = Uuid::uuid4()->toString();
+    }
+    $msg = new Execute([
+      'protocol' => $this->relayInstance->protocol,
+      'method' => 'call.detect',
+      'params' => [
+        'node_id' => $this->nodeId,
+        'call_id' => $this->id,
+        'control_id' => $controlId,
+        'timeout' => $timeout,
+        'detect' => [ 'type' => $type, 'params' => $params ]
+      ]
+    ]);
+
+    return $this->_execute($msg);
   }
 }
