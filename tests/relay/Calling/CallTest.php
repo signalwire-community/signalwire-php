@@ -692,8 +692,11 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
         [ "type" => "phone", "to" => "999", "from" => "231", "timeout" => 10 ],
         [ "type" => "phone", "to" => "888" ]
       ]
-    );
-    $this->assertInstanceOf('React\Promise\PromiseInterface', $res);
+    )->done(function($call) {
+      $this->assertEquals($call->connectState, 'connected');
+      $this->assertInstanceOf('SignalWire\Relay\Calling\Call', $call);
+    });
+    $this->call->_connectStateChange($this->connectNotification);
   }
 
   public function testConnectDevicesInBothSeriesAndParallel(): void {
@@ -735,7 +738,10 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
         [ "type" => "phone", "to" => "999", "from" => "231", "timeout" => 10 ],
         [ "type" => "phone", "to" => "888" ]
       ]
-    );
-    $this->assertInstanceOf('React\Promise\PromiseInterface', $res);
+    )->done(function($call) {
+      $this->assertEquals($call->connectState, 'connected');
+      $this->assertInstanceOf('SignalWire\Relay\Calling\Call', $call);
+    });
+    $this->call->_connectStateChange($this->connectNotification);
   }
 }
