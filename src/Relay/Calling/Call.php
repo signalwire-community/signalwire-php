@@ -99,7 +99,19 @@ class Call {
       )
     ));
 
-    return $this->_execute($msg);
+    $blocker = new Blocker($this->id, Notification::State, function($params) use (&$blocker) {
+      if ($params->call_state === 'answered') {
+        ($blocker->resolve)($this);
+      } elseif ($params->call_state === 'ended') {
+        ($blocker->reject)($this);
+      }
+    });
+
+    array_push($this->_blockers, $blocker);
+
+    $this->_execute($msg)->done();
+
+    return $blocker->promise;
   }
 
   public function playAudioAsync(String $url) {
@@ -225,13 +237,14 @@ class Call {
     return $this->_execute($msg);
   }
 
-  public function _stateChange(String $state) {
+  public function _stateChange($params) {
     $this->prevState = $this->state;
-    $this->state = $state;
+    $this->state = $params->call_state;
     $this->_dispatchCallback('stateChange');
-    $this->_dispatchCallback($state);
+    $this->_dispatchCallback($params->call_state);
+    $this->_addControlParams($params);
     $last = count(self::STATES) - 1;
-    if ($state === self::STATES[$last]) {
+    if ($params->call_state === self::STATES[$last]) {
       $this->relayInstance->removeCall($this);
     }
   }

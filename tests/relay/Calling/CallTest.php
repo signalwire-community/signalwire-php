@@ -13,6 +13,8 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
 
   protected function setUp() {
     parent::setUp();
+    $this->stateNotificationAnswered = json_decode('{"call_state":"answered","call_id":"call-id","event_type":"'.Notification::State.'"}');
+    $this->stateNotificationEnded = json_decode('{"call_state":"ended","call_id":"call-id","event_type":"'.Notification::State.'"}');
     $this->playNotification = json_decode('{"state":"finished","control_id":"control-id","event_type":"'.Notification::Play.'"}');
     $this->collectNotification = json_decode('{"control_id":"control-id","event_type":"'.Notification::Collect.'","result":{"type":"digit","params":{"digits":"12345","terminator":"#"}}}');
   }
@@ -60,7 +62,7 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
     $this->assertInstanceOf('React\Promise\PromiseInterface', $res);
   }
 
-  public function testAnswer(): void {
+  public function testAnswerSuccess(): void {
     $this->_setCallReady();
     $msg = new Execute([
       'protocol' => 'signalwire_calling_proto',
@@ -76,8 +78,31 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
       ->with($msg)
       ->willReturn(\React\Promise\resolve(json_decode('{"result":{"code":"200","message":"message"}}')));
 
-    $res = $this->call->answer();
-    $this->assertInstanceOf('React\Promise\PromiseInterface', $res);
+    $this->call->answer()->done(function($call) {
+      $this->assertEquals($call->state, 'answered');
+      $this->assertInstanceOf('SignalWire\Relay\Calling\Call', $call);
+    });
+    $this->call->_stateChange($this->stateNotificationAnswered);
+  }
+
+  public function testAnswerFail(): void {
+    $this->_setCallReady();
+    $msg = new Execute([
+      'protocol' => 'signalwire_calling_proto',
+      'method' => 'call.answer',
+      'params' => [
+        'call_id' => 'call-id',
+        'node_id' => 'node-id'
+      ]
+    ]);
+
+    $this->client->connection->expects($this->once())
+      ->method('send')
+      ->with($msg)
+      ->willReturn(\React\Promise\reject(json_decode('{"result":{"code":"400","message":"some error"}}')));
+
+    $this->expectException(Exception::class);
+    $this->call->answer();
   }
 
   public function testPlayAudioAsync(): void {
