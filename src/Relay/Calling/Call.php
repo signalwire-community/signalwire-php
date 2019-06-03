@@ -309,29 +309,32 @@ class Call {
   }
 
   private function _play(Array $play) {
-    return $this->_playAsync($play)->then(function($result) {
-      $blocker = new Blocker($result->control_id, Notification::Play, function($params) use (&$blocker) {
-        if ($params->state === 'finished') {
-          ($blocker->resolve)($this);
-        } elseif ($params->state === 'error') {
-          ($blocker->reject)();
-        }
-      });
+    $controlId = Uuid::uuid4()->toString();
+    $blocker = new Blocker($controlId, Notification::Play, function($params) use (&$blocker) {
+      if ($params->state === 'finished') {
+        ($blocker->resolve)($this);
+      } elseif ($params->state === 'error') {
+        ($blocker->reject)();
+      }
+    });
 
-      array_push($this->_blockers, $blocker);
-
+    array_push($this->_blockers, $blocker);
+    return $this->_playAsync($play, $controlId)->then(function($result) use (&$blocker) {
       return $blocker->promise;
     });
   }
 
-  private function _playAsync(Array $play) {
+  private function _playAsync(Array $play, String $controlId = null) {
+    if (is_null($controlId)) {
+      $controlId = Uuid::uuid4()->toString();
+    }
     $msg = new Execute(array(
       'protocol' => $this->relayInstance->protocol,
       'method' => 'call.play',
       'params' => array(
         'node_id' => $this->nodeId,
         'call_id' => $this->id,
-        'control_id' => Uuid::uuid4()->toString(),
+        'control_id' => $controlId,
         'play' => $play
       )
     ));
@@ -340,26 +343,30 @@ class Call {
   }
 
   private function _playAndCollect(Array $collect, Array $play) {
-    return $this->_playAndCollectAsync($collect, $play)->then(function($result) {
-      $blocker = new Blocker($result->control_id, Notification::Collect, function($params) use (&$blocker) {
-        $method = $params->result->type === 'error' ? 'reject' : 'resolve';
-        ($blocker->$method)($params->result);
-      });
+    $controlId = Uuid::uuid4()->toString();
+    $blocker = new Blocker($controlId, Notification::Collect, function($params) use (&$blocker) {
+      $method = $params->result->type === 'error' ? 'reject' : 'resolve';
+      ($blocker->$method)($params->result);
+    });
 
-      array_push($this->_blockers, $blocker);
+    array_push($this->_blockers, $blocker);
 
+    return $this->_playAndCollectAsync($collect, $play, $controlId)->then(function($result) use (&$blocker) {
       return $blocker->promise;
     });
   }
 
-  private function _playAndCollectAsync(Array $collect, Array $play) {
+  private function _playAndCollectAsync(Array $collect, Array $play, String $controlId = null) {
+    if (is_null($controlId)) {
+      $controlId = Uuid::uuid4()->toString();
+    }
     $msg = new Execute(array(
       'protocol' => $this->relayInstance->protocol,
       'method' => 'call.play_and_collect',
       'params' => array(
         'node_id' => $this->nodeId,
         'call_id' => $this->id,
-        'control_id' => Uuid::uuid4()->toString(),
+        'control_id' => $controlId,
         'collect' => $collect,
         'play' => $play
       )
