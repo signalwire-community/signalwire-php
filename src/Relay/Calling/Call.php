@@ -86,7 +86,17 @@ class Call {
       )
     ));
 
-    return $this->_execute($msg);
+    $blocker = new Blocker($this->id, Notification::State, function($params) use (&$blocker) {
+      if ($params->call_state === 'ended') {
+        ($blocker->resolve)($this);
+      }
+    });
+
+    array_push($this->_blockers, $blocker);
+
+    return $this->_execute($msg)->then(function($result) use (&$blocker) {
+      return $blocker->promise;
+    });
   }
 
   public function answer() {
@@ -99,7 +109,17 @@ class Call {
       )
     ));
 
-    return $this->_execute($msg);
+    $blocker = new Blocker($this->id, Notification::State, function($params) use (&$blocker) {
+      if ($params->call_state === 'answered') {
+        ($blocker->resolve)($this);
+      }
+    });
+
+    array_push($this->_blockers, $blocker);
+
+    return $this->_execute($msg)->then(function($result) use (&$blocker) {
+      return $blocker->promise;
+    });
   }
 
   public function playAudioAsync(String $url) {
@@ -148,20 +168,23 @@ class Call {
     return $this->_play($play);
   }
 
-  public function record(Array $record) {
-    $msg = new Execute(array(
-      'protocol' => $this->relayInstance->protocol,
-      'method' => 'call.record',
-      'params' => array(
-        'node_id' => $this->nodeId,
-        'call_id' => $this->id,
-        'control_id' => Uuid::uuid4()->toString(),
-        'record' => $record
-      )
-    ));
-
-    return $this->_execute($msg)->then(function($result) {
+  public function recordAsync(Array $record) {
+    return $this->_record($record)->then(function($result) {
       return new RecordAction($this, $result->control_id);
+    });
+  }
+
+  public function record(Array $record) {
+    $controlId = Uuid::uuid4()->toString();
+    $blocker = new Blocker($controlId, Notification::Record, function($params) use (&$blocker) {
+      if ($params->state === 'finished' || $params->state === 'no_input') {
+        ($blocker->resolve)($params);
+      }
+    });
+
+    array_push($this->_blockers, $blocker);
+    return $this->_record($record, $controlId)->then(function($result) use (&$blocker) {
+      return $blocker->promise;
     });
   }
 
@@ -211,7 +234,7 @@ class Call {
     return $this->_playAndCollect($collect, $play);
   }
 
-  public function connect(...$devices) {
+  public function connectAsync(...$devices) {
     $msg = new Execute(array(
       'protocol' => $this->relayInstance->protocol,
       'method' => 'call.connect',
@@ -225,22 +248,40 @@ class Call {
     return $this->_execute($msg);
   }
 
-  public function _stateChange(String $state) {
+  public function connect(...$devices) {
+    $blocker = new Blocker($this->id, Notification::Connect, function($params) use (&$blocker) {
+      if ($params->connect_state === 'connected') {
+        ($blocker->resolve)($this);
+      } elseif ($params->connect_state === 'failed') {
+        ($blocker->reject)($params);
+      }
+    });
+
+    array_push($this->_blockers, $blocker);
+
+    return $this->connectAsync(...$devices)->then(function($result) use (&$blocker) {
+      return $blocker->promise;
+    });
+  }
+
+  public function _stateChange($params) {
     $this->prevState = $this->state;
-    $this->state = $state;
+    $this->state = $params->call_state;
     $this->_dispatchCallback('stateChange');
-    $this->_dispatchCallback($state);
+    $this->_dispatchCallback($params->call_state);
+    $this->_addControlParams($params);
     $last = count(self::STATES) - 1;
-    if ($state === self::STATES[$last]) {
+    if ($params->call_state === self::STATES[$last]) {
       $this->relayInstance->removeCall($this);
     }
   }
 
-  public function _connectStateChange(String $state) {
+  public function _connectStateChange($params) {
     $this->prevConnectState = $this->connectState;
-    $this->connectState = $state;
+    $this->connectState = $params->connect_state;
+    $this->_addControlParams($params);
     $this->_dispatchCallback("connect.stateChange");
-    $this->_dispatchCallback("connect.$state");
+    $this->_dispatchCallback("connect.$params->connect_state");
   }
 
   public function _recordStateChange($params) {
@@ -269,52 +310,51 @@ class Call {
   public function _execute(Execute $msg) {
     return $this->relayInstance->client->execute($msg)->then(function($result) {
       return $result->result;
-    })->otherwise(function($error) {
+    }, function($error) {
       $e = isset($error->result) ? $error->result : $error;
       throw new \Exception($e->message, $e->code);
     });
   }
 
   private function _addControlParams($params) {
-    if (!isset($params->control_id) || !isset($params->event_type)) {
+    if (!isset($params->event_type)) {
       return;
     }
-    $blocker = null;
+    $controlId = isset($params->control_id) ? $params->control_id : $params->call_id;
     foreach ($this->_blockers as $b) {
-      if ($params->control_id === $b->controlId && $params->event_type === $b->eventType) {
-        $blocker = $b;
-        break;
+      if ($controlId === $b->controlId && $params->event_type === $b->eventType) {
+        ($b->resolver)($params);
       }
-    }
-    if ($blocker) {
-      ($blocker->resolver)($params);
     }
   }
 
   private function _play(Array $play) {
-    return $this->_playAsync($play)->then(function($result) {
-      $blocker = new Blocker($result->control_id, Notification::Play, function($params) use (&$blocker) {
-        if ($params->state === 'finished') {
-          ($blocker->resolve)($this);
-        } elseif ($params->state === 'error') {
-          ($blocker->reject)();
-        }
-      });
+    $controlId = Uuid::uuid4()->toString();
+    $blocker = new Blocker($controlId, Notification::Play, function($params) use (&$blocker) {
+      if ($params->state === 'finished') {
+        ($blocker->resolve)($this);
+      } elseif ($params->state === 'error') {
+        ($blocker->reject)();
+      }
+    });
 
-      array_push($this->_blockers, $blocker);
-
+    array_push($this->_blockers, $blocker);
+    return $this->_playAsync($play, $controlId)->then(function($result) use (&$blocker) {
       return $blocker->promise;
     });
   }
 
-  private function _playAsync(Array $play) {
+  private function _playAsync(Array $play, String $controlId = null) {
+    if (is_null($controlId)) {
+      $controlId = Uuid::uuid4()->toString();
+    }
     $msg = new Execute(array(
       'protocol' => $this->relayInstance->protocol,
       'method' => 'call.play',
       'params' => array(
         'node_id' => $this->nodeId,
         'call_id' => $this->id,
-        'control_id' => Uuid::uuid4()->toString(),
+        'control_id' => $controlId,
         'play' => $play
       )
     ));
@@ -323,31 +363,54 @@ class Call {
   }
 
   private function _playAndCollect(Array $collect, Array $play) {
-    return $this->_playAndCollectAsync($collect, $play)->then(function($result) {
-      $blocker = new Blocker($result->control_id, Notification::Collect, function($params) use (&$blocker) {
-        $method = $params->result->type === 'error' ? 'reject' : 'resolve';
-        ($blocker->$method)($params->result);
-      });
+    $controlId = Uuid::uuid4()->toString();
+    $blocker = new Blocker($controlId, Notification::Collect, function($params) use (&$blocker) {
+      $method = $params->result->type === 'error' ? 'reject' : 'resolve';
+      ($blocker->$method)($params->result);
+    });
 
-      array_push($this->_blockers, $blocker);
+    array_push($this->_blockers, $blocker);
 
+    return $this->_playAndCollectAsync($collect, $play, $controlId)->then(function($result) use (&$blocker) {
       return $blocker->promise;
     });
   }
 
-  private function _playAndCollectAsync(Array $collect, Array $play) {
+  private function _playAndCollectAsync(Array $collect, Array $play, String $controlId = null) {
+    if (is_null($controlId)) {
+      $controlId = Uuid::uuid4()->toString();
+    }
     $msg = new Execute(array(
       'protocol' => $this->relayInstance->protocol,
       'method' => 'call.play_and_collect',
       'params' => array(
         'node_id' => $this->nodeId,
         'call_id' => $this->id,
-        'control_id' => Uuid::uuid4()->toString(),
+        'control_id' => $controlId,
         'collect' => $collect,
         'play' => $play
       )
     ));
 
     return $this->_execute($msg);
+  }
+
+  private function _record(Array $record, String $controlId = null) {
+    if (is_null($controlId)) {
+      $controlId = Uuid::uuid4()->toString();
+    }
+    $msg = new Execute(array(
+      'protocol' => $this->relayInstance->protocol,
+      'method' => 'call.record',
+      'params' => array(
+        'node_id' => $this->nodeId,
+        'call_id' => $this->id,
+        'control_id' => $controlId,
+        'record' => $record
+      )
+    ));
+
+    return $this->_execute($msg);
+
   }
 }

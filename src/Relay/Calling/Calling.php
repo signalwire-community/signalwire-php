@@ -122,7 +122,7 @@ class Calling extends \SignalWire\Relay\BaseRelay {
         $call->id = $params->call_id;
         $call->nodeId = $params->node_id;
       }
-      $call->_stateChange($params->call_state);
+      $call->_stateChange($params);
     } elseif (isset($params->call_id) && isset($params->peer)) {
       $call = new Call($this, $params);
     } else {
@@ -157,7 +157,7 @@ class Calling extends \SignalWire\Relay\BaseRelay {
       if (isset($params->peer) && isset($params->peer->call_id)) {
         $call->peer = $this->getCallById($params->peer->call_id);
       }
-      $call->_connectStateChange($params->connect_state);
+      $call->_connectStateChange($params);
     }
   }
 }
