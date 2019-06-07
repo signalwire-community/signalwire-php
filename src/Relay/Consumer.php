@@ -10,15 +10,29 @@ use React\EventLoop\LoopInterface;
 use React\EventLoop\Factory as ReactFactory;
 
 abstract class Consumer {
+  /**
+   * SignalWire Space Url
+   * @var String
+   */
+  public $spaceUrl;
+
+  /**
+   * SignalWire project
+   * @var String
+   */
+  public $project;
+
+  /**
+   * SignalWire token
+   * @var String
+   */
+  public $token;
 
   protected $loop = null;
   protected $client = null;
   private $_kernel = null;
 
   function __construct() {
-    if (!isset($this->spaceUrl)) {
-      throw new LogicException(get_class($this) . ' must have a $spaceUrl.');
-    }
     if (!isset($this->project)) {
       throw new LogicException(get_class($this) . ' must have a $project.');
     }
@@ -59,17 +73,15 @@ abstract class Consumer {
       Log::error($error->getMessage());
     });
 
-    $this->client->on('signalwire.ready', function($client) {
-      $this->_kernel->execute(function(): Coroutine {
-        try {
-          yield $this->_registerCallingContexts();
-          yield $this->setup();
-        } catch (\Throwable $th) {
-          echo PHP_EOL . $th->getMessage() . PHP_EOL;
-          throw $th;
-        }
-      });
-    });
+    $this->client->on('signalwire.ready', yield Recoil::callback(function($client) {
+      try {
+        yield $this->_registerCallingContexts();
+        yield $this->setup();
+      } catch (\Throwable $th) {
+        Log::error($th->getMessage());
+        throw $th;
+      }
+    }));
 
     yield $this->client->connect();
   }
