@@ -24,13 +24,9 @@ class CustomConsumer extends Consumer {
     print "\n - onIncomingCall on context: {$call->context}, from: {$call->from} to: {$call->to} !\n";
 
     yield $call->answer();
-    $action = yield $call->playAudio('https://cdn.signalwire.com/default-music/welcome.mp3');
-    $this->loop->addTimer(5, function () use ($action) {
-      $action->stop();
-    });
-    $this->loop->addTimer(7, function () use ($call) {
-      $call->hangup();
-    });
+    yield $call->playAudio('https://cdn.signalwire.com/default-music/welcome.mp3');
+    yield $call->playTTS([ 'text' => 'Goodbye Sir!' ]);
+    yield $call->hangup();
   }
 }
 
