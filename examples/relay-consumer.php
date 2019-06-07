@@ -6,14 +6,12 @@ use Generator as Coroutine;
 use SignalWire\Relay\Consumer;
 
 class CustomConsumer extends Consumer {
-  public $spaceUrl;
   public $project;
   public $token;
   public $contexts = ['home', 'office'];
 
   function __construct() {
     $this->loop = \React\EventLoop\Factory::create();
-    $this->spaceUrl = isset($_ENV['HOST']) ? $_ENV['HOST'] : '';
     $this->project = isset($_ENV['PROJECT']) ? $_ENV['PROJECT'] : '';
     $this->token = isset($_ENV['TOKEN']) ? $_ENV['TOKEN'] : '';
 
