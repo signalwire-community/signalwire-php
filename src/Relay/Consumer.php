@@ -3,6 +3,7 @@
 namespace SignalWire\Relay;
 
 use Generator as Coroutine;
+use SignalWire\Log;
 use Recoil\Recoil;
 use Recoil\React\ReactKernel;
 use React\EventLoop\LoopInterface;
@@ -55,7 +56,7 @@ abstract class Consumer {
     ]);
 
     $this->client->on('signalwire.error', function($error) {
-      echo $error->getMessage();
+      Log::error($error->getMessage());
     });
 
     $this->client->on('signalwire.ready', function($client) {
@@ -86,7 +87,7 @@ abstract class Consumer {
     }
     $results = yield $promises;
     foreach ($results as $res) {
-      echo PHP_EOL . $res->message . PHP_EOL;
+      Log::info($res->message);
     }
     return $results;
   }
