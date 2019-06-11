@@ -347,11 +347,13 @@ class Call {
 
   public function _detectStateChange($params) {
     $this->_addControlParams($params);
-    $this->_dispatchCallback('detect', $params);
+    // TODO: handle detect notification between dtmf and others
+    // $this->_dispatchCallback('detect', $params);
   }
 
   public function _faxStateChange($params) {
     $this->_addControlParams($params);
+    // TODO: handle detect notification between pages send/recv and finished
     // $this->_dispatchCallback('fax', $params);
   }
 
