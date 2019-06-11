@@ -20,6 +20,7 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
     $this->recordNotification = json_decode('{"state":"finished","call_id":"call-id","control_id":"'.self::UUID.'","event_type":"'.Notification::Record.'","url":"record-url","record":{"audio":{"type":"digit","params":{"digits":"12345","terminator":"#"}}}}');
     $this->connectNotification = json_decode('{"connect_state":"connected","call_id":"call-id","event_type":"'.Notification::Connect.'"}');
     $this->detectNotification = json_decode('{"control_id":"'.self::UUID.'","call_id":"call-id","event_type":"'.Notification::Detect.'","detect":{"type":"fax","params":{"event":"CED"}}}');
+    $this->faxNotification = json_decode('{"control_id":"'.self::UUID.'","call_id":"call-id","event_type":"'.Notification::Fax.'","fax":{"type":"finished","params":{"direction":"send","document":"url.pdf","pages":2}}}');
   }
 
   public function testBegin(): void {
@@ -794,5 +795,101 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
     });
 
     $this->call->_detectStateChange($this->detectNotification);
+  }
+
+  public function testSendFaxAsync(): void {
+    $this->_setCallReady();
+    $msg = new Execute([
+      'protocol' => 'signalwire_calling_proto',
+      'method' => 'call.send_fax',
+      'params' => [
+        'call_id' => 'call-id',
+        'node_id' => 'node-id',
+        'control_id' => self::UUID,
+        'document' => 'document.pdf',
+        'identity' => '+17778889999',
+        'header_info' => 'Testing Header'
+      ]
+    ]);
+
+    $this->client->connection->expects($this->once())
+      ->method('send')
+      ->with($msg)
+      ->willReturn(\React\Promise\resolve(json_decode('{"result":{"code":"200","message":"message","control_id":"control-id"}}')));
+
+    $this->call->sendFaxAsync('document.pdf', '+17778889999', 'Testing Header')->done(function($action) {
+      $this->assertInstanceOf('SignalWire\Relay\Calling\SendFaxAction', $action);
+    });
+  }
+
+  public function testSendFax(): void {
+    $this->_setCallReady();
+    $msg = new Execute([
+      'protocol' => 'signalwire_calling_proto',
+      'method' => 'call.send_fax',
+      'params' => [
+        'call_id' => 'call-id',
+        'node_id' => 'node-id',
+        'control_id' => self::UUID,
+        'document' => 'document.pdf',
+        'identity' => '+17778889999',
+        'header_info' => 'Testing Header'
+      ]
+    ]);
+
+    $this->client->connection->expects($this->once())
+      ->method('send')
+      ->with($msg)
+      ->willReturn(\React\Promise\resolve(json_decode('{"result":{"code":"200","message":"message","control_id":"'.self::UUID.'"}}')));
+
+    $this->call->sendFax('document.pdf', '+17778889999', 'Testing Header')->done(function($params) {
+      $this->assertEquals($params->params->direction, 'send');
+      $this->assertEquals($params->params->pages, 2);
+    });
+
+    $this->call->_faxStateChange($this->faxNotification);
+  }
+
+  public function testSendFaxWithoutHeader(): void {
+    $this->_setCallReady();
+    $msg = new Execute([
+      'protocol' => 'signalwire_calling_proto',
+      'method' => 'call.send_fax',
+      'params' => [
+        'call_id' => 'call-id',
+        'node_id' => 'node-id',
+        'control_id' => self::UUID,
+        'document' => 'document.pdf',
+        'identity' => '+17778889999'
+      ]
+    ]);
+
+    $this->client->connection->expects($this->once())
+      ->method('send')
+      ->with($msg)
+      ->willReturn(\React\Promise\resolve(json_decode('{"result":{"code":"200","message":"message","control_id":"'.self::UUID.'"}}')));
+
+    $this->call->sendFax('document.pdf', '+17778889999')->done();
+  }
+
+  public function testSendFaxWithoutIdentity(): void {
+    $this->_setCallReady();
+    $msg = new Execute([
+      'protocol' => 'signalwire_calling_proto',
+      'method' => 'call.send_fax',
+      'params' => [
+        'call_id' => 'call-id',
+        'node_id' => 'node-id',
+        'control_id' => self::UUID,
+        'document' => 'document.pdf'
+      ]
+    ]);
+
+    $this->client->connection->expects($this->once())
+      ->method('send')
+      ->with($msg)
+      ->willReturn(\React\Promise\resolve(json_decode('{"result":{"code":"200","message":"message","control_id":"'.self::UUID.'"}}')));
+
+    $this->call->sendFax('document.pdf')->done();
   }
 }
