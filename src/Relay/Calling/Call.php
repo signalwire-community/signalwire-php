@@ -13,6 +13,7 @@ use SignalWire\Relay\Calling\PlaySilenceAndCollectAction;
 use SignalWire\Relay\Calling\PlayTTSAndCollectAction;
 use SignalWire\Relay\Calling\PlayMediaAndCollectAction;
 use SignalWire\Relay\Calling\DetectAction;
+use SignalWire\Relay\Calling\SendFaxAction;
 
 class Call {
   const DefaultTimeout = 30;
@@ -285,6 +286,28 @@ class Call {
     });
   }
 
+  public function sendFaxAsync(String $url, String $identity, String $header = null) {
+    return $this->_sendFax($url, $identity, $header)->then(function($result) {
+      return new SendFaxAction($this, $result->control_id);
+    });
+  }
+
+  public function sendFax(String $documentUrl, String $identity = null, String $header = null) {
+    $controlId = Uuid::uuid4()->toString();
+    $blocker = new Blocker($controlId, Notification::Fax, function($params) use (&$blocker) {
+      if ($params->fax->type === 'finished') {
+        ($blocker->resolve)($params->fax);
+      } elseif ($params->fax->type === 'error') {
+        ($blocker->reject)($params->fax);
+      }
+    });
+
+    array_push($this->_blockers, $blocker);
+    return $this->_sendFax($documentUrl, $identity, $header, $controlId)->then(function($result) use (&$blocker) {
+      return $blocker->promise;
+    });
+  }
+
   public function _stateChange($params) {
     $this->prevState = $this->state;
     $this->state = $params->call_state;
@@ -458,6 +481,31 @@ class Call {
         'timeout' => $timeout,
         'detect' => [ 'type' => $type, 'params' => $params ]
       ]
+    ]);
+
+    return $this->_execute($msg);
+  }
+
+  private function _sendFax(String $documentUrl, String $identity = null, String $header = null, String $controlId = null) {
+    if (is_null($controlId)) {
+      $controlId = Uuid::uuid4()->toString();
+    }
+    $params = [
+      'node_id' => $this->nodeId,
+      'call_id' => $this->id,
+      'control_id' => $controlId,
+      'document' => $documentUrl
+    ];
+    if (!is_null($identity)) {
+      $params['identity'] = $identity;
+    }
+    if (!is_null($header)) {
+      $params['header_info'] = $header;
+    }
+    $msg = new Execute([
+      'protocol' => $this->relayInstance->protocol,
+      'method' => 'call.send_fax',
+      'params' => $params
     ]);
 
     return $this->_execute($msg);
