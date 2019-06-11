@@ -40,6 +40,9 @@ class Calling extends \SignalWire\Relay\BaseRelay {
       case Notification::Detect:
         $this->_onDetect($notification->params);
         break;
+      case Notification::Fax:
+        $this->_onFax($notification->params);
+        break;
     }
   }
 
@@ -168,6 +171,13 @@ class Calling extends \SignalWire\Relay\BaseRelay {
         $call->peer = $this->getCallById($params->peer->call_id);
       }
       $call->_connectStateChange($params);
+    }
+  }
+
+  private function _onFax($params) {
+    $call = $this->getCallById($params->call_id);
+    if ($call) {
+      $call->_faxStateChange($params);
     }
   }
 }

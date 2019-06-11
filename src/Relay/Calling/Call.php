@@ -327,6 +327,11 @@ class Call {
     $this->_dispatchCallback('detect', $params);
   }
 
+  public function _faxStateChange($params) {
+    $this->_addControlParams($params);
+    // $this->_dispatchCallback('fax', $params);
+  }
+
   private function _dispatchCallback(string $key, ...$params) {
     if (isset($this->_cbQueue[$key]) && is_callable($this->_cbQueue[$key])) {
       call_user_func($this->_cbQueue[$key], $this, ...$params);
