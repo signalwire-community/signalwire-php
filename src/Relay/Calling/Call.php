@@ -6,11 +6,9 @@ use Ramsey\Uuid\Uuid;
 
 class Call {
   const DefaultTimeout = 30;
-  const STATES = ['none', 'created', 'ringing', 'answered', 'ending', 'ended'];
   public $id = false;
   public $nodeId = false;
   public $relayInstance;
-  public $ready = false;
   public $prevState = '';
   public $state = '';
   public $prevConnectState = '';
@@ -261,8 +259,7 @@ class Call {
     $this->_dispatchCallback('stateChange');
     $this->_dispatchCallback($params->call_state);
     $this->_addControlParams($params);
-    $last = count(self::STATES) - 1;
-    if ($params->call_state === self::STATES[$last]) {
+    if ($params->call_state === CallState::Ended) {
       $this->relayInstance->removeCall($this);
     }
   }
