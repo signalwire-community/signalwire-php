@@ -401,4 +401,24 @@ class Call {
     return $this->_execute($msg);
 
   }
+
+  /**
+   * Dynamic getter for Call state.
+   *
+   * @param string $name Property name to return
+   */
+  public function __get($name) {
+    switch ($name) {
+      case in_array($name, CallState::STATES):
+        return $this->state === $name;
+      case 'active':
+        return $this->state === CallState::Answered;
+      // case 'failed':
+      //   return false;
+      // case 'busy':
+      //   return false;
+      default:
+        return null;
+    }
+  }
 }
