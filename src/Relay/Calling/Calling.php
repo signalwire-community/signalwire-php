@@ -3,7 +3,6 @@ namespace SignalWire\Relay\Calling;
 use SignalWire\Messages\Execute;
 use SignalWire\Handler;
 use SignalWire\Log;
-use SignalWire\Relay\Calling\Notification;
 
 class Calling extends \SignalWire\Relay\BaseRelay {
   const Service = 'calling';
