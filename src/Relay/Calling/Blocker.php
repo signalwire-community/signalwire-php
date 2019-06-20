@@ -1,6 +1,7 @@
 <?php
 namespace SignalWire\Relay\Calling;
 use React\Promise\Promise;
+use Ramsey\Uuid\Uuid;
 
 class Blocker {
   public $controlId;
@@ -10,8 +11,8 @@ class Blocker {
   public $resolve;
   public $reject;
 
-  public function __construct(String $controlId, String $eventType, Callable $resolver) {
-    $this->controlId = $controlId;
+  public function __construct(String $eventType, Callable $resolver) {
+    $this->controlId = Uuid::uuid4()->toString();
     $this->eventType = $eventType;
     $this->resolver = $resolver;
 
