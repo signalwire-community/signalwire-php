@@ -23,6 +23,7 @@ class Call {
 
   private $_cbQueue = array();
   private $_blockers = array();
+  private $_actions = array();
 
   public function __construct(Calling $relayInstance, $options) {
     $this->relayInstance = $relayInstance;
@@ -160,8 +161,11 @@ class Call {
   }
 
   public function recordAsync(Array $record) {
-    return $this->_record($record)->then(function($result) {
-      return new RecordAction($this, $result->control_id);
+    $action = new RecordAction($this);
+
+    $this->_actions[$action->controlId] = $action;
+    return $this->_record($record, $action->controlId)->then(function($result) use (&$action) {
+      return $action;
     });
   }
 
@@ -276,6 +280,7 @@ class Call {
 
   public function _recordStateChange($params) {
     $this->_addControlParams($params);
+    $this->_checkAction($params);
     $this->_dispatchCallback('record.stateChange', $params);
     $this->_dispatchCallback("record.$params->state", $params);
   }
@@ -315,6 +320,14 @@ class Call {
       if ($controlId === $b->controlId && $params->event_type === $b->eventType) {
         ($b->resolver)($params);
       }
+    }
+  }
+
+  private function _checkAction($params) {
+    // If exists an Action for this controlId ...
+    $controlId = $params->control_id;
+    if ($controlId && isset($this->_actions[$controlId])) {
+      $this->_actions[$controlId]->update($params);
     }
   }
 

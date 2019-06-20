@@ -1,15 +1,18 @@
 <?php
 namespace SignalWire\Relay\Calling;
 use SignalWire\Messages\Execute;
+use Ramsey\Uuid\Uuid;
 
 abstract class BaseAction {
   public $call;
-  protected $controlId;
+  public $controlId;
   protected $baseMethod = '';
 
-  public function __construct(Call $call, String $controlId) {
+  abstract function update();
+
+  public function __construct(Call $call) {
     $this->call = $call;
-    $this->controlId = $controlId;
+    $this->controlId = Uuid::uuid4()->toString();
   }
 
   public function stop() {
