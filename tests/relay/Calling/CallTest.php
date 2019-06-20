@@ -152,7 +152,7 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
       ->willReturn(\React\Promise\resolve(json_decode('{"result":{"code":"200","message":"message","control_id":"control-id"}}')));
 
     $this->call->playAudioAsync('url-to-audio.mp3')->done(function($action) {
-      $this->assertInstanceOf('SignalWire\Relay\Calling\PlayAudioAction', $action);
+      $this->assertInstanceOf('SignalWire\Relay\Calling\PlayAction', $action);
     });
   }
 
@@ -203,7 +203,7 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
       ->willReturn(\React\Promise\resolve(json_decode('{"result":{"code":"200","message":"message","control_id":"control-id"}}')));
 
     $this->call->playSilenceAsync(5)->done(function($action) {
-      $this->assertInstanceOf('SignalWire\Relay\Calling\PlaySilenceAction', $action);
+      $this->assertInstanceOf('SignalWire\Relay\Calling\PlayAction', $action);
     });
   }
 
@@ -254,7 +254,7 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
       ->willReturn(\React\Promise\resolve(json_decode('{"result":{"code":"200","message":"message","control_id":"control-id"}}')));
 
     $this->call->playTTSAsync(['text' => 'Welcome', 'gender' => 'male'])->done(function($action) {
-      $this->assertInstanceOf('SignalWire\Relay\Calling\PlayTTSAction', $action);
+      $this->assertInstanceOf('SignalWire\Relay\Calling\PlayAction', $action);
     });
   }
 
@@ -311,7 +311,7 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
       ['type' => 'tts', 'params' => ['text' => 'Welcome', 'gender' => 'male']],
       ['type' => 'silence', 'params' => ['duration' => 5]]
     )->done(function($action) {
-      $this->assertInstanceOf('SignalWire\Relay\Calling\PlayMediaAction', $action);
+      $this->assertInstanceOf('SignalWire\Relay\Calling\PlayAction', $action);
     });
   }
 
@@ -420,7 +420,7 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
       ->willReturn(\React\Promise\resolve(json_decode('{"result":{"code":"200","message":"message","control_id":"control-id"}}')));
 
     $this->call->playAudioAndCollectAsync($collect, 'url-to-audio.mp3')->done(function($action) {
-      $this->assertInstanceOf('SignalWire\Relay\Calling\PlayAudioAndCollectAction', $action);
+      $this->assertInstanceOf('SignalWire\Relay\Calling\PromptAction', $action);
     });
   }
 
@@ -475,7 +475,7 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
       ->willReturn(\React\Promise\resolve(json_decode('{"result":{"code":"200","message":"message","control_id":"control-id"}}')));
 
     $this->call->playSilenceAndCollectAsync($collect, 5)->done(function($action) {
-      $this->assertInstanceOf('SignalWire\Relay\Calling\PlaySilenceAndCollectAction', $action);
+      $this->assertInstanceOf('SignalWire\Relay\Calling\PromptAction', $action);
     });
   }
 
@@ -530,7 +530,7 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
       ->willReturn(\React\Promise\resolve(json_decode('{"result":{"code":"200","message":"message","control_id":"control-id"}}')));
 
     $this->call->playTTSAndCollectAsync($collect, ['text' => 'Welcome', 'gender' => 'male'])->done(function($action) {
-      $this->assertInstanceOf('SignalWire\Relay\Calling\PlayTTSAndCollectAction', $action);
+      $this->assertInstanceOf('SignalWire\Relay\Calling\PromptAction', $action);
     });
   }
 
@@ -592,7 +592,7 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
       ['type' => 'tts', 'params' => ['text' => 'Welcome', 'gender' => 'male']],
       ['type' => 'silence', 'params' => ['duration' => 5]]
     )->done(function($action) {
-      $this->assertInstanceOf('SignalWire\Relay\Calling\PlayMediaAndCollectAction', $action);
+      $this->assertInstanceOf('SignalWire\Relay\Calling\PromptAction', $action);
     });
   }
 

@@ -117,7 +117,7 @@ class Call {
   public function playAudioAsync(String $url) {
     $params = ['type' => 'audio', 'params' => ['url' => $url]];
     return $this->_playAsync([$params])->then(function($result) {
-      return new PlayAudioAction($this, $result->control_id);
+      return new PlayAction($this, $result->control_id);
     });
   }
 
@@ -129,7 +129,7 @@ class Call {
   public function playSilenceAsync(String $duration) {
     $params = ['type' => 'silence', 'params' => ['duration' => $duration]];
     return $this->_playAsync([$params])->then(function($result) {
-      return new PlaySilenceAction($this, $result->control_id);
+      return new PlayAction($this, $result->control_id);
     });
   }
 
@@ -141,7 +141,7 @@ class Call {
   public function playTTSAsync(Array $options) {
     $params = ['type' => 'tts', 'params' => $options];
     return $this->_playAsync([$params])->then(function($result) {
-      return new PlayTTSAction($this, $result->control_id);
+      return new PlayAction($this, $result->control_id);
     });
   }
 
@@ -152,7 +152,7 @@ class Call {
 
   public function playMediaAsync(...$play) {
     return $this->_playAsync($play)->then(function($result) {
-      return new PlayMediaAction($this, $result->control_id);
+      return new PlayAction($this, $result->control_id);
     });
   }
 
@@ -185,7 +185,7 @@ class Call {
   public function playAudioAndCollectAsync(Array $collect, String $url) {
     $params = ['type' => 'audio', 'params' => ['url' => $url]];
     return $this->_playAndCollectAsync($collect, [$params])->then(function($result) {
-      return new PlayAudioAndCollectAction($this, $result->control_id);
+      return new PromptAction($this, $result->control_id);
     });
   }
 
@@ -197,7 +197,7 @@ class Call {
   public function playSilenceAndCollectAsync(Array $collect, String $duration) {
     $params = ['type' => 'silence', 'params' => ['duration' => $duration]];
     return $this->_playAndCollectAsync($collect, [$params])->then(function($result) {
-      return new PlaySilenceAndCollectAction($this, $result->control_id);
+      return new PromptAction($this, $result->control_id);
     });
   }
 
@@ -209,7 +209,7 @@ class Call {
   public function playTTSAndCollectAsync(Array $collect, Array $options) {
     $params = ['type' => 'tts', 'params' => $options];
     return $this->_playAndCollectAsync($collect, [$params])->then(function($result) {
-      return new PlayTTSAndCollectAction($this, $result->control_id);
+      return new PromptAction($this, $result->control_id);
     });
   }
 
@@ -220,7 +220,7 @@ class Call {
 
   public function playMediaAndCollectAsync(Array $collect, ...$play) {
     return $this->_playAndCollectAsync($collect, $play)->then(function($result) {
-      return new PlayMediaAndCollectAction($this, $result->control_id);
+      return new PromptAction($this, $result->control_id);
     });
   }
 
