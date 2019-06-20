@@ -75,11 +75,12 @@ class Call {
       )
     ));
 
-    $blocker = new Blocker($this->id, Notification::State, function($params) use (&$blocker) {
+    $blocker = new Blocker(Notification::State, function($params) use (&$blocker) {
       if ($params->call_state === 'ended') {
         ($blocker->resolve)($this);
       }
     });
+    $blocker->controlId = $this->id;
 
     array_push($this->_blockers, $blocker);
 
@@ -98,11 +99,12 @@ class Call {
       )
     ));
 
-    $blocker = new Blocker($this->id, Notification::State, function($params) use (&$blocker) {
+    $blocker = new Blocker(Notification::State, function($params) use (&$blocker) {
       if ($params->call_state === 'answered') {
         ($blocker->resolve)($this);
       }
     });
+    $blocker->controlId = $this->id;
 
     array_push($this->_blockers, $blocker);
 
@@ -164,15 +166,14 @@ class Call {
   }
 
   public function record(Array $record) {
-    $controlId = Uuid::uuid4()->toString();
-    $blocker = new Blocker($controlId, Notification::Record, function($params) use (&$blocker) {
+    $blocker = new Blocker(Notification::Record, function($params) use (&$blocker) {
       if ($params->state === 'finished' || $params->state === 'no_input') {
         ($blocker->resolve)($params);
       }
     });
 
     array_push($this->_blockers, $blocker);
-    return $this->_record($record, $controlId)->then(function($result) use (&$blocker) {
+    return $this->_record($record, $blocker->controlId)->then(function($result) use (&$blocker) {
       return $blocker->promise;
     });
   }
@@ -238,13 +239,14 @@ class Call {
   }
 
   public function connect(...$devices) {
-    $blocker = new Blocker($this->id, Notification::Connect, function($params) use (&$blocker) {
+    $blocker = new Blocker(Notification::Connect, function($params) use (&$blocker) {
       if ($params->connect_state === 'connected') {
         ($blocker->resolve)($this);
       } elseif ($params->connect_state === 'failed') {
         ($blocker->reject)($params);
       }
     });
+    $blocker->controlId = $this->id;
 
     array_push($this->_blockers, $blocker);
 
@@ -317,8 +319,7 @@ class Call {
   }
 
   private function _play(Array $play) {
-    $controlId = Uuid::uuid4()->toString();
-    $blocker = new Blocker($controlId, Notification::Play, function($params) use (&$blocker) {
+    $blocker = new Blocker(Notification::Play, function($params) use (&$blocker) {
       if ($params->state === 'finished') {
         ($blocker->resolve)($this);
       } elseif ($params->state === 'error') {
@@ -327,7 +328,7 @@ class Call {
     });
 
     array_push($this->_blockers, $blocker);
-    return $this->_playAsync($play, $controlId)->then(function($result) use (&$blocker) {
+    return $this->_playAsync($play, $blocker->controlId)->then(function($result) use (&$blocker) {
       return $blocker->promise;
     });
   }
@@ -351,15 +352,14 @@ class Call {
   }
 
   private function _playAndCollect(Array $collect, Array $play) {
-    $controlId = Uuid::uuid4()->toString();
-    $blocker = new Blocker($controlId, Notification::Collect, function($params) use (&$blocker) {
+    $blocker = new Blocker(Notification::Collect, function($params) use (&$blocker) {
       $method = $params->result->type === 'error' ? 'reject' : 'resolve';
       ($blocker->$method)($params->result);
     });
 
     array_push($this->_blockers, $blocker);
 
-    return $this->_playAndCollectAsync($collect, $play, $controlId)->then(function($result) use (&$blocker) {
+    return $this->_playAndCollectAsync($collect, $play, $blocker->controlId)->then(function($result) use (&$blocker) {
       return $blocker->promise;
     });
   }
