@@ -4,11 +4,15 @@ use SignalWire\Messages\Execute;
 use Ramsey\Uuid\Uuid;
 
 abstract class BaseAction {
-  public $call;
-  public $controlId;
   protected $baseMethod = '';
 
-  abstract function update();
+  public $call;
+  public $controlId;
+  public $finished = false;
+  public $state = null;
+  public $result = null;
+
+  abstract function update($params);
 
   public function __construct(Call $call) {
     $this->call = $call;

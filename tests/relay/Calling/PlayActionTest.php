@@ -2,10 +2,7 @@
 require_once dirname(__FILE__) . '/BaseActionCase.php';
 
 use PHPUnit\Framework\TestCase;
-use SignalWire\Relay\Calling\PlayMediaAction;
-use SignalWire\Relay\Calling\PlayAudioAction;
-use SignalWire\Relay\Calling\PlaySilenceAction;
-use SignalWire\Relay\Calling\PlayTTSAction;
+use SignalWire\Relay\Calling\PlayAction;
 use SignalWire\Messages\Execute;
 
 class RelayCallingPlayActionTest extends RelayCallingBaseActionCase
@@ -13,16 +10,17 @@ class RelayCallingPlayActionTest extends RelayCallingBaseActionCase
   protected function setUp() {
     parent::setUp();
     $this->_setCallReady();
+    $this->action = new PlayAction($this->call);
   }
 
-  public function testPlayMediaActionStop(): void {
+  public function testPlayActionStop(): void {
     $msg = new Execute([
       'protocol' => 'signalwire_calling_proto',
       'method' => 'call.play.stop',
       'params' => [
         'node_id' => 'node-id',
         'call_id' => 'call-id',
-        'control_id' => 'control-id'
+        'control_id' => self::UUID
       ]
     ]);
 
@@ -31,71 +29,38 @@ class RelayCallingPlayActionTest extends RelayCallingBaseActionCase
       ->with($msg)
       ->willReturn(\React\Promise\resolve(json_decode('{"result":{"code":"200","message":"message"}}')));
 
-    $action = new PlayMediaAction($this->call, 'control-id');
-    $res = $action->stop();
-    $this->assertInstanceOf('React\Promise\PromiseInterface', $res);
+    $res = $this->action->stop()->done(function($result) {
+      $this->assertEquals($result->code, '200');
+    });
   }
 
-  public function testPlayAudioActionStop(): void {
-    $msg = new Execute([
-      'protocol' => 'signalwire_calling_proto',
-      'method' => 'call.play.stop',
-      'params' => [
-        'node_id' => 'node-id',
-        'call_id' => 'call-id',
-        'control_id' => 'control-id'
-      ]
-    ]);
+  public function testUpdateWithPlaying(): void {
+    $msg = json_decode('{"node_id":"node-id","call_id":"call-id","control_id":"control-id","state":"playing"}');
 
-    $this->client->connection->expects($this->once())
-      ->method('send')
-      ->with($msg)
-      ->willReturn(\React\Promise\resolve(json_decode('{"result":{"code":"200","message":"message"}}')));
+    $this->action->update($msg);
 
-    $action = new PlayAudioAction($this->call, 'control-id');
-    $res = $action->stop();
-    $this->assertInstanceOf('React\Promise\PromiseInterface', $res);
+    $this->assertFalse($this->action->finished);
+    $this->assertEquals($this->action->state, 'playing');
+    $this->assertNull($this->action->result);
   }
 
-  public function testPlaySilenceActionStop(): void {
-    $msg = new Execute([
-      'protocol' => 'signalwire_calling_proto',
-      'method' => 'call.play.stop',
-      'params' => [
-        'node_id' => 'node-id',
-        'call_id' => 'call-id',
-        'control_id' => 'control-id'
-      ]
-    ]);
+  public function testUpdateWithNoInput(): void {
+    $msg = json_decode('{"node_id":"node-id","call_id":"call-id","control_id":"control-id","state":"error"}');
 
-    $this->client->connection->expects($this->once())
-      ->method('send')
-      ->with($msg)
-      ->willReturn(\React\Promise\resolve(json_decode('{"result":{"code":"200","message":"message"}}')));
+    $this->action->update($msg);
 
-    $action = new PlaySilenceAction($this->call, 'control-id');
-    $res = $action->stop();
-    $this->assertInstanceOf('React\Promise\PromiseInterface', $res);
+    $this->assertTrue($this->action->finished);
+    $this->assertEquals($this->action->state, 'error');
+    $this->assertEquals($this->action->result, $msg);
   }
 
-  public function testPlayTTSActionStop(): void {
-    $msg = new Execute([
-      'protocol' => 'signalwire_calling_proto',
-      'method' => 'call.play.stop',
-      'params' => [
-        'node_id' => 'node-id',
-        'call_id' => 'call-id',
-        'control_id' => 'control-id'
-      ]
-    ]);
+  public function testUpdateWithFinished(): void {
+    $msg = json_decode('{"node_id":"node-id","call_id":"call-id","control_id":"control-id","state":"finished"}');
 
-    $this->client->connection->expects($this->once())
-      ->method('send')
-      ->with($msg)
-      ->willReturn(\React\Promise\resolve(json_decode('{"result":{"code":"200","message":"message"}}')));
+    $this->action->update($msg);
 
-    $action = new PlayTTSAction($this->call, 'control-id');
-    $res = $action->stop();
-    $this->assertInstanceOf('React\Promise\PromiseInterface', $res);
+    $this->assertTrue($this->action->finished);
+    $this->assertEquals($this->action->state, 'finished');
+    $this->assertEquals($this->action->result, $msg);
   }
 }
