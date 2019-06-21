@@ -17,6 +17,7 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
     $this->stateNotificationEnded = json_decode('{"call_state":"ended","call_id":"call-id","event_type":"'.Notification::State.'"}');
     $this->playNotification = json_decode('{"state":"finished","call_id":"call-id","control_id":"'.self::UUID.'","event_type":"'.Notification::Play.'"}');
     $this->collectNotification = json_decode('{"control_id":"'.self::UUID.'","call_id":"call-id","event_type":"'.Notification::Collect.'","result":{"type":"digit","params":{"digits":"12345","terminator":"#"}}}');
+    $this->collectNotificationError = json_decode('{"control_id":"'.self::UUID.'","call_id":"call-id","event_type":"'.Notification::Collect.'","result":{"type":"error"}}');
     $this->recordNotification = json_decode('{"state":"finished","call_id":"call-id","control_id":"'.self::UUID.'","event_type":"'.Notification::Record.'","url":"recording.mp3","record":{"audio":{"type":"digit","params":{"digits":"12345","terminator":"#"}}}}');
     $this->connectNotification = json_decode('{"connect_state":"connected","call_id":"call-id","event_type":"'.Notification::Connect.'"}');
   }
@@ -462,8 +463,12 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
       ->with($msg)
       ->willReturn(\React\Promise\resolve(json_decode('{"result":{"code":"200","message":"message","control_id":"control-id"}}')));
 
-    $this->call->promptAudio($collect, 'url-to-audio.mp3')->done(function($result) {
-      $this->assertEquals($result->type, 'digit');
+    $this->call->promptAudio($collect, 'url-to-audio.mp3')->done(function($res) {
+      $this->assertInstanceOf('SignalWire\Relay\Calling\PromptResult', $res);
+      $this->assertFalse($res->failed);
+      $this->assertTrue($res->succeeded);
+      $this->assertEquals($res->state, 'successful');
+      $this->assertObjectHasAttribute('digits', $res->result);
     });
     $this->call->_collectStateChange($this->collectNotification);
   }
@@ -572,8 +577,12 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
       ->with($msg)
       ->willReturn(\React\Promise\resolve(json_decode('{"result":{"code":"200","message":"message","control_id":"control-id"}}')));
 
-    $this->call->promptTTS($collect, ['text' => 'Welcome', 'gender' => 'male'])->done(function($result) {
-      $this->assertEquals($result->type, 'digit');
+    $this->call->promptTTS($collect, ['text' => 'Welcome', 'gender' => 'male'])->done(function($res) {
+      $this->assertInstanceOf('SignalWire\Relay\Calling\PromptResult', $res);
+      $this->assertFalse($res->failed);
+      $this->assertTrue($res->succeeded);
+      $this->assertEquals($res->state, 'successful');
+      $this->assertObjectHasAttribute('digits', $res->result);
     });
     $this->call->_collectStateChange($this->collectNotification);
   }
@@ -641,10 +650,52 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
       ['type' => 'audio', 'params' => ['url' => 'audio.mp3']],
       ['type' => 'tts', 'params' => ['text' => 'Welcome', 'gender' => 'male']],
       ['type' => 'silence', 'params' => ['duration' => 5]]
-    )->done(function($result) {
-      $this->assertEquals($result->type, 'digit');
+    )->done(function($res) {
+      $this->assertInstanceOf('SignalWire\Relay\Calling\PromptResult', $res);
+      $this->assertFalse($res->failed);
+      $this->assertTrue($res->succeeded);
+      $this->assertEquals($res->state, 'successful');
+      $this->assertObjectHasAttribute('digits', $res->result);
     });
     $this->call->_collectStateChange($this->collectNotification);
+  }
+
+  public function testPromptWithFailureResponse(): void {
+    $this->_setCallReady();
+    $collect = ["initial_timeout" => 10, "digits" => [ "max" => 3 ]];
+    $msg = new Execute([
+      'protocol' => 'signalwire_calling_proto',
+      'method' => 'call.play_and_collect',
+      'params' => [
+        'call_id' => 'call-id',
+        'node_id' => 'node-id',
+        'control_id' => self::UUID,
+        'collect' => $collect,
+        'play' => [
+          ['type' => 'audio', 'params' => ['url' => 'audio.mp3']],
+          ['type' => 'tts', 'params' => ['text' => 'Welcome', 'gender' => 'male']],
+          ['type' => 'silence', 'params' => ['duration' => 5]]
+        ]
+      ]
+    ]);
+
+    $this->client->connection->expects($this->once())
+      ->method('send')
+      ->with($msg)
+      ->willReturn(\React\Promise\resolve(json_decode('{"result":{"code":"200","message":"message","control_id":"control-id"}}')));
+
+    $this->call->prompt(
+      $collect,
+      ['type' => 'audio', 'params' => ['url' => 'audio.mp3']],
+      ['type' => 'tts', 'params' => ['text' => 'Welcome', 'gender' => 'male']],
+      ['type' => 'silence', 'params' => ['duration' => 5]]
+    )->done(function($res) {
+      $this->assertInstanceOf('SignalWire\Relay\Calling\PromptResult', $res);
+      $this->assertTrue($res->failed);
+      $this->assertFalse($res->succeeded);
+      $this->assertEquals($res->state, 'error');
+    });
+    $this->call->_collectStateChange($this->collectNotificationError);
   }
 
   public function testConnectDevicesInSeries(): void {

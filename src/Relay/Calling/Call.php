@@ -380,8 +380,8 @@ class Call {
 
   private function _prompt(Array $collect, Array $play) {
     $blocker = new Blocker(Notification::Collect, function($params) use (&$blocker) {
-      $method = $params->result->type === 'error' ? 'reject' : 'resolve';
-      ($blocker->$method)($params->result);
+      $result = new PromptResult($params);
+      ($blocker->resolve)($result);
     });
 
     array_push($this->_blockers, $blocker);
