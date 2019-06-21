@@ -279,7 +279,7 @@ class Call {
     $this->state = $params->call_state;
     $this->_dispatchCallback('stateChange');
     $this->_dispatchCallback($params->call_state);
-    $this->_addControlParams($params);
+    $this->_checkBlockers($params);
     if ($params->call_state === CallState::Ended) {
       $this->relayInstance->removeCall($this);
     }
@@ -288,28 +288,28 @@ class Call {
   public function _connectStateChange($params) {
     $this->prevConnectState = $this->connectState;
     $this->connectState = $params->connect_state;
-    $this->_addControlParams($params);
+    $this->_checkBlockers($params);
     $this->_dispatchCallback("connect.stateChange");
     $this->_dispatchCallback("connect.$params->connect_state");
   }
 
   public function _recordStateChange($params) {
-    $this->_addControlParams($params);
-    $this->_checkAction($params);
+    $this->_checkBlockers($params);
+    $this->_checkActions($params);
     $this->_dispatchCallback('record.stateChange', $params);
     $this->_dispatchCallback("record.$params->state", $params);
   }
 
   public function _playStateChange($params) {
-    $this->_addControlParams($params);
-    $this->_checkAction($params);
+    $this->_checkBlockers($params);
+    $this->_checkActions($params);
     $this->_dispatchCallback('play.stateChange', $params);
     $this->_dispatchCallback("play.$params->state", $params);
   }
 
   public function _collectStateChange($params) {
-    $this->_addControlParams($params);
-    $this->_checkAction($params);
+    $this->_checkBlockers($params);
+    $this->_checkActions($params);
     $this->_dispatchCallback('collect', $params);
   }
 
@@ -328,7 +328,7 @@ class Call {
     });
   }
 
-  private function _addControlParams($params) {
+  private function _checkBlockers($params) {
     if (!isset($params->event_type)) {
       return;
     }
@@ -340,7 +340,7 @@ class Call {
     }
   }
 
-  private function _checkAction($params) {
+  private function _checkActions($params) {
     // If exists an Action for this controlId ...
     $controlId = $params->control_id;
     if ($controlId && isset($this->_actions[$controlId])) {
