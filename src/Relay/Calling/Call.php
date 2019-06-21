@@ -169,9 +169,8 @@ class Call {
   }
 
   public function recordAsync(Array $record) {
-    $action = new RecordAction($this);
+    $action = $this->_buildAction('SignalWire\Relay\Calling\RecordAction');
 
-    $this->_actions[$action->controlId] = $action;
     return $this->_record($record, $action->controlId)->then(function($result) use (&$action) {
       return $action;
     });
@@ -401,10 +400,7 @@ class Call {
     return $this->_execute($msg);
   }
 
-  private function _record(Array $record, String $controlId = null) {
-    if (is_null($controlId)) {
-      $controlId = Uuid::uuid4()->toString();
-    }
+  private function _record(Array $record, String $controlId) {
     $msg = new Execute(array(
       'protocol' => $this->relayInstance->protocol,
       'method' => 'call.record',
@@ -417,7 +413,6 @@ class Call {
     ));
 
     return $this->_execute($msg);
-
   }
 
   /**
