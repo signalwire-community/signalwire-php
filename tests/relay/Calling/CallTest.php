@@ -176,8 +176,8 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
       ->with($msg)
       ->willReturn(\React\Promise\resolve(json_decode('{"result":{"code":"200","message":"message","control_id":"control-id"}}')));
 
-    $this->call->playAudio('url-to-audio.mp3')->done(function($call) {
-      $this->assertInstanceOf('SignalWire\Relay\Calling\Call', $call);
+    $this->call->playAudio('url-to-audio.mp3')->done(function($res) {
+      $this->assertInstanceOf('SignalWire\Relay\Calling\PlayResult', $res);
     });
     $this->call->_playStateChange($this->playNotification);
   }
@@ -227,8 +227,8 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
       ->with($msg)
       ->willReturn(\React\Promise\resolve(json_decode('{"result":{"code":"200","message":"message","control_id":"control-id"}}')));
 
-    $this->call->playSilence(5)->done(function($call) {
-      $this->assertInstanceOf('SignalWire\Relay\Calling\Call', $call);
+    $this->call->playSilence(5)->done(function($res) {
+      $this->assertInstanceOf('SignalWire\Relay\Calling\PlayResult', $res);
     });
     $this->call->_playStateChange($this->playNotification);
   }
@@ -278,8 +278,8 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
       ->with($msg)
       ->willReturn(\React\Promise\resolve(json_decode('{"result":{"code":"200","message":"message","control_id":"control-id"}}')));
 
-    $this->call->playTTS(['text' => 'Welcome', 'gender' => 'male'])->done(function($call) {
-      $this->assertInstanceOf('SignalWire\Relay\Calling\Call', $call);
+    $this->call->playTTS(['text' => 'Welcome', 'gender' => 'male'])->done(function($res) {
+      $this->assertInstanceOf('SignalWire\Relay\Calling\PlayResult', $res);
     });
     $this->call->_playStateChange($this->playNotification);
   }
@@ -341,8 +341,8 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
       ['type' => 'audio', 'params' => ['url' => 'audio.mp3']],
       ['type' => 'tts', 'params' => ['text' => 'Welcome', 'gender' => 'male']],
       ['type' => 'silence', 'params' => ['duration' => 5]]
-    )->done(function($call) {
-      $this->assertInstanceOf('SignalWire\Relay\Calling\Call', $call);
+    )->done(function($res) {
+      $this->assertInstanceOf('SignalWire\Relay\Calling\PlayResult', $res);
     });
     $this->call->_playStateChange($this->playNotification);
   }

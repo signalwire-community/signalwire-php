@@ -350,10 +350,9 @@ class Call {
 
   private function _play(Array $play) {
     $blocker = new Blocker(Notification::Play, function($params) use (&$blocker) {
-      if ($params->state === 'finished') {
-        ($blocker->resolve)($this);
-      } elseif ($params->state === 'error') {
-        ($blocker->reject)();
+      if ($params->state !== PlayState::Playing) {
+        $playResult = new PlayResult();
+        ($blocker->resolve)($playResult);
       }
     });
 
