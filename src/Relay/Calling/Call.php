@@ -115,9 +115,11 @@ class Call {
   }
 
   public function playAudioAsync(String $url) {
-    $params = ['type' => 'audio', 'params' => ['url' => $url]];
-    return $this->_playAsync([$params])->then(function($result) {
-      return new PlayAction($this, $result->control_id);
+    $action = $this->_buildAction('SignalWire\Relay\Calling\PlayAction');
+
+    $params = ['type' => PlayType::Audio, 'params' => ['url' => $url]];
+    return $this->_playAsync([$params], $action->controlId)->then(function($result) use (&$action) {
+      return $action;
     });
   }
 
@@ -127,9 +129,11 @@ class Call {
   }
 
   public function playSilenceAsync(String $duration) {
-    $params = ['type' => 'silence', 'params' => ['duration' => $duration]];
-    return $this->_playAsync([$params])->then(function($result) {
-      return new PlayAction($this, $result->control_id);
+    $action = $this->_buildAction('SignalWire\Relay\Calling\PlayAction');
+
+    $params = ['type' => PlayType::Silence, 'params' => ['duration' => $duration]];
+    return $this->_playAsync([$params], $action->controlId)->then(function($result) use (&$action) {
+      return $action;
     });
   }
 
@@ -139,9 +143,11 @@ class Call {
   }
 
   public function playTTSAsync(Array $options) {
-    $params = ['type' => 'tts', 'params' => $options];
-    return $this->_playAsync([$params])->then(function($result) {
-      return new PlayAction($this, $result->control_id);
+    $action = $this->_buildAction('SignalWire\Relay\Calling\PlayAction');
+
+    $params = ['type' => PlayType::TTS, 'params' => $options];
+    return $this->_playAsync([$params], $action->controlId)->then(function($result) use (&$action) {
+      return $action;
     });
   }
 
@@ -151,8 +157,10 @@ class Call {
   }
 
   public function playMediaAsync(...$play) {
-    return $this->_playAsync($play)->then(function($result) {
-      return new PlayAction($this, $result->control_id);
+    $action = $this->_buildAction('SignalWire\Relay\Calling\PlayAction');
+
+    return $this->_playAsync($play, $action->controlId)->then(function($result) use (&$action) {
+      return $action;
     });
   }
 
@@ -346,10 +354,7 @@ class Call {
     });
   }
 
-  private function _playAsync(Array $play, String $controlId = null) {
-    if (is_null($controlId)) {
-      $controlId = Uuid::uuid4()->toString();
-    }
+  private function _playAsync(Array $play, String $controlId) {
     $msg = new Execute(array(
       'protocol' => $this->relayInstance->protocol,
       'method' => 'call.play',
@@ -413,6 +418,19 @@ class Call {
 
     return $this->_execute($msg);
 
+  }
+
+  /**
+   * Build an *Action object, cache it in the hashmap and return
+   *
+   * @param string $name Class name with namespace to build
+   * @return SignalWire\Relay\Calling\*Action Action object built
+   */
+  private function _buildAction(String $className) {
+    $action = new $className($this);
+    $this->_actions[$action->controlId] = $action;
+
+    return $action;
   }
 
   /**
