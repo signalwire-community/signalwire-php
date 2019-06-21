@@ -189,49 +189,57 @@ class Call {
     });
   }
 
-  public function playAudioAndCollectAsync(Array $collect, String $url) {
+  public function promptAudioAsync(Array $collect, String $url) {
+    $action = $this->_buildAction('SignalWire\Relay\Calling\PromptAction');
+
     $params = ['type' => PlayType::Audio, 'params' => ['url' => $url]];
-    return $this->_playAndCollectAsync($collect, [$params])->then(function($result) {
-      return new PromptAction($this, $result->control_id);
+    return $this->_promptAsync($collect, [$params], $action->controlId)->then(function($result) use (&$action) {
+      return $action;
     });
   }
 
-  public function playAudioAndCollect(Array $collect, String $url) {
+  public function promptAudio(Array $collect, String $url) {
     $params = ['type' => PlayType::Audio, 'params' => ['url' => $url]];
     return $this->_playAndCollect($collect, [$params]);
   }
 
-  public function playSilenceAndCollectAsync(Array $collect, String $duration) {
-    $params = ['type' => PlayType::Silence, 'params' => ['duration' => $duration]];
-    return $this->_playAndCollectAsync($collect, [$params])->then(function($result) {
-      return new PromptAction($this, $result->control_id);
+  // public function playSilenceAndCollectAsync(Array $collect, String $duration) {
+  //   $action = $this->_buildAction('SignalWire\Relay\Calling\PromptAction');
+
+  //   $params = ['type' => PlayType::Silence, 'params' => ['duration' => $duration]];
+  //   return $this->_promptAsync($collect, [$params], $action->controlId)->then(function($result) use (&$action) {
+  //     return $action;
+  //   });
+  // }
+
+  // public function playSilenceAndCollect(Array $collect, String $duration) {
+  //   $params = ['type' => PlayType::Silence, 'params' => ['duration' => $duration]];
+  //   return $this->_playAndCollect($collect, [$params]);
+  // }
+
+  public function promptTTSAsync(Array $collect, Array $options) {
+    $action = $this->_buildAction('SignalWire\Relay\Calling\PromptAction');
+
+    $params = ['type' => PlayType::TTS, 'params' => $options];
+    return $this->_promptAsync($collect, [$params], $action->controlId)->then(function($result) use (&$action) {
+      return $action;
     });
   }
 
-  public function playSilenceAndCollect(Array $collect, String $duration) {
-    $params = ['type' => PlayType::Silence, 'params' => ['duration' => $duration]];
+  public function promptTTS(Array $collect, Array $options) {
+    $params = ['type' => PlayType::TTS, 'params' => $options];
     return $this->_playAndCollect($collect, [$params]);
   }
 
-  public function playTTSAndCollectAsync(Array $collect, Array $options) {
-    $params = ['type' => PlayType::TTS, 'params' => $options];
-    return $this->_playAndCollectAsync($collect, [$params])->then(function($result) {
-      return new PromptAction($this, $result->control_id);
+  public function promptAsync(Array $collect, ...$play) {
+    $action = $this->_buildAction('SignalWire\Relay\Calling\PromptAction');
+
+    return $this->_promptAsync($collect, $play, $action->controlId)->then(function($result) use (&$action) {
+      return $action;
     });
   }
 
-  public function playTTSAndCollect(Array $collect, Array $options) {
-    $params = ['type' => PlayType::TTS, 'params' => $options];
-    return $this->_playAndCollect($collect, [$params]);
-  }
-
-  public function playMediaAndCollectAsync(Array $collect, ...$play) {
-    return $this->_playAndCollectAsync($collect, $play)->then(function($result) {
-      return new PromptAction($this, $result->control_id);
-    });
-  }
-
-  public function playMediaAndCollect(Array $collect, ...$play) {
+  public function prompt(Array $collect, ...$play) {
     return $this->_playAndCollect($collect, $play);
   }
 
@@ -376,15 +384,12 @@ class Call {
 
     array_push($this->_blockers, $blocker);
 
-    return $this->_playAndCollectAsync($collect, $play, $blocker->controlId)->then(function($result) use (&$blocker) {
+    return $this->_promptAsync($collect, $play, $blocker->controlId)->then(function($result) use (&$blocker) {
       return $blocker->promise;
     });
   }
 
-  private function _playAndCollectAsync(Array $collect, Array $play, String $controlId = null) {
-    if (is_null($controlId)) {
-      $controlId = Uuid::uuid4()->toString();
-    }
+  private function _promptAsync(Array $collect, Array $play, String $controlId) {
     $msg = new Execute(array(
       'protocol' => $this->relayInstance->protocol,
       'method' => 'call.play_and_collect',

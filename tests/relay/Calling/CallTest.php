@@ -397,7 +397,7 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
     $this->call->_recordStateChange($this->recordNotification);
   }
 
-  public function testPlayAudioAndCollectAsync(): void {
+  public function testPromptAudioAsync(): void {
     $this->_setCallReady();
     $collect = ["initial_timeout" => 10, "digits" => [ "max" => 3 ]];
     $msg = new Execute([
@@ -419,12 +419,12 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
       ->with($msg)
       ->willReturn(\React\Promise\resolve(json_decode('{"result":{"code":"200","message":"message","control_id":"control-id"}}')));
 
-    $this->call->playAudioAndCollectAsync($collect, 'url-to-audio.mp3')->done(function($action) {
+    $this->call->promptAudioAsync($collect, 'url-to-audio.mp3')->done(function($action) {
       $this->assertInstanceOf('SignalWire\Relay\Calling\PromptAction', $action);
     });
   }
 
-  public function testPlayAudioAndCollect(): void {
+  public function testPromptAudio(): void {
     $this->_setCallReady();
     $collect = ["initial_timeout" => 10, "digits" => [ "max" => 3 ]];
     $msg = new Execute([
@@ -446,12 +446,12 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
       ->with($msg)
       ->willReturn(\React\Promise\resolve(json_decode('{"result":{"code":"200","message":"message","control_id":"control-id"}}')));
 
-    $this->call->playAudioAndCollect($collect, 'url-to-audio.mp3')->done(function($result) {
+    $this->call->promptAudio($collect, 'url-to-audio.mp3')->done(function($result) {
       $this->assertEquals($result->type, 'digit');
     });
     $this->call->_collectStateChange($this->collectNotification);
   }
-
+/*
   public function testPlaySilenceAndCollectAsync(): void {
     $this->_setCallReady();
     $collect = ["initial_timeout" => 10, "digits" => [ "max" => 3 ]];
@@ -506,8 +506,8 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
     });
     $this->call->_collectStateChange($this->collectNotification);
   }
-
-  public function testPlayTTSAndCollectAsync(): void {
+*/
+  public function testPromptTTSAsync(): void {
     $this->_setCallReady();
     $collect = ["initial_timeout" => 10, "digits" => [ "max" => 3 ]];
     $msg = new Execute([
@@ -529,12 +529,12 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
       ->with($msg)
       ->willReturn(\React\Promise\resolve(json_decode('{"result":{"code":"200","message":"message","control_id":"control-id"}}')));
 
-    $this->call->playTTSAndCollectAsync($collect, ['text' => 'Welcome', 'gender' => 'male'])->done(function($action) {
+    $this->call->promptTTSAsync($collect, ['text' => 'Welcome', 'gender' => 'male'])->done(function($action) {
       $this->assertInstanceOf('SignalWire\Relay\Calling\PromptAction', $action);
     });
   }
 
-  public function testPlayTTSAndCollect(): void {
+  public function testPromptTTS(): void {
     $this->_setCallReady();
     $collect = ["initial_timeout" => 10, "digits" => [ "max" => 3 ]];
     $msg = new Execute([
@@ -556,13 +556,13 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
       ->with($msg)
       ->willReturn(\React\Promise\resolve(json_decode('{"result":{"code":"200","message":"message","control_id":"control-id"}}')));
 
-    $this->call->playTTSAndCollect($collect, ['text' => 'Welcome', 'gender' => 'male'])->done(function($result) {
+    $this->call->promptTTS($collect, ['text' => 'Welcome', 'gender' => 'male'])->done(function($result) {
       $this->assertEquals($result->type, 'digit');
     });
     $this->call->_collectStateChange($this->collectNotification);
   }
 
-  public function testPlayMediaAndCollectAsync(): void {
+  public function testPromptAsync(): void {
     $this->_setCallReady();
     $collect = ["initial_timeout" => 10, "digits" => [ "max" => 3 ]];
     $msg = new Execute([
@@ -586,7 +586,7 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
       ->with($msg)
       ->willReturn(\React\Promise\resolve(json_decode('{"result":{"code":"200","message":"message","control_id":"control-id"}}')));
 
-    $this->call->playMediaAndCollectAsync(
+    $this->call->promptAsync(
       $collect,
       ['type' => 'audio', 'params' => ['url' => 'audio.mp3']],
       ['type' => 'tts', 'params' => ['text' => 'Welcome', 'gender' => 'male']],
@@ -596,7 +596,7 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
     });
   }
 
-  public function testPlayMediaAndCollect(): void {
+  public function testPrompt(): void {
     $this->_setCallReady();
     $collect = ["initial_timeout" => 10, "digits" => [ "max" => 3 ]];
     $msg = new Execute([
@@ -620,7 +620,7 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
       ->with($msg)
       ->willReturn(\React\Promise\resolve(json_decode('{"result":{"code":"200","message":"message","control_id":"control-id"}}')));
 
-    $this->call->playMediaAndCollect(
+    $this->call->prompt(
       $collect,
       ['type' => 'audio', 'params' => ['url' => 'audio.mp3']],
       ['type' => 'tts', 'params' => ['text' => 'Welcome', 'gender' => 'male']],
