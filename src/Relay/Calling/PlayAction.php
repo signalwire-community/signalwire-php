@@ -6,11 +6,10 @@ class PlayAction extends BaseAction {
 
   public function update($params) {
     $this->state = $params->state;
-    $finished = $this->state == 'finished' || $this->state == 'error';
-    if ($finished) {
+
+    if ($this->state !== PlayState::Playing) {
       $this->finished = true;
-      // TODO: Use "new PlayResult()" here
-      $this->result = $params;
+      $this->result = new PlayResult($params);
     }
   }
 }

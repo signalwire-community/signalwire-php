@@ -41,7 +41,7 @@ class RelayCallingPromptActionTest extends RelayCallingBaseActionCase
 
     $this->assertTrue($this->action->finished);
     $this->assertEquals($this->action->state, 'error');
-    $this->assertEquals($this->action->result, $msg);
+    $this->assertInstanceOf('SignalWire\Relay\Calling\PromptResult', $this->action->result);
   }
 
   public function testUpdateWithNoInput(): void {
@@ -51,7 +51,7 @@ class RelayCallingPromptActionTest extends RelayCallingBaseActionCase
 
     $this->assertTrue($this->action->finished);
     $this->assertEquals($this->action->state, 'no_input');
-    $this->assertEquals($this->action->result, $msg);
+    $this->assertInstanceOf('SignalWire\Relay\Calling\PromptResult', $this->action->result);
   }
 
   public function testUpdateWithNoMatch(): void {
@@ -61,7 +61,7 @@ class RelayCallingPromptActionTest extends RelayCallingBaseActionCase
 
     $this->assertTrue($this->action->finished);
     $this->assertEquals($this->action->state, 'no_match');
-    $this->assertEquals($this->action->result, $msg);
+    $this->assertInstanceOf('SignalWire\Relay\Calling\PromptResult', $this->action->result);
   }
 
   public function testUpdateWithDigits(): void {
@@ -71,7 +71,7 @@ class RelayCallingPromptActionTest extends RelayCallingBaseActionCase
 
     $this->assertTrue($this->action->finished);
     $this->assertEquals($this->action->state, 'successful');
-    $this->assertEquals($this->action->result, $msg);
+    $this->assertInstanceOf('SignalWire\Relay\Calling\PromptResult', $this->action->result);
   }
 
   public function testUpdateWithSpeech(): void {
@@ -81,6 +81,6 @@ class RelayCallingPromptActionTest extends RelayCallingBaseActionCase
 
     $this->assertTrue($this->action->finished);
     $this->assertEquals($this->action->state, 'successful');
-    $this->assertEquals($this->action->result, $msg);
+    $this->assertInstanceOf('SignalWire\Relay\Calling\PromptResult', $this->action->result);
   }
 }

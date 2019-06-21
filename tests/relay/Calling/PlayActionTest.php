@@ -51,7 +51,7 @@ class RelayCallingPlayActionTest extends RelayCallingBaseActionCase
 
     $this->assertTrue($this->action->finished);
     $this->assertEquals($this->action->state, 'error');
-    $this->assertEquals($this->action->result, $msg);
+    $this->assertInstanceOf('SignalWire\Relay\Calling\PlayResult', $this->action->result);
   }
 
   public function testUpdateWithFinished(): void {
@@ -61,6 +61,6 @@ class RelayCallingPlayActionTest extends RelayCallingBaseActionCase
 
     $this->assertTrue($this->action->finished);
     $this->assertEquals($this->action->state, 'finished');
-    $this->assertEquals($this->action->result, $msg);
+    $this->assertInstanceOf('SignalWire\Relay\Calling\PlayResult', $this->action->result);
   }
 }
