@@ -178,6 +178,9 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
 
     $this->call->playAudio('url-to-audio.mp3')->done(function($res) {
       $this->assertInstanceOf('SignalWire\Relay\Calling\PlayResult', $res);
+      $this->assertFalse($res->failed);
+      $this->assertTrue($res->succeeded);
+      $this->assertEquals($res->state, 'finished');
     });
     $this->call->_playStateChange($this->playNotification);
   }
@@ -229,6 +232,9 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
 
     $this->call->playSilence(5)->done(function($res) {
       $this->assertInstanceOf('SignalWire\Relay\Calling\PlayResult', $res);
+      $this->assertFalse($res->failed);
+      $this->assertTrue($res->succeeded);
+      $this->assertEquals($res->state, 'finished');
     });
     $this->call->_playStateChange($this->playNotification);
   }
@@ -280,6 +286,9 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
 
     $this->call->playTTS(['text' => 'Welcome', 'gender' => 'male'])->done(function($res) {
       $this->assertInstanceOf('SignalWire\Relay\Calling\PlayResult', $res);
+      $this->assertFalse($res->failed);
+      $this->assertTrue($res->succeeded);
+      $this->assertEquals($res->state, 'finished');
     });
     $this->call->_playStateChange($this->playNotification);
   }
@@ -343,6 +352,9 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
       ['type' => 'silence', 'params' => ['duration' => 5]]
     )->done(function($res) {
       $this->assertInstanceOf('SignalWire\Relay\Calling\PlayResult', $res);
+      $this->assertFalse($res->failed);
+      $this->assertTrue($res->succeeded);
+      $this->assertEquals($res->state, 'finished');
     });
     $this->call->_playStateChange($this->playNotification);
   }
