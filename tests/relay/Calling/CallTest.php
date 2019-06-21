@@ -17,7 +17,7 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
     $this->stateNotificationEnded = json_decode('{"call_state":"ended","call_id":"call-id","event_type":"'.Notification::State.'"}');
     $this->playNotification = json_decode('{"state":"finished","call_id":"call-id","control_id":"'.self::UUID.'","event_type":"'.Notification::Play.'"}');
     $this->collectNotification = json_decode('{"control_id":"'.self::UUID.'","call_id":"call-id","event_type":"'.Notification::Collect.'","result":{"type":"digit","params":{"digits":"12345","terminator":"#"}}}');
-    $this->recordNotification = json_decode('{"state":"finished","call_id":"call-id","control_id":"'.self::UUID.'","event_type":"'.Notification::Record.'","url":"record-url","record":{"audio":{"type":"digit","params":{"digits":"12345","terminator":"#"}}}}');
+    $this->recordNotification = json_decode('{"state":"finished","call_id":"call-id","control_id":"'.self::UUID.'","event_type":"'.Notification::Record.'","url":"recording.mp3","record":{"audio":{"type":"digit","params":{"digits":"12345","terminator":"#"}}}}');
     $this->connectNotification = json_decode('{"connect_state":"connected","call_id":"call-id","event_type":"'.Notification::Connect.'"}');
   }
 
@@ -402,8 +402,12 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
       ->willReturn(\React\Promise\resolve(json_decode('{"result":{"code":"200","message":"message","control_id":"'.self::UUID.'"}}')));
 
     $record = ["beep" => true, "stereo" => false];
-    $this->call->record($record)->done(function($params) {
-      $this->assertEquals($params->url, 'record-url');
+    $this->call->record($record)->done(function($res) {
+      $this->assertInstanceOf('SignalWire\Relay\Calling\RecordResult', $res);
+      $this->assertFalse($res->failed);
+      $this->assertTrue($res->succeeded);
+      $this->assertEquals($res->url, 'recording.mp3');
+      $this->assertObjectHasAttribute('audio', $res->result);
     });
 
     $this->call->_recordStateChange($this->recordNotification);

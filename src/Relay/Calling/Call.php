@@ -178,8 +178,9 @@ class Call {
 
   public function record(Array $record) {
     $blocker = new Blocker(Notification::Record, function($params) use (&$blocker) {
-      if ($params->state === 'finished' || $params->state === 'no_input') {
-        ($blocker->resolve)($params);
+      if ($params->state !== RecordState::Recording) {
+        $result = new RecordResult($params);
+        ($blocker->resolve)($result);
       }
     });
 
