@@ -122,7 +122,7 @@ class Call {
   }
 
   public function playAudio(String $url) {
-    $params = ['type' => 'audio', 'params' => ['url' => $url]];
+    $params = ['type' => PlayType::Audio, 'params' => ['url' => $url]];
     return $this->_play([$params]);
   }
 
@@ -134,7 +134,7 @@ class Call {
   }
 
   public function playSilence(String $duration) {
-    $params = ['type' => 'silence', 'params' => ['duration' => $duration]];
+    $params = ['type' => PlayType::Silence, 'params' => ['duration' => $duration]];
     return $this->_play([$params]);
   }
 
@@ -146,7 +146,7 @@ class Call {
   }
 
   public function playTTS(Array $options) {
-    $params = ['type' => 'tts', 'params' => $options];
+    $params = ['type' => PlayType::TTS, 'params' => $options];
     return $this->_play([$params]);
   }
 
@@ -183,38 +183,38 @@ class Call {
   }
 
   public function playAudioAndCollectAsync(Array $collect, String $url) {
-    $params = ['type' => 'audio', 'params' => ['url' => $url]];
+    $params = ['type' => PlayType::Audio, 'params' => ['url' => $url]];
     return $this->_playAndCollectAsync($collect, [$params])->then(function($result) {
       return new PromptAction($this, $result->control_id);
     });
   }
 
   public function playAudioAndCollect(Array $collect, String $url) {
-    $params = ['type' => 'audio', 'params' => ['url' => $url]];
+    $params = ['type' => PlayType::Audio, 'params' => ['url' => $url]];
     return $this->_playAndCollect($collect, [$params]);
   }
 
   public function playSilenceAndCollectAsync(Array $collect, String $duration) {
-    $params = ['type' => 'silence', 'params' => ['duration' => $duration]];
+    $params = ['type' => PlayType::Silence, 'params' => ['duration' => $duration]];
     return $this->_playAndCollectAsync($collect, [$params])->then(function($result) {
       return new PromptAction($this, $result->control_id);
     });
   }
 
   public function playSilenceAndCollect(Array $collect, String $duration) {
-    $params = ['type' => 'silence', 'params' => ['duration' => $duration]];
+    $params = ['type' => PlayType::Silence, 'params' => ['duration' => $duration]];
     return $this->_playAndCollect($collect, [$params]);
   }
 
   public function playTTSAndCollectAsync(Array $collect, Array $options) {
-    $params = ['type' => 'tts', 'params' => $options];
+    $params = ['type' => PlayType::TTS, 'params' => $options];
     return $this->_playAndCollectAsync($collect, [$params])->then(function($result) {
       return new PromptAction($this, $result->control_id);
     });
   }
 
   public function playTTSAndCollect(Array $collect, Array $options) {
-    $params = ['type' => 'tts', 'params' => $options];
+    $params = ['type' => PlayType::TTS, 'params' => $options];
     return $this->_playAndCollect($collect, [$params]);
   }
 
