@@ -302,12 +302,14 @@ class Call {
 
   public function _playStateChange($params) {
     $this->_addControlParams($params);
+    $this->_checkAction($params);
     $this->_dispatchCallback('play.stateChange', $params);
     $this->_dispatchCallback("play.$params->state", $params);
   }
 
   public function _collectStateChange($params) {
     $this->_addControlParams($params);
+    $this->_checkAction($params);
     $this->_dispatchCallback('collect', $params);
   }
 
