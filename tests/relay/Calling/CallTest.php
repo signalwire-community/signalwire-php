@@ -284,7 +284,7 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
     $this->call->_playStateChange($this->playNotification);
   }
 
-  public function testPlayMediaAsync(): void {
+  public function testPlayAsync(): void {
     $this->_setCallReady();
     $msg = new Execute([
       'protocol' => 'signalwire_calling_proto',
@@ -306,7 +306,7 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
       ->with($msg)
       ->willReturn(\React\Promise\resolve(json_decode('{"result":{"code":"200","message":"message","control_id":"control-id"}}')));
 
-    $this->call->playMediaAsync(
+    $this->call->playAsync(
       ['type' => 'audio', 'params' => ['url' => 'audio.mp3']],
       ['type' => 'tts', 'params' => ['text' => 'Welcome', 'gender' => 'male']],
       ['type' => 'silence', 'params' => ['duration' => 5]]
@@ -315,7 +315,7 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
     });
   }
 
-  public function testPlayMedia(): void {
+  public function testPlay(): void {
     $this->_setCallReady();
     $msg = new Execute([
       'protocol' => 'signalwire_calling_proto',
@@ -337,7 +337,7 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
       ->with($msg)
       ->willReturn(\React\Promise\resolve(json_decode('{"result":{"code":"200","message":"message","control_id":"control-id"}}')));
 
-    $this->call->playMedia(
+    $this->call->play(
       ['type' => 'audio', 'params' => ['url' => 'audio.mp3']],
       ['type' => 'tts', 'params' => ['text' => 'Welcome', 'gender' => 'male']],
       ['type' => 'silence', 'params' => ['duration' => 5]]

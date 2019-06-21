@@ -156,7 +156,7 @@ class Call {
     return $this->_play([$params]);
   }
 
-  public function playMediaAsync(...$play) {
+  public function playAsync(...$play) {
     $action = $this->_buildAction('SignalWire\Relay\Calling\PlayAction');
 
     return $this->_playAsync($play, $action->controlId)->then(function($result) use (&$action) {
@@ -164,7 +164,7 @@ class Call {
     });
   }
 
-  public function playMedia(...$play) {
+  public function play(...$play) {
     return $this->_play($play);
   }
 
