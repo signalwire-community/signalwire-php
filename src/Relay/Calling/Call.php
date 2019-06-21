@@ -200,7 +200,7 @@ class Call {
 
   public function promptAudio(Array $collect, String $url) {
     $params = ['type' => PlayType::Audio, 'params' => ['url' => $url]];
-    return $this->_playAndCollect($collect, [$params]);
+    return $this->_prompt($collect, [$params]);
   }
 
   // public function playSilenceAndCollectAsync(Array $collect, String $duration) {
@@ -214,7 +214,7 @@ class Call {
 
   // public function playSilenceAndCollect(Array $collect, String $duration) {
   //   $params = ['type' => PlayType::Silence, 'params' => ['duration' => $duration]];
-  //   return $this->_playAndCollect($collect, [$params]);
+  //   return $this->_prompt($collect, [$params]);
   // }
 
   public function promptTTSAsync(Array $collect, Array $options) {
@@ -228,7 +228,7 @@ class Call {
 
   public function promptTTS(Array $collect, Array $options) {
     $params = ['type' => PlayType::TTS, 'params' => $options];
-    return $this->_playAndCollect($collect, [$params]);
+    return $this->_prompt($collect, [$params]);
   }
 
   public function promptAsync(Array $collect, ...$play) {
@@ -240,7 +240,7 @@ class Call {
   }
 
   public function prompt(Array $collect, ...$play) {
-    return $this->_playAndCollect($collect, $play);
+    return $this->_prompt($collect, $play);
   }
 
   public function connectAsync(...$devices) {
@@ -376,7 +376,7 @@ class Call {
     return $this->_execute($msg);
   }
 
-  private function _playAndCollect(Array $collect, Array $play) {
+  private function _prompt(Array $collect, Array $play) {
     $blocker = new Blocker(Notification::Collect, function($params) use (&$blocker) {
       $method = $params->result->type === 'error' ? 'reject' : 'resolve';
       ($blocker->$method)($params->result);
