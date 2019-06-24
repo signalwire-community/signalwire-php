@@ -76,16 +76,19 @@ class Call {
       )
     ));
 
-    $blocker = new Blocker(Notification::State, function($params) use (&$blocker) {
-      if ($params->call_state === 'ended') {
-        ($blocker->resolve)($this);
+    $hangupResult = new HangupResult();
+    $blocker = new Blocker(Notification::State, function($params) use (&$blocker, &$hangupResult) {
+      if ($params->call_state === CallState::Ended) {
+        $hangupResult->reason = isset($params->reason) ? $params->reason : 'hangup';
+        ($blocker->resolve)($hangupResult);
       }
     });
     $blocker->controlId = $this->id;
 
     array_push($this->_blockers, $blocker);
 
-    return $this->_execute($msg)->then(function($result) use (&$blocker) {
+    return $this->_execute($msg)->then(function($result) use (&$blocker, &$hangupResult) {
+      $hangupResult->result = $result;
       return $blocker->promise;
     });
   }
@@ -100,16 +103,18 @@ class Call {
       )
     ));
 
-    $blocker = new Blocker(Notification::State, function($params) use (&$blocker) {
+    $answerResult = new AnswerResult();
+    $blocker = new Blocker(Notification::State, function($params) use (&$blocker, &$answerResult) {
       if ($params->call_state === 'answered') {
-        ($blocker->resolve)($this);
+        ($blocker->resolve)($answerResult);
       }
     });
     $blocker->controlId = $this->id;
 
     array_push($this->_blockers, $blocker);
 
-    return $this->_execute($msg)->then(function($result) use (&$blocker) {
+    return $this->_execute($msg)->then(function($result) use (&$blocker, &$answerResult) {
+      $answerResult->result = $result;
       return $blocker->promise;
     });
   }

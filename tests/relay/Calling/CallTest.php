@@ -14,7 +14,7 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
   protected function setUp() {
     parent::setUp();
     $this->stateNotificationAnswered = json_decode('{"call_state":"answered","call_id":"call-id","event_type":"'.Notification::State.'"}');
-    $this->stateNotificationEnded = json_decode('{"call_state":"ended","call_id":"call-id","event_type":"'.Notification::State.'"}');
+    $this->stateNotificationEnded = json_decode('{"call_state":"ended","reason":"busy","call_id":"call-id","event_type":"'.Notification::State.'"}');
     $this->playNotification = json_decode('{"state":"finished","call_id":"call-id","control_id":"'.self::UUID.'","event_type":"'.Notification::Play.'"}');
     $this->collectNotification = json_decode('{"control_id":"'.self::UUID.'","call_id":"call-id","event_type":"'.Notification::Collect.'","result":{"type":"digit","params":{"digits":"12345","terminator":"#"}}}');
     $this->collectNotificationError = json_decode('{"control_id":"'.self::UUID.'","call_id":"call-id","event_type":"'.Notification::Collect.'","result":{"type":"error"}}');
@@ -61,9 +61,9 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
       ->with($msg)
       ->willReturn(\React\Promise\resolve(json_decode('{"result":{"code":"200","message":"message"}}')));
 
-    $this->call->hangup()->done(function($call) {
-      $this->assertEquals($call->state, 'ended');
-      $this->assertInstanceOf('SignalWire\Relay\Calling\Call', $call);
+    $this->call->hangup()->done(function($result) {
+      $this->assertInstanceOf('SignalWire\Relay\Calling\HangupResult', $result);
+      $this->assertEquals($result->result->code, '200');
     });
     $this->call->_stateChange($this->stateNotificationEnded);
   }
@@ -105,9 +105,9 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
       ->with($msg)
       ->willReturn(\React\Promise\resolve(json_decode('{"result":{"code":"200","message":"message"}}')));
 
-    $this->call->answer()->done(function($call) {
-      $this->assertEquals($call->state, 'answered');
-      $this->assertInstanceOf('SignalWire\Relay\Calling\Call', $call);
+    $this->call->answer()->done(function($result) {
+      $this->assertInstanceOf('SignalWire\Relay\Calling\AnswerResult', $result);
+      $this->assertEquals($result->result->code, '200');
     });
     $this->call->_stateChange($this->stateNotificationAnswered);
   }
