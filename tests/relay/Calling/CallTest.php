@@ -63,6 +63,7 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
 
     $this->call->hangup()->done(function($result) {
       $this->assertInstanceOf('SignalWire\Relay\Calling\HangupResult', $result);
+      $this->assertEquals($result->reason, 'busy');
       $this->assertEquals($result->result->code, '200');
     });
     $this->call->_stateChange($this->stateNotificationEnded);
