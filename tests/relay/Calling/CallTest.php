@@ -23,7 +23,7 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
     $this->connectNotificationFailed = json_decode('{"connect_state":"failed","call_id":"call-id","control_id":"'.self::UUID.'","event_type":"'.Notification::Connect.'"}');
   }
 
-  public function testBegin(): void {
+  public function testDial(): void {
     $msg = new Execute([
       'protocol' => 'signalwire_calling_proto',
       'method' => 'call.begin',
@@ -41,7 +41,7 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
       ->with($msg)
       ->willReturn(\React\Promise\resolve(json_decode('{"result":{"code":"200","message":"message"}}')));
 
-    $res = $this->call->begin();
+    $res = $this->call->dial();
     $this->assertInstanceOf('React\Promise\PromiseInterface', $res);
   }
 

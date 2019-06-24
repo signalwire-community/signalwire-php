@@ -52,7 +52,7 @@ class Call {
     return $this;
   }
 
-  public function begin() {
+  public function dial() {
     $msg = new Execute(array(
       'protocol' => $this->relayInstance->protocol,
       'method' => 'call.begin',
