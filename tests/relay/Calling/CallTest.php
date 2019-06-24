@@ -19,7 +19,8 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
     $this->collectNotification = json_decode('{"control_id":"'.self::UUID.'","call_id":"call-id","event_type":"'.Notification::Collect.'","result":{"type":"digit","params":{"digits":"12345","terminator":"#"}}}');
     $this->collectNotificationError = json_decode('{"control_id":"'.self::UUID.'","call_id":"call-id","event_type":"'.Notification::Collect.'","result":{"type":"error"}}');
     $this->recordNotification = json_decode('{"state":"finished","call_id":"call-id","control_id":"'.self::UUID.'","event_type":"'.Notification::Record.'","url":"recording.mp3","record":{"audio":{"type":"digit","params":{"digits":"12345","terminator":"#"}}}}');
-    $this->connectNotification = json_decode('{"connect_state":"connected","call_id":"call-id","event_type":"'.Notification::Connect.'"}');
+    $this->connectNotification = json_decode('{"connect_state":"connected","call_id":"call-id","control_id":"'.self::UUID.'","event_type":"'.Notification::Connect.'"}');
+    $this->connectNotificationFailed = json_decode('{"connect_state":"failed","call_id":"call-id","control_id":"'.self::UUID.'","event_type":"'.Notification::Connect.'"}');
   }
 
   public function testBegin(): void {
@@ -697,6 +698,80 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
       $this->assertEquals($res->state, 'error');
     });
     $this->call->_collectStateChange($this->collectNotificationError);
+  }
+
+  public function testConnectAsyncDevicesInSeries(): void {
+    $this->_setCallReady();
+    $msg = new Execute([
+      'protocol' => 'signalwire_calling_proto',
+      'method' => 'call.connect',
+      'params' => [
+        'call_id' => 'call-id',
+        'node_id' => 'node-id',
+        'tag' => self::UUID,
+        'devices' => [
+          [
+            [ "type" => "phone", "params" => [ "to_number" => "999", "from_number" => "231", "timeout" => 10 ] ],
+          ],
+          [
+            [ "type" => "phone", "params" => [ "to_number" => "888", "from_number" => "234", "timeout" => 20 ] ]
+          ]
+        ]
+      ]
+    ]);
+
+    $this->client->connection->expects($this->once())
+      ->method('send')
+      ->with($msg)
+      ->willReturn(\React\Promise\resolve(json_decode('{"result":{"code":"200","message":"message"}}')));
+
+    $this->call->connectAsync(
+      [ "type" => "phone", "to" => "999", "from" => "231", "timeout" => 10 ],
+      [ "type" => "phone", "to" => "888" ]
+    )->done(function($action) {
+      $this->assertInstanceOf('SignalWire\Relay\Calling\ConnectAction', $action);
+      $this->assertFalse($action->finished);
+      $this->call->_connectStateChange($this->connectNotification);
+      $this->assertTrue($action->finished);
+      $this->assertEquals($action->state, 'connected');
+    });
+  }
+
+  public function testConnectAsyncDevicesInSeriesWithFailure(): void {
+    $this->_setCallReady();
+    $msg = new Execute([
+      'protocol' => 'signalwire_calling_proto',
+      'method' => 'call.connect',
+      'params' => [
+        'call_id' => 'call-id',
+        'node_id' => 'node-id',
+        'tag' => self::UUID,
+        'devices' => [
+          [
+            [ "type" => "phone", "params" => [ "to_number" => "999", "from_number" => "231", "timeout" => 10 ] ],
+          ],
+          [
+            [ "type" => "phone", "params" => [ "to_number" => "888", "from_number" => "234", "timeout" => 20 ] ]
+          ]
+        ]
+      ]
+    ]);
+
+    $this->client->connection->expects($this->once())
+      ->method('send')
+      ->with($msg)
+      ->willReturn(\React\Promise\resolve(json_decode('{"result":{"code":"200","message":"message"}}')));
+
+    $this->call->connectAsync(
+      [ "type" => "phone", "to" => "999", "from" => "231", "timeout" => 10 ],
+      [ "type" => "phone", "to" => "888" ]
+    )->done(function($action) {
+      $this->assertInstanceOf('SignalWire\Relay\Calling\ConnectAction', $action);
+      $this->assertFalse($action->finished);
+      $this->call->_connectStateChange($this->connectNotificationFailed);
+      $this->assertTrue($action->finished);
+      $this->assertEquals($action->state, 'failed');
+    });
   }
 
   public function testConnectDevicesInSeries(): void {

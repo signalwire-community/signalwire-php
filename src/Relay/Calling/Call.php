@@ -248,17 +248,11 @@ class Call {
   }
 
   public function connectAsync(...$devices) {
-    $msg = new Execute(array(
-      'protocol' => $this->relayInstance->protocol,
-      'method' => 'call.connect',
-      'params' => array(
-        'node_id' => $this->nodeId,
-        'call_id' => $this->id,
-        'devices' => \SignalWire\reduceConnectParams($devices, $this->from, $this->timeout)
-      )
-    ));
+    $action = $this->_buildAction('SignalWire\Relay\Calling\ConnectAction');
 
-    return $this->_execute($msg);
+    return $this->_connect($devices, $action->controlId)->then(function($result) use (&$action) {
+      return $action;
+    });
   }
 
   public function connect(...$devices) {
@@ -272,7 +266,7 @@ class Call {
 
     array_push($this->_blockers, $blocker);
 
-    return $this->connectAsync(...$devices)->then(function($result) use (&$blocker) {
+    return $this->_connect($devices, $blocker->controlId)->then(function($result) use (&$blocker) {
       return $blocker->promise;
     });
   }
@@ -421,6 +415,21 @@ class Call {
         'call_id' => $this->id,
         'control_id' => $controlId,
         'record' => $record
+      )
+    ));
+
+    return $this->_execute($msg);
+  }
+
+  private function _connect(Array $devices, String $tag) {
+    $msg = new Execute(array(
+      'protocol' => $this->relayInstance->protocol,
+      'method' => 'call.connect',
+      'params' => array(
+        'node_id' => $this->nodeId,
+        'call_id' => $this->id,
+        'tag' => $tag,
+        'devices' => \SignalWire\reduceConnectParams($devices, $this->from, $this->timeout)
       )
     ));
 
