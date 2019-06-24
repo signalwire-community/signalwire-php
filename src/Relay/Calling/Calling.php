@@ -15,6 +15,10 @@ class Calling extends \SignalWire\Relay\BaseRelay {
 
   public function notificationHandler($notification): void {
     $notification->params->event_type = $notification->event_type;
+    // Workaround to use 'tag' as a 'control_id' for state and connect notifications
+    if (!isset($notification->params->control_id) && isset($notification->params->tag)) {
+      $notification->params->control_id = $notification->params->tag;
+    }
     switch ($notification->event_type)
     {
       case Notification::State:

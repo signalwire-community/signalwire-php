@@ -707,6 +707,7 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
       'params' => [
         'call_id' => 'call-id',
         'node_id' => 'node-id',
+        'tag' => self::UUID,
         'devices' => [
           [
             [ "type" => "phone", "params" => [ "to_number" => "999", "from_number" => "231", "timeout" => 10 ] ],
@@ -741,6 +742,7 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
       'params' => [
         'call_id' => 'call-id',
         'node_id' => 'node-id',
+        'tag' => self::UUID,
         'devices' => [
           [
             [ "type" => "phone", "params" => [ "to_number" => "999", "from_number" => "231", "timeout" => 10 ] ],
@@ -775,6 +777,7 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
       'params' => [
         'call_id' => 'call-id',
         'node_id' => 'node-id',
+        'tag' => self::UUID,
         'devices' => [
           [
             [ "type" => "phone", "params" => [ "to_number" => "999", "from_number" => "234", "timeout" => 20 ] ]

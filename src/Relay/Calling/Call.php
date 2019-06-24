@@ -83,7 +83,6 @@ class Call {
         ($blocker->resolve)($hangupResult);
       }
     });
-    $blocker->controlId = $this->id;
 
     array_push($this->_blockers, $blocker);
 
@@ -109,7 +108,6 @@ class Call {
         ($blocker->resolve)($answerResult);
       }
     });
-    $blocker->controlId = $this->id;
 
     array_push($this->_blockers, $blocker);
 
@@ -271,7 +269,6 @@ class Call {
         ($blocker->reject)($params);
       }
     });
-    $blocker->controlId = $this->id;
 
     array_push($this->_blockers, $blocker);
 
@@ -295,6 +292,7 @@ class Call {
     $this->prevConnectState = $this->connectState;
     $this->connectState = $params->connect_state;
     $this->_checkBlockers($params);
+    $this->_checkActions($params);
     $this->_dispatchCallback("connect.stateChange");
     $this->_dispatchCallback("connect.$params->connect_state");
   }
@@ -335,18 +333,20 @@ class Call {
   }
 
   private function _checkBlockers($params) {
-    if (!isset($params->event_type)) {
+    if (!isset($params->control_id) || !isset($params->event_type)) {
       return;
     }
-    $controlId = isset($params->control_id) ? $params->control_id : $params->call_id;
     foreach ($this->_blockers as $b) {
-      if ($controlId === $b->controlId && $params->event_type === $b->eventType) {
+      if ($params->control_id === $b->controlId && $params->event_type === $b->eventType) {
         ($b->resolver)($params);
       }
     }
   }
 
   private function _checkActions($params) {
+    if (!isset($params->control_id)) {
+      return;
+    }
     // If exists an Action for this controlId ...
     $controlId = $params->control_id;
     if ($controlId && isset($this->_actions[$controlId])) {
