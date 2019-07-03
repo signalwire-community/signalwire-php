@@ -30,6 +30,7 @@ class Answer extends BaseComponent {
     if ($params->call_state === CallState::Answered) {
       $this->completed = true;
       $this->successful = true;
+      $this->event = $params;
     }
 
     if ($this->_hasBlocker() && in_array($params->call_state, $this->_eventsToWait)) {

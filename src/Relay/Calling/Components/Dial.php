@@ -22,7 +22,7 @@ class Dial extends BaseComponent {
   public function payload() {
     return [
       'tag' => $this->call->tag,
-      'device' => $this->call->device
+      'device' => $this->call->getDevice()
     ];
   }
 
