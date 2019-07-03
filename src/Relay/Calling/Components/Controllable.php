@@ -4,7 +4,7 @@ namespace SignalWire\Relay\Calling\Components;
 
 use SignalWire\Messages\Execute;
 
-class Controllable extends BaseComponent {
+abstract class Controllable extends BaseComponent {
 
   public function stop() {
     $msg = new Execute([

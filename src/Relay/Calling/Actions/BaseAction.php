@@ -5,7 +5,8 @@ namespace SignalWire\Relay\Calling\Actions;
 use SignalWire\Relay\Calling\Components\BaseComponent;
 
 abstract class BaseAction {
-  private $component;
+
+  protected $component;
 
   public function __construct(BaseComponent $component) {
     $this->component = $component;
