@@ -23,15 +23,6 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
     $this->connectNotification = json_decode('{"event_type":"calling.call.connect","params":{"connect_state":"connected","device":{"node_id":"other-node-id","call_id":"other-call-id","tag":"other-tag-id","peer":{"type":"phone","params":{"from_number":"+1555","to_number":"+1777"}}},"tag":"'.self::UUID.'","call_id":"call-id","node_id":"node-id"}}');
     $this->playNotification = json_decode('{"event_type":"calling.call.play","params":{"control_id":"'.self::UUID.'","call_id":"call-id","node_id":"node-id","state":"finished"}}');
     $this->collectNotification = json_decode('{"event_type":"calling.call.collect","params":{"control_id":"'.self::UUID.'","call_id":"call-id","node_id":"node-id","result":{"type":"digit","params":{"digits":"12345","terminator":"#"}}}}');
-
-    // $this->stateNotificationAnswered = json_decode('{"call_state":"answered","call_id":"call-id","event_type":"'.Notification::State.'"}');
-    // $this->stateNotificationEnded = json_decode('{"call_state":"ended","reason":"busy","call_id":"call-id","event_type":"'.Notification::State.'"}');
-    // $this->playNotification = json_decode('{"state":"finished","call_id":"call-id","control_id":"'.self::UUID.'","event_type":"'.Notification::Play.'"}');
-    // $this->collectNotification = json_decode('{"control_id":"'.self::UUID.'","call_id":"call-id","event_type":"'.Notification::Collect.'","result":{"type":"digit","params":{"digits":"12345","terminator":"#"}}}');
-    // $this->collectNotificationError = json_decode('{"control_id":"'.self::UUID.'","call_id":"call-id","event_type":"'.Notification::Collect.'","result":{"type":"error"}}');
-    // $this->recordNotification = json_decode('{"state":"finished","call_id":"call-id","control_id":"'.self::UUID.'","event_type":"'.Notification::Record.'","url":"recording.mp3","record":{"audio":{"type":"digit","params":{"digits":"12345","terminator":"#"}}}}');
-    // $this->connectNotification = json_decode('{"connect_state":"connected","call_id":"call-id","control_id":"'.self::UUID.'","event_type":"'.Notification::Connect.'"}');
-    // $this->connectNotificationFailed = json_decode('{"connect_state":"failed","call_id":"call-id","control_id":"'.self::UUID.'","event_type":"'.Notification::Connect.'"}');
   }
 
   public function testDial(): void {
@@ -336,6 +327,154 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
     $this->call->playTTSAsync(['text' => 'Welcome', 'gender' => 'male'])->done([$this, '__asyncPlayCheck']);
   }
 
+  public function testPrompt(): void {
+    $this->_setCallReady();
+
+    $collect = ["initial_timeout" => 10, "digits" => [ "max" => 3 ]];
+    $play = [
+      ['type' => 'audio', 'params' => ['url' => 'audio.mp3']],
+      ['type' => 'tts', 'params' => ['text' => 'Welcome', 'gender' => 'male']],
+      ['type' => 'silence', 'params' => ['duration' => 5]]
+    ];
+    $msg = new Execute([
+      'protocol' => 'signalwire_calling_proto',
+      'method' => 'call.play_and_collect',
+      'params' => [
+        'call_id' => 'call-id',
+        'node_id' => 'node-id',
+        'control_id' => self::UUID,
+        'collect' => $collect,
+        'play' => $play
+      ]
+    ]);
+
+    $this->client->connection->expects($this->once())->method('send')->with($msg)->willReturn($this->_successResponse);
+
+    $this->call->prompt($collect, ...$play)->done([$this, '__syncPromptCheck']);
+
+    $this->calling->notificationHandler($this->collectNotification);
+  }
+
+  public function testPromptAsync(): void {
+    $this->_setCallReady();
+
+    $collect = ["initial_timeout" => 10, "digits" => [ "max" => 3 ]];
+    $play = [
+      ['type' => 'audio', 'params' => ['url' => 'audio.mp3']],
+      ['type' => 'tts', 'params' => ['text' => 'Welcome', 'gender' => 'male']],
+      ['type' => 'silence', 'params' => ['duration' => 5]]
+    ];
+    $msg = new Execute([
+      'protocol' => 'signalwire_calling_proto',
+      'method' => 'call.play_and_collect',
+      'params' => [
+        'call_id' => 'call-id',
+        'node_id' => 'node-id',
+        'control_id' => self::UUID,
+        'collect' => $collect,
+        'play' => $play
+      ]
+    ]);
+
+    $this->client->connection->expects($this->once())->method('send')->with($msg)->willReturn($this->_successResponse);
+
+    $this->call->promptAsync($collect, ...$play)->done([$this, '__asyncPromptCheck']);
+  }
+
+  public function testPromptTTS(): void {
+    $this->_setCallReady();
+
+    $collect = ["initial_timeout" => 10, "digits" => ["max" => 3]];
+    $msg = new Execute([
+      'protocol' => 'signalwire_calling_proto',
+      'method' => 'call.play_and_collect',
+      'params' => [
+        'call_id' => 'call-id',
+        'node_id' => 'node-id',
+        'control_id' => self::UUID,
+        'collect' => $collect,
+        'play' => [
+          ['type' => 'tts', 'params' => ['text' => 'Welcome', 'gender' => 'male']]
+        ]
+      ]
+    ]);
+
+    $this->client->connection->expects($this->once())->method('send')->with($msg)->willReturn($this->_successResponse);
+
+    $this->call->promptTTS($collect, ['text' => 'Welcome', 'gender' => 'male'])->done([$this, '__syncPromptCheck']);
+    $this->calling->notificationHandler($this->collectNotification);
+  }
+
+  public function testPromptTTSAsync(): void {
+    $this->_setCallReady();
+
+    $collect = ["initial_timeout" => 10, "digits" => [ "max" => 3 ]];
+    $msg = new Execute([
+      'protocol' => 'signalwire_calling_proto',
+      'method' => 'call.play_and_collect',
+      'params' => [
+        'call_id' => 'call-id',
+        'node_id' => 'node-id',
+        'control_id' => self::UUID,
+        'collect' => $collect,
+        'play' => [
+          ['type' => 'tts', 'params' => ['text' => 'Welcome', 'gender' => 'male']]
+        ]
+      ]
+    ]);
+
+    $this->client->connection->expects($this->once())->method('send')->with($msg)->willReturn($this->_successResponse);
+
+    $this->call->promptTTSAsync($collect, ['text' => 'Welcome', 'gender' => 'male'])->done([$this, '__asyncPromptCheck']);
+  }
+
+  public function testPromptAudio(): void {
+    $this->_setCallReady();
+
+    $collect = ["initial_timeout" => 10, "digits" => ["max" => 3]];
+    $msg = new Execute([
+      'protocol' => 'signalwire_calling_proto',
+      'method' => 'call.play_and_collect',
+      'params' => [
+        'call_id' => 'call-id',
+        'node_id' => 'node-id',
+        'control_id' => self::UUID,
+        'collect' => $collect,
+        'play' => [
+          ['type' => 'audio', 'params' => ['url' => 'audio.mp3']]
+        ]
+      ]
+    ]);
+
+    $this->client->connection->expects($this->once())->method('send')->with($msg)->willReturn($this->_successResponse);
+
+    $this->call->promptAudio($collect, 'audio.mp3')->done([$this, '__syncPromptCheck']);
+    $this->calling->notificationHandler($this->collectNotification);
+  }
+
+  public function testPromptAudioAsync(): void {
+    $this->_setCallReady();
+
+    $collect = ["initial_timeout" => 10, "digits" => [ "max" => 3 ]];
+    $msg = new Execute([
+      'protocol' => 'signalwire_calling_proto',
+      'method' => 'call.play_and_collect',
+      'params' => [
+        'call_id' => 'call-id',
+        'node_id' => 'node-id',
+        'control_id' => self::UUID,
+        'collect' => $collect,
+        'play' => [
+          ['type' => 'audio', 'params' => ['url' => 'audio.mp3']]
+        ]
+      ]
+    ]);
+
+    $this->client->connection->expects($this->once())->method('send')->with($msg)->willReturn($this->_successResponse);
+
+    $this->call->promptAudioAsync($collect, 'audio.mp3')->done([$this, '__asyncPromptCheck']);
+  }
+
   /**
    * Callable to not repeat the same function for every SYNC play test
    */
@@ -354,6 +493,31 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
     $this->assertFalse($action->isCompleted());
 
     $this->calling->notificationHandler($this->playNotification);
+
+    $this->assertTrue($action->isCompleted());
+  }
+
+  /**
+   * Callable to not repeat the same function for every SYNC prompt test
+   */
+  public function __syncPromptCheck($result) {
+    $this->assertInstanceOf('SignalWire\Relay\Calling\Results\PromptResult', $result);
+    $this->assertTrue($result->isSuccessful());
+    $this->assertEquals($result->getType(), 'digit');
+    $this->assertEquals($result->getTerminator(), '#');
+    $this->assertObjectHasAttribute('type', $result->getEvent());
+    $this->assertObjectHasAttribute('params', $result->getEvent());
+  }
+
+  /**
+   * Callable to not repeat the same function for every ASYNC prompt test
+  */
+  public function __asyncPromptCheck($action) {
+    $this->assertInstanceOf('SignalWire\Relay\Calling\Actions\PromptAction', $action);
+    $this->assertInstanceOf('SignalWire\Relay\Calling\Results\PromptResult', $action->getResult());
+    $this->assertFalse($action->isCompleted());
+
+    $this->calling->notificationHandler($this->collectNotification);
 
     $this->assertTrue($action->isCompleted());
   }

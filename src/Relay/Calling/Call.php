@@ -163,6 +163,42 @@ class Call {
     return $this->playAsync(['type' => PlayType::TTS, 'params' => $options]);
   }
 
+  public function prompt(Array $collect, ...$play) {
+    $component = new Components\Prompt($this, $collect, $play);
+    $this->_addComponent($component);
+
+    $events = [PromptState::Error, PromptState::NoInput, PromptState::NoMatch, PromptState::Digit, PromptState::Speech];
+    return $component->_waitFor(...$events)->then(function() use (&$component) {
+      return new Results\PromptResult($component);
+    });
+  }
+
+  public function promptAsync(Array $collect, ...$play) {
+    $component = new Components\Prompt($this, $collect, $play);
+    $this->_addComponent($component);
+
+    return $component->execute()->then(function() use (&$component) {
+      return new Actions\PromptAction($component);
+    });
+  }
+
+  public function promptAudio(Array $collect, String $url) {
+    return $this->prompt($collect, ['type' => PlayType::Audio, 'params' => ['url' => $url]]);
+  }
+
+  public function promptAudioAsync(Array $collect, String $url) {
+    return $this->promptAsync($collect, ['type' => PlayType::Audio, 'params' => ['url' => $url]]);
+  }
+
+  public function promptTTS(Array $collect, Array $options) {
+    return $this->prompt($collect, ['type' => PlayType::TTS, 'params' => $options]);
+  }
+
+  public function promptTTSAsync(Array $collect, Array $options) {
+    return $this->promptAsync($collect, ['type' => PlayType::TTS, 'params' => $options]);
+  }
+
+
   public function on(String $event, Callable $fn) {
     $this->_cbQueue[$event] = $fn;
     return $this;
