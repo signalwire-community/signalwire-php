@@ -157,4 +157,204 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
       $this->assertTrue($action->isCompleted());
     });
   }
+
+  public function testPlay(): void {
+    $this->_setCallReady();
+
+    $msg = new Execute([
+      'protocol' => 'signalwire_calling_proto',
+      'method' => 'call.play',
+      'params' => [
+        'call_id' => 'call-id',
+        'node_id' => 'node-id',
+        'control_id' => self::UUID,
+        'play' => [
+          ['type' => 'audio', 'params' => ['url' => 'audio.mp3']],
+          ['type' => 'tts', 'params' => ['text' => 'Welcome', 'gender' => 'male']],
+          ['type' => 'silence', 'params' => ['duration' => 5]]
+        ]
+      ]
+    ]);
+
+    $this->client->connection->expects($this->once())->method('send')->with($msg)->willReturn($this->_successResponse);
+
+    $this->call->play(
+      ['type' => 'audio', 'params' => ['url' => 'audio.mp3']],
+      ['type' => 'tts', 'params' => ['text' => 'Welcome', 'gender' => 'male']],
+      ['type' => 'silence', 'params' => ['duration' => 5]]
+    )->done([$this, '__syncPlayCheck']);
+    $this->calling->notificationHandler($this->playNotification);
+  }
+
+  public function testPlayAsync(): void {
+    $this->_setCallReady();
+
+    $msg = new Execute([
+      'protocol' => 'signalwire_calling_proto',
+      'method' => 'call.play',
+      'params' => [
+        'call_id' => 'call-id',
+        'node_id' => 'node-id',
+        'control_id' => self::UUID,
+        'play' => [
+          ['type' => 'audio', 'params' => ['url' => 'audio.mp3']],
+          ['type' => 'tts', 'params' => ['text' => 'Welcome', 'gender' => 'male']],
+          ['type' => 'silence', 'params' => ['duration' => 5]]
+        ]
+      ]
+    ]);
+
+    $this->client->connection->expects($this->once())->method('send')->with($msg)->willReturn($this->_successResponse);
+
+    $this->call->playAsync(
+      ['type' => 'audio', 'params' => ['url' => 'audio.mp3']],
+      ['type' => 'tts', 'params' => ['text' => 'Welcome', 'gender' => 'male']],
+      ['type' => 'silence', 'params' => ['duration' => 5]]
+    )->done([$this, '__asyncPlayCheck']);
+  }
+
+  public function testPlayAudio(): void {
+    $this->_setCallReady();
+    $msg = new Execute([
+      'protocol' => 'signalwire_calling_proto',
+      'method' => 'call.play',
+      'params' => [
+        'call_id' => 'call-id',
+        'node_id' => 'node-id',
+        'control_id' => self::UUID,
+        'play' => [
+          ['type' => 'audio', 'params' => ['url' => 'url-to-audio.mp3']]
+        ]
+      ]
+    ]);
+
+    $this->client->connection->expects($this->once())->method('send')->with($msg)->willReturn($this->_successResponse);
+
+    $this->call->playAudio('url-to-audio.mp3')->done([$this, '__syncPlayCheck']);
+    $this->calling->notificationHandler($this->playNotification);
+  }
+
+  public function testPlayAudioAsync(): void {
+    $this->_setCallReady();
+    $msg = new Execute([
+      'protocol' => 'signalwire_calling_proto',
+      'method' => 'call.play',
+      'params' => [
+        'call_id' => 'call-id',
+        'node_id' => 'node-id',
+        'control_id' => self::UUID,
+        'play' => [
+          ['type' => 'audio', 'params' => ['url' => 'url-to-audio.mp3']]
+        ]
+      ]
+    ]);
+
+    $this->client->connection->expects($this->once())->method('send')->with($msg)->willReturn($this->_successResponse);
+
+    $this->call->playAudioAsync('url-to-audio.mp3')->done([$this, '__asyncPlayCheck']);
+  }
+
+  public function testPlaySilence(): void {
+    $this->_setCallReady();
+    $msg = new Execute([
+      'protocol' => 'signalwire_calling_proto',
+      'method' => 'call.play',
+      'params' => [
+        'call_id' => 'call-id',
+        'node_id' => 'node-id',
+        'control_id' => self::UUID,
+        'play' => [
+          ['type' => 'silence', 'params' => ['duration' => 5]]
+        ]
+      ]
+    ]);
+
+    $this->client->connection->expects($this->once())->method('send')->with($msg)->willReturn($this->_successResponse);
+
+    $this->call->playSilence(5)->done([$this, '__syncPlayCheck']);
+    $this->calling->notificationHandler($this->playNotification);
+  }
+
+  public function testPlaySilenceAsync(): void {
+    $this->_setCallReady();
+    $msg = new Execute([
+      'protocol' => 'signalwire_calling_proto',
+      'method' => 'call.play',
+      'params' => [
+        'call_id' => 'call-id',
+        'node_id' => 'node-id',
+        'control_id' => self::UUID,
+        'play' => [
+          ['type' => 'silence', 'params' => ['duration' => 5]]
+        ]
+      ]
+    ]);
+
+    $this->client->connection->expects($this->once())->method('send')->with($msg)->willReturn($this->_successResponse);
+
+    $this->call->playSilenceAsync(5)->done([$this, '__asyncPlayCheck']);
+  }
+
+  public function testPlayTTS(): void {
+    $this->_setCallReady();
+    $msg = new Execute([
+      'protocol' => 'signalwire_calling_proto',
+      'method' => 'call.play',
+      'params' => [
+        'call_id' => 'call-id',
+        'node_id' => 'node-id',
+        'control_id' => self::UUID,
+        'play' => [
+          ['type' => 'tts', 'params' => ['text' => 'Welcome', 'gender' => 'male']]
+        ]
+      ]
+    ]);
+
+    $this->client->connection->expects($this->once())->method('send')->with($msg)->willReturn($this->_successResponse);
+
+    $this->call->playTTS(['text' => 'Welcome', 'gender' => 'male'])->done([$this, '__syncPlayCheck']);
+    $this->calling->notificationHandler($this->playNotification);
+  }
+
+  public function testPlayTTSAsync(): void {
+    $this->_setCallReady();
+    $msg = new Execute([
+      'protocol' => 'signalwire_calling_proto',
+      'method' => 'call.play',
+      'params' => [
+        'call_id' => 'call-id',
+        'node_id' => 'node-id',
+        'control_id' => self::UUID,
+        'play' => [
+          ['type' => 'tts', 'params' => ['text' => 'Welcome', 'gender' => 'male']]
+        ]
+      ]
+    ]);
+
+    $this->client->connection->expects($this->once())->method('send')->with($msg)->willReturn($this->_successResponse);
+
+    $this->call->playTTSAsync(['text' => 'Welcome', 'gender' => 'male'])->done([$this, '__asyncPlayCheck']);
+  }
+
+  /**
+   * Callable to not repeat the same function for every SYNC play test
+   */
+  public function __syncPlayCheck($result) {
+    $this->assertInstanceOf('SignalWire\Relay\Calling\Results\PlayResult', $result);
+    $this->assertTrue($result->isSuccessful());
+    $this->assertObjectHasAttribute('state', $result->getEvent());
+  }
+
+  /**
+   * Callable to not repeat the same function for every ASYNC play test
+  */
+  public function __asyncPlayCheck($action) {
+    $this->assertInstanceOf('SignalWire\Relay\Calling\Actions\PlayAction', $action);
+    $this->assertInstanceOf('SignalWire\Relay\Calling\Results\PlayResult', $action->getResult());
+    $this->assertFalse($action->isCompleted());
+
+    $this->calling->notificationHandler($this->playNotification);
+
+    $this->assertTrue($action->isCompleted());
+  }
 }

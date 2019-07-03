@@ -107,8 +107,7 @@ class Call {
     $component = new Components\Record($this, $record);
     $this->_addComponent($component);
 
-    $events = [RecordState::NoInput, RecordState::Finished];
-    return $component->_waitFor(...$events)->then(function() use (&$component) {
+    return $component->_waitFor(RecordState::NoInput, RecordState::Finished)->then(function() use (&$component) {
       return new Results\RecordResult($component);
     });
   }
@@ -120,6 +119,48 @@ class Call {
     return $component->execute()->then(function() use (&$component) {
       return new Actions\RecordAction($component);
     });
+  }
+
+  public function play(...$play) {
+    $component = new Components\Play($this, $play);
+    $this->_addComponent($component);
+
+    return $component->_waitFor(PlayState::Error, PlayState::Finished)->then(function() use (&$component) {
+      return new Results\PlayResult($component);
+    });
+  }
+
+  public function playAsync(...$play) {
+    $component = new Components\Play($this, $play);
+    $this->_addComponent($component);
+
+    return $component->execute()->then(function() use (&$component) {
+      return new Actions\PlayAction($component);
+    });
+  }
+
+  public function playAudio(String $url) {
+    return $this->play(['type' => PlayType::Audio, 'params' => [ 'url' => $url ]]);
+  }
+
+  public function playAudioAsync(String $url) {
+    return $this->playAsync(['type' => PlayType::Audio, 'params' => [ 'url' => $url ]]);
+  }
+
+  public function playSilence(String $duration) {
+    return $this->play(['type' => PlayType::Silence, 'params' => [ 'duration' => $duration ]]);
+  }
+
+  public function playSilenceAsync(String $duration) {
+    return $this->playAsync(['type' => PlayType::Silence, 'params' => [ 'duration' => $duration ]]);
+  }
+
+  public function playTTS(Array $options) {
+    return $this->play(['type' => PlayType::TTS, 'params' => $options]);
+  }
+
+  public function playTTSAsync(Array $options) {
+    return $this->playAsync(['type' => PlayType::TTS, 'params' => $options]);
   }
 
   public function on(String $event, Callable $fn) {
