@@ -10,10 +10,6 @@ class ConnectResult extends BaseResult {
     parent::__construct($component);
   }
 
-  public function getState() {
-    return $this->component->state;
-  }
-
   public function getCall() {
     return $this->component->call->peer;
   }

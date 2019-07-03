@@ -708,7 +708,6 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
     $this->assertTrue($result->isSuccessful());
     $this->assertEquals($result->getCall(), $this->call->peer);
     $this->assertEquals($result->getCall()->id, 'peer-call-id');
-    $this->assertEquals($result->getState(), 'connected');
     $this->assertObjectHasAttribute('peer', $result->getEvent());
     $this->assertObjectHasAttribute('connect_state', $result->getEvent());
   }
