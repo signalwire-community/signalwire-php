@@ -241,10 +241,24 @@ class Call {
     $this->prevState = $this->state;
     $this->state = $params->call_state;
     $this->_dispatchCallback('stateChange');
-    $this->_dispatchCallback($params->call_state);
+    $this->_dispatchCallback($this->state);
     $this->_notifyComponents(Notification::State, $this->tag, $params);
-    if ($params->call_state === CallState::Ended) {
-      $this->relayInstance->removeCall($this);
+
+    switch ($this->state) {
+      case CallState::Created:
+        $this->active = true;
+        break;
+      case CallState::Answered:
+        $this->answered = true;
+        break;
+      case CallState::Ending:
+        $this->active = false;
+        break;
+      case CallState::Ended:
+        $this->active = false;
+        $this->ended = true;
+        $this->relayInstance->removeCall($this);
+        break;
     }
   }
 
