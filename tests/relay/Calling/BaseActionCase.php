@@ -9,6 +9,7 @@ abstract class RelayCallingBaseActionCase extends TestCase
 {
   const UUID = 'e36f227c-2946-11e8-b467-0ed5f89f718b';
   protected $client;
+  protected $calling;
   protected $call;
 
   protected function setUp() {
@@ -36,8 +37,8 @@ abstract class RelayCallingBaseActionCase extends TestCase
   }
 
   protected function setUpCall() {
-    $calling = new Calling($this->client);
-    $calling->protocol = 'signalwire_calling_proto';
+    $this->calling = new Calling($this->client);
+    $this->calling->protocol = 'signalwire_calling_proto';
 
     $options = (object)[
       'device' => (object)[
@@ -45,7 +46,7 @@ abstract class RelayCallingBaseActionCase extends TestCase
         'params' => (object)['from_number' => '234', 'to_number' => '456', 'timeout' => 20]
       ]
     ];
-    $this->call = new Call($calling, $options);
+    $this->call = new Call($this->calling, $options);
   }
 
   protected function _setCallReady() {

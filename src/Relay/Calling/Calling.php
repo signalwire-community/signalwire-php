@@ -15,10 +15,6 @@ class Calling extends \SignalWire\Relay\BaseRelay {
 
   public function notificationHandler($notification): void {
     $notification->params->event_type = $notification->event_type;
-    // Workaround to use 'tag' as a 'control_id' for state and connect notifications
-    if (!isset($notification->params->control_id) && isset($notification->params->tag)) {
-      $notification->params->control_id = $notification->params->tag;
-    }
     switch ($notification->event_type)
     {
       case Notification::State:
@@ -136,21 +132,21 @@ class Calling extends \SignalWire\Relay\BaseRelay {
   private function _onRecord($params) {
     $call = $this->getCallById($params->call_id);
     if ($call) {
-      $call->_recordStateChange($params);
+      $call->_recordChange($params);
     }
   }
 
   private function _onPlay($params) {
     $call = $this->getCallById($params->call_id);
     if ($call) {
-      $call->_playStateChange($params);
+      $call->_playChange($params);
     }
   }
 
   private function _onCollect($params) {
     $call = $this->getCallById($params->call_id);
     if ($call) {
-      $call->_collectStateChange($params);
+      $call->_collectChange($params);
     }
   }
 
@@ -160,7 +156,7 @@ class Calling extends \SignalWire\Relay\BaseRelay {
       if (isset($params->peer) && isset($params->peer->call_id)) {
         $call->peer = $this->getCallById($params->peer->call_id);
       }
-      $call->_connectStateChange($params);
+      $call->_connectChange($params);
     }
   }
 }
