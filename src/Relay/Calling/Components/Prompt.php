@@ -62,7 +62,7 @@ class Prompt extends Controllable {
     }
 
     if ($this->_hasBlocker() && in_array($this->type, $this->_eventsToWait)) {
-      $this->blocker.resolve();
+      ($this->blocker->resolve)();
     }
   }
 }
