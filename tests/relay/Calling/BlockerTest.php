@@ -1,5 +1,4 @@
 <?php
-require_once dirname(__FILE__) . '/BaseActionCase.php';
 
 use PHPUnit\Framework\TestCase;
 use SignalWire\Relay\Calling\Blocker;
