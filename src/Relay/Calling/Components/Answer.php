@@ -33,7 +33,7 @@ class Answer extends BaseComponent {
     }
 
     if ($this->_hasBlocker() && in_array($params->call_state, $this->_eventsToWait)) {
-      $this->blocker->resolve();
+      ($this->blocker->resolve)();
     }
   }
 }

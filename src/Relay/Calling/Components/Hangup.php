@@ -43,7 +43,7 @@ class Hangup extends BaseComponent {
     }
 
     if ($this->_hasBlocker() && in_array($this->state, $this->_eventsToWait)) {
-      $this->blocker->resolve();
+      ($this->blocker->resolve)();
     }
   }
 }
