@@ -1,10 +1,6 @@
 <?php
 require_once dirname(__FILE__) . '/BaseActionCase.php';
 
-use PHPUnit\Framework\TestCase;
-use SignalWire\Relay\Client;
-use SignalWire\Relay\Calling\Call;
-use SignalWire\Relay\Calling\Notification;
 use SignalWire\Messages\Execute;
 
 class RelayCallingCallTest extends RelayCallingBaseActionCase
