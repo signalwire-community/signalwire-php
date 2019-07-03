@@ -20,9 +20,11 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
     $this->stateNotificationAnswered = json_decode('{"event_type":"calling.call.state","params":{"call_state":"answered","direction":"inbound","device":{"type":"phone","params":{"from_number":"+1234","to_number":"15678"}},"call_id":"call-id","node_id":"node-id"}}');
     $this->stateNotificationEnded = json_decode('{"event_type":"calling.call.state","params":{"call_state":"ended","end_reason":"busy","direction":"inbound","device":{"type":"phone","params":{"from_number":"+1234","to_number":"15678"}},"call_id":"call-id","node_id":"node-id"}}');
     $this->recordNotification = json_decode('{"event_type":"calling.call.record","params":{"state":"finished","record":{"audio":{"format":"mp3","direction":"speak","stereo":false}},"url":"record.mp3","control_id":"'.self::UUID.'","size":4096,"duration":4,"call_id":"call-id","node_id":"node-id"}}');
-    $this->connectNotification = json_decode('{"event_type":"calling.call.connect","params":{"connect_state":"connected","device":{"node_id":"other-node-id","call_id":"other-call-id","tag":"other-tag-id","peer":{"type":"phone","params":{"from_number":"+1555","to_number":"+1777"}}},"tag":"'.self::UUID.'","call_id":"call-id","node_id":"node-id"}}');
     $this->playNotification = json_decode('{"event_type":"calling.call.play","params":{"control_id":"'.self::UUID.'","call_id":"call-id","node_id":"node-id","state":"finished"}}');
     $this->collectNotification = json_decode('{"event_type":"calling.call.collect","params":{"control_id":"'.self::UUID.'","call_id":"call-id","node_id":"node-id","result":{"type":"digit","params":{"digits":"12345","terminator":"#"}}}}');
+    $this->connectNotification = json_decode('{"event_type":"calling.call.connect","params":{"connect_state":"connected","peer":{"call_id":"peer-call-id","node_id":"peer-node-id","device":{"type":"phone","params":{"from_number":"+1234","to_number":"+15678"}}},"call_id":"call-id","node_id":"node-id"}}');
+    $this->connectNotificationPeerCreated = json_decode('{"event_type":"calling.call.state","params":{"call_state":"created","direction":"outbound","device":{"type":"phone","params":{"from_number":"+1234","to_number":"15678"}},"peer":{"call_id":"call-id","node_id":"node-id"},"call_id":"peer-call-id","node_id":"peer-node-id"}}');
+    $this->connectNotificationFailed = json_decode('{"event_type":"calling.call.connect","params":{"connect_state":"failed","peer":{"call_id":"peer-call-id","node_id":"peer-node-id"},"call_id":"call-id","node_id":"node-id"}}');
   }
 
   public function testDial(): void {
@@ -475,6 +477,186 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
     $this->call->promptAudioAsync($collect, 'audio.mp3')->done([$this, '__asyncPromptCheck']);
   }
 
+  public function testConnectDevicesInSeries(): void {
+    $this->_setCallReady();
+
+    $msg = new Execute([
+      'protocol' => 'signalwire_calling_proto',
+      'method' => 'call.connect',
+      'params' => [
+        'call_id' => 'call-id',
+        'node_id' => 'node-id',
+        'devices' => [
+          [
+            [ "type" => "phone", "params" => [ "to_number" => "999", "from_number" => "231", "timeout" => 10 ] ]
+          ],
+          [
+            [ "type" => "phone", "params" => [ "to_number" => "888", "from_number" => "234", "timeout" => 20 ] ]
+          ]
+        ]
+      ]
+    ]);
+
+    $this->client->connection->expects($this->once())->method('send')->with($msg)->willReturn($this->_successResponse);
+
+    $this->call->connect(
+      [ "type" => "phone", "to" => "999", "from" => "231", "timeout" => 10 ],
+      [ "type" => "phone", "to" => "888" ]
+    )->done([$this, '__syncConnectCheck']);
+
+    $this->calling->notificationHandler($this->connectNotificationPeerCreated);
+    $this->calling->notificationHandler($this->connectNotification);
+  }
+
+  public function testConnectDevicesInParallel(): void {
+    $this->_setCallReady();
+
+    $msg = new Execute([
+      'protocol' => 'signalwire_calling_proto',
+      'method' => 'call.connect',
+      'params' => [
+        'call_id' => 'call-id',
+        'node_id' => 'node-id',
+        'devices' => [
+          [
+            [ "type" => "phone", "params" => [ "to_number" => "999", "from_number" => "231", "timeout" => 10 ] ],
+            [ "type" => "phone", "params" => [ "to_number" => "888", "from_number" => "234", "timeout" => 20 ] ]
+          ]
+        ]
+      ]
+    ]);
+
+    $this->client->connection->expects($this->once())->method('send')->with($msg)->willReturn($this->_successResponse);
+
+    $this->call->connect(
+      [
+        [ "type" => "phone", "to" => "999", "from" => "231", "timeout" => 10 ],
+        [ "type" => "phone", "to" => "888" ]
+      ]
+    )->done([$this, '__syncConnectCheck']);
+
+    $this->calling->notificationHandler($this->connectNotificationPeerCreated);
+    $this->calling->notificationHandler($this->connectNotification);
+  }
+
+  public function testConnectDevicesInBothSeriesAndParallel(): void {
+    $this->_setCallReady();
+
+    $msg = new Execute([
+      'protocol' => 'signalwire_calling_proto',
+      'method' => 'call.connect',
+      'params' => [
+        'call_id' => 'call-id',
+        'node_id' => 'node-id',
+        'devices' => [
+          [
+            [ "type" => "phone", "params" => [ "to_number" => "999", "from_number" => "234", "timeout" => 20 ] ]
+          ],
+          [
+            [ "type" => "phone", "params" => [ "to_number" => "555", "from_number" => "234", "timeout" => 20 ] ]
+          ],
+          [
+            [ "type" => "phone", "params" => [ "to_number" => "999", "from_number" => "231", "timeout" => 10 ] ],
+            [ "type" => "phone", "params" => [ "to_number" => "888", "from_number" => "234", "timeout" => 20 ] ]
+          ]
+        ]
+      ]
+    ]);
+
+    $this->client->connection->expects($this->once())->method('send')->with($msg)->willReturn($this->_successResponse);
+
+    $this->call->connect(
+      [
+        [ "type" => "phone", "to" => "999" ],
+      ],
+      [
+        [ "type" => "phone", "to" => "555" ],
+      ],
+      [
+        [ "type" => "phone", "to" => "999", "from" => "231", "timeout" => 10 ],
+        [ "type" => "phone", "to" => "888" ]
+      ]
+    )->done([$this, '__syncConnectCheck']);
+
+    $this->calling->notificationHandler($this->connectNotificationPeerCreated);
+    $this->calling->notificationHandler($this->connectNotification);
+  }
+
+  public function testConnectAsyncDevicesInSeries(): void {
+    $this->_setCallReady();
+
+    $msg = new Execute([
+      'protocol' => 'signalwire_calling_proto',
+      'method' => 'call.connect',
+      'params' => [
+        'call_id' => 'call-id',
+        'node_id' => 'node-id',
+        'devices' => [
+          [
+            [ "type" => "phone", "params" => [ "to_number" => "999", "from_number" => "231", "timeout" => 10 ] ]
+          ],
+          [
+            [ "type" => "phone", "params" => [ "to_number" => "888", "from_number" => "234", "timeout" => 20 ] ]
+          ]
+        ]
+      ]
+    ]);
+
+    $this->client->connection->expects($this->once())->method('send')->with($msg)->willReturn($this->_successResponse);
+
+    $this->call->connectAsync(
+      [ "type" => "phone", "to" => "999", "from" => "231", "timeout" => 10 ],
+      [ "type" => "phone", "to" => "888" ]
+    )->done(function($action) {
+      $this->assertInstanceOf('SignalWire\Relay\Calling\Actions\ConnectAction', $action);
+      $this->assertInstanceOf('SignalWire\Relay\Calling\Results\ConnectResult', $action->getResult());
+      $this->assertFalse($action->isCompleted());
+
+      $this->calling->notificationHandler($this->connectNotification);
+
+      $this->assertEquals($action->getState(), 'connected');
+      $this->assertTrue($action->isCompleted());
+    });
+  }
+
+  public function testConnectAsyncDevicesInSeriesWithFailure(): void {
+    $this->_setCallReady();
+
+    $msg = new Execute([
+      'protocol' => 'signalwire_calling_proto',
+      'method' => 'call.connect',
+      'params' => [
+        'call_id' => 'call-id',
+        'node_id' => 'node-id',
+        'devices' => [
+          [
+            [ "type" => "phone", "params" => [ "to_number" => "999", "from_number" => "231", "timeout" => 10 ] ]
+          ],
+          [
+            [ "type" => "phone", "params" => [ "to_number" => "888", "from_number" => "234", "timeout" => 20 ] ]
+          ]
+        ]
+      ]
+    ]);
+
+    $this->client->connection->expects($this->once())->method('send')->with($msg)->willReturn($this->_successResponse);
+
+    $this->call->connectAsync(
+      [ "type" => "phone", "to" => "999", "from" => "231", "timeout" => 10 ],
+      [ "type" => "phone", "to" => "888" ]
+    )->done(function($action) {
+      $this->assertInstanceOf('SignalWire\Relay\Calling\Actions\ConnectAction', $action);
+      $this->assertInstanceOf('SignalWire\Relay\Calling\Results\ConnectResult', $action->getResult());
+      $this->assertFalse($action->isCompleted());
+
+      $this->calling->notificationHandler($this->connectNotificationFailed);
+
+      $this->assertEquals($action->getState(), 'failed');
+      $this->assertTrue($action->isCompleted());
+      $this->assertFalse($action->getResult()->isSuccessful());
+    });
+  }
+
   /**
    * Callable to not repeat the same function for every SYNC play test
    */
@@ -520,5 +702,18 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
     $this->calling->notificationHandler($this->collectNotification);
 
     $this->assertTrue($action->isCompleted());
+  }
+
+  /**
+   * Callable to not repeat the same function for every SYNC connect test
+   */
+  public function __syncConnectCheck($result) {
+    $this->assertInstanceOf('SignalWire\Relay\Calling\Results\ConnectResult', $result);
+    $this->assertTrue($result->isSuccessful());
+    $this->assertEquals($result->getCall(), $this->call->peer);
+    $this->assertEquals($result->getCall()->id, 'peer-call-id');
+    $this->assertEquals($result->getState(), 'connected');
+    $this->assertObjectHasAttribute('peer', $result->getEvent());
+    $this->assertObjectHasAttribute('connect_state', $result->getEvent());
   }
 }

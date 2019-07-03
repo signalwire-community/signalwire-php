@@ -198,6 +198,25 @@ class Call {
     return $this->promptAsync($collect, ['type' => PlayType::TTS, 'params' => $options]);
   }
 
+  public function connect(...$devices) {
+    $devices = \SignalWire\reduceConnectParams($devices, $this->from, $this->timeout);
+    $component = new Components\Connect($this, $devices);
+    $this->_addComponent($component);
+
+    return $component->_waitFor(ConnectState::Failed, ConnectState::Connected)->then(function() use (&$component) {
+      return new Results\ConnectResult($component);
+    });
+  }
+
+  public function connectAsync(...$devices) {
+    $devices = \SignalWire\reduceConnectParams($devices, $this->from, $this->timeout);
+    $component = new Components\Connect($this, $devices);
+    $this->_addComponent($component);
+
+    return $component->execute()->then(function() use (&$component) {
+      return new Actions\ConnectAction($component);
+    });
+  }
 
   public function on(String $event, Callable $fn) {
     $this->_cbQueue[$event] = $fn;
