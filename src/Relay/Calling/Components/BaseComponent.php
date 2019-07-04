@@ -96,7 +96,7 @@ abstract class BaseComponent {
     return $this->blocker instanceof Blocker;
   }
 
-  private function _failure() {
+  protected function _failure() {
     $this->completed = true;
     $this->successful = false;
     $this->state = 'failed';

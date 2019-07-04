@@ -11,9 +11,10 @@ class RelayCallingActionsTest extends RelayCallingBaseActionCase {
     parent::setUp();
     $this->_setCallReady();
     $this->_successResponse = \React\Promise\resolve(json_decode('{"result":{"code":"200","message":"message","control_id":"' . self::UUID . '"}}'));
+    $this->_failResponse = \React\Promise\reject(json_decode('{"result":{"code":"400","message":"some error","control_id":"' . self::UUID . '"}}'));
   }
 
-  public function testRecordActionStop(): void {
+  public function testRecordActionStopWithSuccess(): void {
     $msg = new Execute([
       'protocol' => 'signalwire_calling_proto',
       'method' => 'call.record.stop',
@@ -33,7 +34,29 @@ class RelayCallingActionsTest extends RelayCallingBaseActionCase {
     });
   }
 
-  public function testPlayActionStop(): void {
+  public function testRecordActionStopWithFail(): void {
+    $msg = new Execute([
+      'protocol' => 'signalwire_calling_proto',
+      'method' => 'call.record.stop',
+      'params' => [
+        'node_id' => 'node-id',
+        'call_id' => 'call-id',
+        'control_id' => self::UUID
+      ]
+    ]);
+    $this->client->connection->expects($this->once())->method('send')->with($msg)->willReturn($this->_failResponse);
+
+    $component = new Components\Record($this->call, ['audio' => 'blah']);
+    $action = new Actions\RecordAction($component);
+
+    $action->stop()->done(function($result) use (&$action) {
+      $this->assertEquals($result->code, '400');
+      $this->assertTrue($action->isCompleted());
+      $this->assertEquals($action->getState(), 'failed');
+    });
+  }
+
+  public function testPlayActionStopWithSuccess(): void {
     $msg = new Execute([
       'protocol' => 'signalwire_calling_proto',
       'method' => 'call.play.stop',
@@ -53,7 +76,29 @@ class RelayCallingActionsTest extends RelayCallingBaseActionCase {
     });
   }
 
-  public function testPromptActionStop(): void {
+  public function testPlayActionStopWithFail(): void {
+    $msg = new Execute([
+      'protocol' => 'signalwire_calling_proto',
+      'method' => 'call.play.stop',
+      'params' => [
+        'node_id' => 'node-id',
+        'call_id' => 'call-id',
+        'control_id' => self::UUID
+      ]
+    ]);
+    $this->client->connection->expects($this->once())->method('send')->with($msg)->willReturn($this->_failResponse);
+
+    $component = new Components\Play($this->call, ['type' => 'audio', 'params' => ['url' => 'url-to-audio.mp3']]);
+    $action = new Actions\PlayAction($component);
+
+    $action->stop()->done(function ($result) use (&$action) {
+      $this->assertEquals($result->code, '400');
+      $this->assertTrue($action->isCompleted());
+      $this->assertEquals($action->getState(), 'failed');
+    });
+  }
+
+  public function testPromptActionStopWithSuccess(): void {
     $msg = new Execute([
       'protocol' => 'signalwire_calling_proto',
       'method' => 'call.play_and_collect.stop',
@@ -70,6 +115,28 @@ class RelayCallingActionsTest extends RelayCallingBaseActionCase {
 
     $action->stop()->done(function($result) {
       $this->assertEquals($result->code, '200');
+    });
+  }
+
+  public function testPromptActionStopWithFail(): void {
+    $msg = new Execute([
+      'protocol' => 'signalwire_calling_proto',
+      'method' => 'call.play_and_collect.stop',
+      'params' => [
+        'node_id' => 'node-id',
+        'call_id' => 'call-id',
+        'control_id' => self::UUID
+      ]
+    ]);
+    $this->client->connection->expects($this->once())->method('send')->with($msg)->willReturn($this->_failResponse);
+
+    $component = new Components\Prompt($this->call, ['digits' => 'blah'], ['type' => 'audio', 'params' => ['url' => 'url-to-audio.mp3']]);
+    $action = new Actions\PromptAction($component);
+
+    $action->stop()->done(function ($result) use (&$action) {
+      $this->assertEquals($result->code, '400');
+      $this->assertTrue($action->isCompleted());
+      $this->assertEquals($action->getState(), 'failed');
     });
   }
 }

@@ -17,7 +17,13 @@ abstract class Controllable extends BaseComponent {
       ]
     ]);
 
-    return $this->call->_execute($msg);
+    return $this->call->_execute($msg)->otherwise(function($error) {
+      $this->_failure();
+      return (object)[
+        'code' => $error->getCode(),
+        'message' => $error->getMessage()
+      ];
+    });
   }
 
 }
