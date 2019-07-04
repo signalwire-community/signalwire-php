@@ -10,7 +10,7 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
   protected function setUp() {
     parent::setUp();
     $this->_successResponse = \React\Promise\resolve(json_decode('{"result":{"code":"200","message":"message","control_id":"' . self::UUID . '"}}'));
-    // $this->_failResponse = \React\Promise\resolve(json_decode('{"result":{"code":"400","message":"message","control_id":"' . self::UUID . '"}}'));
+    $this->_failResponse = \React\Promise\reject(json_decode('{"result":{"code":"400","message":"some error","control_id":"' . self::UUID . '"}}'));
 
     $this->stateNotificationCreated = json_decode( '{"event_type":"calling.call.state","params":{"call_state":"created","direction":"inbound","device":{"type":"phone","params":{"from_number":"+1234","to_number":"15678"}},"tag":"'.self::UUID.'","call_id":"call-id","node_id":"node-id"}}');
     $this->stateNotificationAnswered = json_decode('{"event_type":"calling.call.state","params":{"call_state":"answered","direction":"inbound","device":{"type":"phone","params":{"from_number":"+1234","to_number":"15678"}},"call_id":"call-id","node_id":"node-id"}}');
@@ -23,7 +23,7 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
     $this->connectNotificationFailed = json_decode('{"event_type":"calling.call.connect","params":{"connect_state":"failed","peer":{"call_id":"peer-call-id","node_id":"peer-node-id"},"call_id":"call-id","node_id":"node-id"}}');
   }
 
-  public function testDial(): void {
+  public function testDialSuccess(): void {
     $msg = new Execute([
       'protocol' => 'signalwire_calling_proto',
       'method' => 'call.begin',
@@ -41,6 +41,31 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
     $this->call->dial()->done(function($result) {
       $this->assertInstanceOf('SignalWire\Relay\Calling\Results\DialResult', $result);
       $this->assertTrue($result->isSuccessful());
+    });
+
+    $this->calling->notificationHandler($this->stateNotificationCreated);
+    $this->calling->notificationHandler($this->stateNotificationAnswered);
+  }
+
+  public function testDialFail(): void {
+    $msg = new Execute([
+      'protocol' => 'signalwire_calling_proto',
+      'method' => 'call.begin',
+      'params' => [
+        'tag' => self::UUID,
+        'device' => [
+          'type' => 'phone',
+          'params' => ['from_number' => '234', 'to_number' => '456', 'timeout' => 20]
+        ]
+      ]
+    ]);
+
+    $this->client->connection->expects($this->once())->method('send')->with($msg)->willReturn($this->_failResponse);
+
+    $this->call->dial()->done(function($result) {
+      $this->assertInstanceOf('SignalWire\Relay\Calling\Results\DialResult', $result);
+      $this->assertFalse($result->isSuccessful());
+      $this->assertEquals($result->getEvent(), null);
     });
 
     $this->calling->notificationHandler($this->stateNotificationCreated);
@@ -70,6 +95,29 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
     $this->calling->notificationHandler($this->stateNotificationEnded);
   }
 
+  public function testHangupFail(): void {
+    $this->_setCallReady();
+
+    $msg = new Execute([
+      'protocol' => 'signalwire_calling_proto',
+      'method' => 'call.end',
+      'params' => [
+        'call_id' => 'call-id',
+        'node_id' => 'node-id',
+        'reason' => 'hangup'
+      ]
+    ]);
+
+    $this->client->connection->expects($this->once())->method('send')->with($msg)->willReturn($this->_failResponse);
+
+    $this->call->hangup()->done(function($result) {
+      $this->assertInstanceOf('SignalWire\Relay\Calling\Results\HangupResult', $result);
+      $this->assertFalse($result->isSuccessful());
+      $this->assertEquals($result->getEvent(), null);
+    });
+    $this->calling->notificationHandler($this->stateNotificationEnded);
+  }
+
   public function testAnswerSuccess(): void {
     $this->_setCallReady();
 
@@ -92,7 +140,29 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
     $this->calling->notificationHandler($this->stateNotificationAnswered);
   }
 
-  public function testRecord(): void {
+  public function testAnswerFail(): void {
+    $this->_setCallReady();
+
+    $msg = new Execute([
+      'protocol' => 'signalwire_calling_proto',
+      'method' => 'call.answer',
+      'params' => [
+        'call_id' => 'call-id',
+        'node_id' => 'node-id'
+      ]
+    ]);
+
+    $this->client->connection->expects($this->once())->method('send')->with($msg)->willReturn($this->_failResponse);
+
+    $this->call->answer()->done(function($result) {
+      $this->assertInstanceOf('SignalWire\Relay\Calling\Results\AnswerResult', $result);
+      $this->assertFalse($result->isSuccessful());
+      $this->assertEquals($result->getEvent(), null);
+    });
+    $this->calling->notificationHandler($this->stateNotificationAnswered);
+  }
+
+  public function testRecordSuccess(): void {
     $this->_setCallReady();
 
     $msg = new Execute([
@@ -119,7 +189,32 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
     $this->calling->notificationHandler($this->recordNotification);
   }
 
-  public function testRecordAsync(): void {
+  public function testRecordFail(): void {
+    $this->_setCallReady();
+
+    $msg = new Execute([
+      'protocol' => 'signalwire_calling_proto',
+      'method' => 'call.record',
+      'params' => [
+        'call_id' => 'call-id',
+        'node_id' => 'node-id',
+        'control_id' => self::UUID,
+        'record' => ["beep" => true, "stereo" => false]
+      ]
+    ]);
+
+    $this->client->connection->expects($this->once())->method('send')->with($msg)->willReturn($this->_failResponse);
+
+    $record = ["beep" => true, "stereo" => false];
+    $this->call->record($record)->done(function($result) {
+      $this->assertInstanceOf('SignalWire\Relay\Calling\Results\RecordResult', $result);
+      $this->assertFalse($result->isSuccessful());
+    });
+
+    $this->calling->notificationHandler($this->recordNotification);
+  }
+
+  public function testRecordAsyncSuccess(): void {
     $this->_setCallReady();
 
     $msg = new Execute([
@@ -147,7 +242,32 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
     });
   }
 
-  public function testPlay(): void {
+  public function testRecordAsyncFail(): void {
+    $this->_setCallReady();
+
+    $msg = new Execute([
+      'protocol' => 'signalwire_calling_proto',
+      'method' => 'call.record',
+      'params' => [
+        'call_id' => 'call-id',
+        'node_id' => 'node-id',
+        'control_id' => self::UUID,
+        'record' => ["beep" => true, "stereo" => false]
+      ]
+    ]);
+
+    $this->client->connection->expects($this->once())->method('send')->with($msg)->willReturn($this->_failResponse);
+
+    $record = ["beep" => true, "stereo" => false];
+    $this->call->recordAsync($record)->done(function($action) {
+      $this->assertInstanceOf('SignalWire\Relay\Calling\Actions\RecordAction', $action);
+      $this->assertInstanceOf('SignalWire\Relay\Calling\Results\RecordResult', $action->getResult());
+      $this->assertTrue($action->isCompleted());
+      $this->assertEquals($action->getState(), 'failed');
+    });
+  }
+
+  public function testPlaySuccess(): void {
     $this->_setCallReady();
 
     $msg = new Execute([
@@ -175,7 +295,38 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
     $this->calling->notificationHandler($this->playNotification);
   }
 
-  public function testPlayAsync(): void {
+  public function testPlayFail(): void {
+    $this->_setCallReady();
+
+    $msg = new Execute([
+      'protocol' => 'signalwire_calling_proto',
+      'method' => 'call.play',
+      'params' => [
+        'call_id' => 'call-id',
+        'node_id' => 'node-id',
+        'control_id' => self::UUID,
+        'play' => [
+          ['type' => 'audio', 'params' => ['url' => 'audio.mp3']],
+          ['type' => 'tts', 'params' => ['text' => 'Welcome', 'gender' => 'male']],
+          ['type' => 'silence', 'params' => ['duration' => 5]]
+        ]
+      ]
+    ]);
+
+    $this->client->connection->expects($this->once())->method('send')->with($msg)->willReturn($this->_failResponse);
+
+    $this->call->play(
+      ['type' => 'audio', 'params' => ['url' => 'audio.mp3']],
+      ['type' => 'tts', 'params' => ['text' => 'Welcome', 'gender' => 'male']],
+      ['type' => 'silence', 'params' => ['duration' => 5]]
+    )->done(function ($result) {
+      $this->assertInstanceOf('SignalWire\Relay\Calling\Results\PlayResult', $result);
+      $this->assertFalse($result->isSuccessful());
+    });
+    $this->calling->notificationHandler($this->playNotification);
+  }
+
+  public function testPlayAsyncSuccess(): void {
     $this->_setCallReady();
 
     $msg = new Execute([
@@ -200,6 +351,37 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
       ['type' => 'tts', 'params' => ['text' => 'Welcome', 'gender' => 'male']],
       ['type' => 'silence', 'params' => ['duration' => 5]]
     )->done([$this, '__asyncPlayCheck']);
+  }
+
+  public function testPlayAsyncFail(): void {
+    $this->_setCallReady();
+
+    $msg = new Execute([
+      'protocol' => 'signalwire_calling_proto',
+      'method' => 'call.play',
+      'params' => [
+        'call_id' => 'call-id',
+        'node_id' => 'node-id',
+        'control_id' => self::UUID,
+        'play' => [
+          ['type' => 'audio', 'params' => ['url' => 'audio.mp3']],
+          ['type' => 'tts', 'params' => ['text' => 'Welcome', 'gender' => 'male']],
+          ['type' => 'silence', 'params' => ['duration' => 5]]
+        ]
+      ]
+    ]);
+
+    $this->client->connection->expects($this->once())->method('send')->with($msg)->willReturn($this->_failResponse);
+
+    $this->call->playAsync(
+      ['type' => 'audio', 'params' => ['url' => 'audio.mp3']],
+      ['type' => 'tts', 'params' => ['text' => 'Welcome', 'gender' => 'male']],
+      ['type' => 'silence', 'params' => ['duration' => 5]]
+    )->done(function ($action) {
+      $this->assertInstanceOf('SignalWire\Relay\Calling\Actions\PlayAction', $action);
+      $this->assertTrue($action->isCompleted());
+      $this->assertEquals($action->getState(), 'failed');
+    });
   }
 
   public function testPlayAudio(): void {
@@ -325,7 +507,7 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
     $this->call->playTTSAsync(['text' => 'Welcome', 'gender' => 'male'])->done([$this, '__asyncPlayCheck']);
   }
 
-  public function testPrompt(): void {
+  public function testPromptSuccess(): void {
     $this->_setCallReady();
 
     $collect = ["initial_timeout" => 10, "digits" => [ "max" => 3 ]];
@@ -353,7 +535,38 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
     $this->calling->notificationHandler($this->collectNotification);
   }
 
-  public function testPromptAsync(): void {
+  public function testPromptFail(): void {
+    $this->_setCallReady();
+
+    $collect = ["initial_timeout" => 10, "digits" => [ "max" => 3 ]];
+    $play = [
+      ['type' => 'audio', 'params' => ['url' => 'audio.mp3']],
+      ['type' => 'tts', 'params' => ['text' => 'Welcome', 'gender' => 'male']],
+      ['type' => 'silence', 'params' => ['duration' => 5]]
+    ];
+    $msg = new Execute([
+      'protocol' => 'signalwire_calling_proto',
+      'method' => 'call.play_and_collect',
+      'params' => [
+        'call_id' => 'call-id',
+        'node_id' => 'node-id',
+        'control_id' => self::UUID,
+        'collect' => $collect,
+        'play' => $play
+      ]
+    ]);
+
+    $this->client->connection->expects($this->once())->method('send')->with($msg)->willReturn($this->_failResponse);
+
+    $this->call->prompt($collect, ...$play)->done(function ($result) {
+      $this->assertInstanceOf('SignalWire\Relay\Calling\Results\PromptResult', $result);
+      $this->assertFalse($result->isSuccessful());
+    });
+
+    $this->calling->notificationHandler($this->collectNotification);
+  }
+
+  public function testPromptAsyncSuccess(): void {
     $this->_setCallReady();
 
     $collect = ["initial_timeout" => 10, "digits" => [ "max" => 3 ]];
@@ -377,6 +590,36 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
     $this->client->connection->expects($this->once())->method('send')->with($msg)->willReturn($this->_successResponse);
 
     $this->call->promptAsync($collect, ...$play)->done([$this, '__asyncPromptCheck']);
+  }
+
+  public function testPromptAsyncFail(): void {
+    $this->_setCallReady();
+
+    $collect = ["initial_timeout" => 10, "digits" => [ "max" => 3 ]];
+    $play = [
+      ['type' => 'audio', 'params' => ['url' => 'audio.mp3']],
+      ['type' => 'tts', 'params' => ['text' => 'Welcome', 'gender' => 'male']],
+      ['type' => 'silence', 'params' => ['duration' => 5]]
+    ];
+    $msg = new Execute([
+      'protocol' => 'signalwire_calling_proto',
+      'method' => 'call.play_and_collect',
+      'params' => [
+        'call_id' => 'call-id',
+        'node_id' => 'node-id',
+        'control_id' => self::UUID,
+        'collect' => $collect,
+        'play' => $play
+      ]
+    ]);
+
+    $this->client->connection->expects($this->once())->method('send')->with($msg)->willReturn($this->_failResponse);
+
+    $this->call->promptAsync($collect, ...$play)->done(function ($action) {
+      $this->assertInstanceOf('SignalWire\Relay\Calling\Actions\PromptAction', $action);
+      $this->assertTrue($action->isCompleted());
+      $this->assertEquals($action->getState(), 'failed');
+    });
   }
 
   public function testPromptTTS(): void {
@@ -471,6 +714,74 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
     $this->client->connection->expects($this->once())->method('send')->with($msg)->willReturn($this->_successResponse);
 
     $this->call->promptAudioAsync($collect, 'audio.mp3')->done([$this, '__asyncPromptCheck']);
+  }
+
+  public function testConnectSyncFail(): void {
+    $this->_setCallReady();
+
+    $msg = new Execute([
+      'protocol' => 'signalwire_calling_proto',
+      'method' => 'call.connect',
+      'params' => [
+        'call_id' => 'call-id',
+        'node_id' => 'node-id',
+        'devices' => [
+          [
+            [ "type" => "phone", "params" => [ "to_number" => "999", "from_number" => "231", "timeout" => 10 ] ]
+          ],
+          [
+            [ "type" => "phone", "params" => [ "to_number" => "888", "from_number" => "234", "timeout" => 20 ] ]
+          ]
+        ]
+      ]
+    ]);
+
+    $this->client->connection->expects($this->once())->method('send')->with($msg)->willReturn($this->_failResponse);
+
+    $this->call->connect(
+      [ "type" => "phone", "to" => "999", "from" => "231", "timeout" => 10 ],
+      [ "type" => "phone", "to" => "888" ]
+    )->done(function ($result) {
+      $this->assertInstanceOf('SignalWire\Relay\Calling\Results\ConnectResult', $result);
+      $this->assertFalse($result->isSuccessful());
+    });
+
+    $this->calling->notificationHandler($this->connectNotificationPeerCreated);
+    $this->calling->notificationHandler($this->connectNotification);
+  }
+
+  public function testConnectAsyncFail(): void {
+    $this->_setCallReady();
+
+    $msg = new Execute([
+      'protocol' => 'signalwire_calling_proto',
+      'method' => 'call.connect',
+      'params' => [
+        'call_id' => 'call-id',
+        'node_id' => 'node-id',
+        'devices' => [
+          [
+            [ "type" => "phone", "params" => [ "to_number" => "999", "from_number" => "231", "timeout" => 10 ] ]
+          ],
+          [
+            [ "type" => "phone", "params" => [ "to_number" => "888", "from_number" => "234", "timeout" => 20 ] ]
+          ]
+        ]
+      ]
+    ]);
+
+    $this->client->connection->expects($this->once())->method('send')->with($msg)->willReturn($this->_failResponse);
+
+    $this->call->connectAsync(
+      [ "type" => "phone", "to" => "999", "from" => "231", "timeout" => 10 ],
+      [ "type" => "phone", "to" => "888" ]
+    )->done(function ($action) {
+      $this->assertInstanceOf('SignalWire\Relay\Calling\Actions\ConnectAction', $action);
+      $this->assertTrue($action->isCompleted());
+    });
+
+    $this->calling->notificationHandler($this->connectNotificationPeerCreated);
+    $this->calling->notificationHandler($this->connectNotification);
   }
 
   public function testConnectDevicesInSeries(): void {

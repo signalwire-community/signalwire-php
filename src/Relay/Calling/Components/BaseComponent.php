@@ -78,6 +78,8 @@ abstract class BaseComponent {
       $this->_executeResult = $result;
 
       return $this->_executeResult;
+    }, function($error) {
+      $this->_failure();
     });
   }
 
@@ -91,6 +93,15 @@ abstract class BaseComponent {
   }
 
   protected function _hasBlocker() {
-    return count($this->_eventsToWait) > 0 && ($this->blocker instanceof Blocker);
+    return $this->blocker instanceof Blocker;
+  }
+
+  private function _failure() {
+    $this->completed = true;
+    $this->successful = false;
+    $this->state = 'failed';
+    if ($this->_hasBlocker()) {
+      ($this->blocker->resolve)();
+    }
   }
 }

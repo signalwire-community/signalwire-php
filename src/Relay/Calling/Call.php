@@ -6,6 +6,7 @@ use Ramsey\Uuid\Uuid;
 use SignalWire\Relay\Calling\Components;
 use SignalWire\Relay\Calling\Actions;
 use SignalWire\Relay\Calling\Results;
+use SignalWire\Log;
 
 class Call {
   const DefaultTimeout = 30;
@@ -233,6 +234,7 @@ class Call {
       return $result->result;
     }, function($error) {
       $e = isset($error->result) ? $error->result : $error;
+      Log::error("Relay command failed with code: {$e->code}. Message: {$e->message}.");
       throw new \Exception($e->message, $e->code);
     });
   }
