@@ -15,11 +15,6 @@ class CustomConsumer extends Consumer {
     $this->token = isset($_ENV['TOKEN']) ? $_ENV['TOKEN'] : '';
   }
 
-  public function ready(): Coroutine {
-    echo PHP_EOL . ' Consumer is ready! ' . PHP_EOL;
-    yield;
-  }
-
   public function onIncomingCall($call): Coroutine {
     print "\n - onIncomingCall on context: {$call->context}, from: {$call->from} to: {$call->to} !\n";
 
