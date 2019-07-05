@@ -87,9 +87,9 @@ abstract class BaseComponent {
     $this->_eventsToWait = $events;
     $this->blocker = new Blocker($this->eventType, $this->controlId);
 
-    $this->execute();
-
-    return $this->blocker->promise;
+    return $this->execute()->then(function() {
+      return $this->blocker->promise;
+    });
   }
 
   protected function _hasBlocker() {
