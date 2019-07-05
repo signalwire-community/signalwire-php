@@ -41,6 +41,7 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
     $this->call->dial()->done(function($result) {
       $this->assertInstanceOf('SignalWire\Relay\Calling\Results\DialResult', $result);
       $this->assertTrue($result->isSuccessful());
+      $this->assertEquals($result->getCall(), $this->call);
     });
 
     $this->calling->notificationHandler($this->stateNotificationCreated);

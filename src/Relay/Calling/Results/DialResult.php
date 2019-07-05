@@ -10,4 +10,7 @@ class DialResult extends BaseResult {
     parent::__construct($component);
   }
 
+  public function getCall() {
+    return $this->component->call;
+  }
 }
