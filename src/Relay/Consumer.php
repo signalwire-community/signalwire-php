@@ -39,7 +39,7 @@ abstract class Consumer {
     yield;
   }
 
-  public function tearDown(): Coroutine {
+  public function teardown(): Coroutine {
     yield;
   }
 
@@ -54,7 +54,7 @@ abstract class Consumer {
     $this->_kernel->execute([$this, '_init']);
     $this->loop->run();
     ReactKernel::start(function() {
-      yield $this->tearDown();
+      yield $this->teardown();
     });
   }
 
