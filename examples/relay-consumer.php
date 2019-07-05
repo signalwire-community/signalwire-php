@@ -10,12 +10,14 @@ class CustomConsumer extends Consumer {
   public $token;
   public $contexts = ['home', 'office'];
 
-  function __construct() {
-    $this->loop = \React\EventLoop\Factory::create();
+  public function setup() {
     $this->project = isset($_ENV['PROJECT']) ? $_ENV['PROJECT'] : '';
     $this->token = isset($_ENV['TOKEN']) ? $_ENV['TOKEN'] : '';
+  }
 
-    parent::__construct();
+  public function ready(): Coroutine {
+    echo PHP_EOL . ' Consumer is ready! ' . PHP_EOL;
+    yield;
   }
 
   public function onIncomingCall($call): Coroutine {
