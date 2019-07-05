@@ -32,24 +32,21 @@ abstract class Consumer {
   protected $client = null;
   private $_kernel = null;
 
-  function __construct() {
-    if (!isset($this->project)) {
-      throw new LogicException(get_class($this) . ' must have a $project.');
-    }
-    if (!isset($this->token)) {
-      throw new LogicException(get_class($this) . ' must have a $token.');
-    }
+  public function setup() {
   }
 
-  public function setup(): Coroutine {
+  public function ready(): Coroutine {
     yield;
   }
 
-  public function tearDown(): Coroutine {
+  public function teardown(): Coroutine {
     yield;
   }
 
   public final function run() {
+    $this->setup();
+    $this->_checkProjectAndToken();
+
     if (!($this->loop instanceof LoopInterface)) {
       $this->loop = ReactFactory::create();
     }
@@ -57,7 +54,7 @@ abstract class Consumer {
     $this->_kernel->execute([$this, '_init']);
     $this->loop->run();
     ReactKernel::start(function() {
-      yield $this->tearDown();
+      yield $this->teardown();
     });
   }
 
@@ -76,7 +73,7 @@ abstract class Consumer {
     $this->client->on('signalwire.ready', yield Recoil::callback(function($client) {
       try {
         yield $this->_registerCallingContexts();
-        yield $this->setup();
+        yield $this->ready();
       } catch (\Throwable $th) {
         Log::error($th->getMessage());
         throw $th;
@@ -102,5 +99,14 @@ abstract class Consumer {
       Log::info($res->message);
     }
     return $results;
+  }
+
+  private function _checkProjectAndToken() {
+    if (!isset($this->project)) {
+      throw new \InvalidArgumentException(get_class($this) . ' must have a $project.');
+    }
+    if (!isset($this->token)) {
+      throw new \InvalidArgumentException(get_class($this) . ' must have a $token.');
+    }
   }
 }

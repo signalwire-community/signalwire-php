@@ -1,7 +1,6 @@
 <?php
 namespace SignalWire\Relay;
 use SignalWire\Messages\Execute;
-use SignalWire\Log;
 use SignalWire\Util\Events;
 use SignalWire\Handler;
 
