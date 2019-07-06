@@ -95,9 +95,6 @@ abstract class Consumer {
       $promises[] = $this->client->calling->onInbound($context, yield Recoil::callback([$this, 'onIncomingCall']));
     }
     $results = yield $promises;
-    foreach ($results as $res) {
-      Log::info($res->message);
-    }
     return $results;
   }
 
