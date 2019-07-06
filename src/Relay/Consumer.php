@@ -92,7 +92,17 @@ abstract class Consumer {
     }
     $promises = [];
     foreach ((array)$this->contexts as $context) {
-      $promises[] = $this->client->calling->onInbound($context, yield Recoil::callback([$this, 'onIncomingCall']));
+      // $promises[] = $this->client->calling->onInbound($context, yield Recoil::callback([$this, 'onIncomingCall']));
+      $promises[] = $this->client->calling->onInbound($context, yield Recoil::callback(function($call) {
+        try {
+          yield $this->onIncomingCall($call);
+        } catch (\Throwable $error) {
+          echo PHP_EOL;
+          echo PHP_EOL . $error->getMessage();
+          echo PHP_EOL . $error->getTraceAsString();
+          echo PHP_EOL;
+        }
+      }));
     }
     $results = yield $promises;
     return $results;
