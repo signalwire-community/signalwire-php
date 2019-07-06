@@ -168,16 +168,10 @@ class Client {
     Handler::trigger(Events::Error, $error, $this->uuid);
   }
 
-  public function _onSocketMessage($msg) {
-    switch ($msg->method) {
+  public function _onSocketMessage($message) {
+    switch ($message->method) {
       case BladeMethod::Broadcast:
-        $protocol = $msg->params->protocol;
-        $event = $msg->params->event;
-        $channel = $msg->params->channel;
-        $params = $msg->params->params;
-        if (Handler::trigger($protocol, $params, $channel) === false) {
-          Log::warning('Unknown broadcast message', [$protocol, $event, $channel, $params]);
-        }
+        BroadcastHandler::notification($this, $message->params);
         break;
       case BladeMethod::Disconnect:
         $this->_idle = true;
@@ -217,6 +211,13 @@ class Client {
     });
   }
 
+  public function getCalling() {
+    if (!$this->_calling) {
+      $this->_calling = new \SignalWire\Relay\Calling\Calling($this);
+    }
+    return $this->_calling;
+  }
+
   private function _existsSubscription(String $protocol, String $channel) {
     return isset($this->_subscriptions[$protocol . $channel]);
   }
@@ -237,13 +238,6 @@ class Client {
     if (is_callable($handler)) {
       Handler::register($protocol, $handler, $channel);
     }
-  }
-
-  protected function getCalling() {
-    if (!$this->_calling) {
-      $this->_calling = new \SignalWire\Relay\Calling\Calling($this);
-    }
-    return $this->_calling;
   }
 
   private function _attachListeners() {
@@ -282,10 +276,6 @@ class Client {
     $method = 'get' . ucfirst($name);
     if (method_exists($this, $method)) {
       return $this->$method();
-    }
-    $property = '_' . $name;
-    if (property_exists($this, $property)) {
-      return $this->$property;
     }
     throw new \Exception('Unknown service ' . $name);
   }
