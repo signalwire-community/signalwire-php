@@ -59,6 +59,12 @@ class Client {
   public $eventLoop = null;
 
   /**
+   * Relay protocol setup
+   * @var String
+   */
+  public $relayProtocol = null;
+
+  /**
    * Relay Calling service
    * @var SignalWire\Relay\Service\Calling
    */
@@ -134,20 +140,19 @@ class Client {
   public function _onSocketOpen() {
     $this->_idle = false;
     $bladeConnect = new Connect($this->project, $this->token, $this->sessionid);
-    $this->execute($bladeConnect)->then(
-      function($result) {
-        $this->_autoReconnect = true;
-        $this->sessionid = $result->sessionid;
-        $this->nodeid = $result->nodeid;
-        // if ($result->session_restored) { TODO: }
-
+    $this->execute($bladeConnect)->then(function($result) {
+      $this->_autoReconnect = true;
+      $this->sessionid = $result->sessionid;
+      $this->nodeid = $result->nodeid;
+      Setup::protocol($this)->then(function(String $protocol) {
+        $this->relayProtocol = $protocol;
         $this->_emptyExecuteQueue();
         Handler::trigger(Events::Ready, $this, $this->uuid);
         Log::info("Session Ready!");
-      }, function($error) {
-        Handler::trigger(Events::Error, $error, $this->uuid);
-      }
-    );
+      });
+    }, function($error) {
+      Handler::trigger(Events::Error, $error, $this->uuid);
+    });
   }
 
   public function _onSocketClose(Array $param = array()) {
