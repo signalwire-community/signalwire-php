@@ -5,6 +5,7 @@ namespace SignalWire\Relay\Calling\Components;
 use SignalWire\Relay\Calling\Call;
 use SignalWire\Relay\Calling\CallState;
 use SignalWire\Relay\Calling\Notification;
+use SignalWire\Relay\Calling\Event;
 
 class Dial extends BaseComponent {
   public $eventType = Notification::State;
@@ -32,7 +33,7 @@ class Dial extends BaseComponent {
     $this->completed = in_array($this->state, [CallState::Answered, CallState::Ending, CallState::Ended]);
     if ($this->completed) {
       $this->successful = $this->state === CallState::Answered;
-      $this->event = $params;
+      $this->event = new Event($params->call_state, $params);
     }
 
     if ($this->_hasBlocker() && in_array($this->state, $this->_eventsToWait)) {

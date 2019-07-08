@@ -113,7 +113,7 @@ class Calling extends \SignalWire\Relay\BaseRelay {
     } elseif (isset($params->call_id) && isset($params->peer)) {
       $call = new Call($this, $params);
     } else {
-      Log::error('Unknown call', $params);
+      Log::error('Unknown call', (array)$params);
     }
   }
 

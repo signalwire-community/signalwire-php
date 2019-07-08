@@ -91,7 +91,7 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
     $this->call->hangup()->done(function($result) {
       $this->assertInstanceOf('SignalWire\Relay\Calling\Results\HangupResult', $result);
       $this->assertEquals($result->getReason(), 'busy');
-      $this->assertEquals($result->getEvent()->direction, 'inbound');
+      $this->assertEquals($result->getEvent()->payload->direction, 'inbound');
     });
     $this->calling->notificationHandler($this->stateNotificationEnded);
   }
@@ -136,7 +136,7 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
     $this->call->answer()->done(function($result) {
       $this->assertInstanceOf('SignalWire\Relay\Calling\Results\AnswerResult', $result);
       $this->assertTrue($result->isSuccessful());
-      $this->assertEquals($result->getEvent()->direction, 'inbound');
+      $this->assertEquals($result->getEvent()->payload->direction, 'inbound');
     });
     $this->calling->notificationHandler($this->stateNotificationAnswered);
   }
@@ -184,7 +184,7 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
       $this->assertInstanceOf('SignalWire\Relay\Calling\Results\RecordResult', $result);
       $this->assertTrue($result->isSuccessful());
       $this->assertEquals($result->getUrl(), 'record.mp3');
-      $this->assertObjectHasAttribute('url', $result->getEvent());
+      $this->assertObjectHasAttribute('url', $result->getEvent()->payload);
     });
 
     $this->calling->notificationHandler($this->recordNotification);
@@ -965,13 +965,56 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
     });
   }
 
+  public function testWaitForAnswered(): void {
+    $this->call->waitFor('answered')->done(function($event) {
+      $this->assertInstanceOf('SignalWire\Relay\Calling\Event', $event);
+      $this->assertEquals($event->name, 'answered');
+      $this->assertEquals($event->payload, $this->stateNotificationAnswered->params);
+    });
+
+    $this->calling->notificationHandler($this->stateNotificationCreated);
+    $this->calling->notificationHandler($this->stateNotificationAnswered);
+  }
+
+  public function testWaitForAnsweredAlreadyDone(): void {
+    $this->call->state = 'answered';
+
+    $this->call->waitFor('ringing', 'answered')->done(function($event) {
+      $this->assertInstanceOf('SignalWire\Relay\Calling\Event', $event);
+      $this->assertEquals($event->name, 'ringing');
+      $this->assertNull($event->payload);
+    });
+  }
+
+  public function testWaitForEnded(): void {
+    $this->call->waitFor('ending', 'ended')->done(function($event) {
+      $this->assertInstanceOf('SignalWire\Relay\Calling\Event', $event);
+      $this->assertEquals($event->name, 'ended');
+      $this->assertEquals($event->payload, $this->stateNotificationEnded->params);
+    });
+
+    $this->calling->notificationHandler($this->stateNotificationCreated);
+    $this->calling->notificationHandler($this->stateNotificationEnded);
+  }
+
+  public function testWaitForUnansweredCall(): void {
+    $this->call->waitFor('answered')->done(function($event) {
+      $this->assertInstanceOf('SignalWire\Relay\Calling\Event', $event);
+      $this->assertEquals($event->name, 'ended');
+      $this->assertEquals($event->payload, $this->stateNotificationEnded->params);
+    });
+
+    $this->calling->notificationHandler($this->stateNotificationCreated);
+    $this->calling->notificationHandler($this->stateNotificationEnded);
+  }
+
   /**
    * Callable to not repeat the same function for every SYNC play test
    */
   public function __syncPlayCheck($result) {
     $this->assertInstanceOf('SignalWire\Relay\Calling\Results\PlayResult', $result);
     $this->assertTrue($result->isSuccessful());
-    $this->assertObjectHasAttribute('state', $result->getEvent());
+    $this->assertObjectHasAttribute('state', $result->getEvent()->payload);
   }
 
   /**
@@ -995,8 +1038,8 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
     $this->assertTrue($result->isSuccessful());
     $this->assertEquals($result->getType(), 'digit');
     $this->assertEquals($result->getTerminator(), '#');
-    $this->assertObjectHasAttribute('type', $result->getEvent());
-    $this->assertObjectHasAttribute('params', $result->getEvent());
+    $this->assertObjectHasAttribute('type', $result->getEvent()->payload);
+    $this->assertObjectHasAttribute('params', $result->getEvent()->payload);
   }
 
   /**
@@ -1020,7 +1063,7 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
     $this->assertTrue($result->isSuccessful());
     $this->assertEquals($result->getCall(), $this->call->peer);
     $this->assertEquals($result->getCall()->id, 'peer-call-id');
-    $this->assertObjectHasAttribute('peer', $result->getEvent());
-    $this->assertObjectHasAttribute('connect_state', $result->getEvent());
+    $this->assertObjectHasAttribute('peer', $result->getEvent()->payload);
+    $this->assertObjectHasAttribute('connect_state', $result->getEvent()->payload);
   }
 }

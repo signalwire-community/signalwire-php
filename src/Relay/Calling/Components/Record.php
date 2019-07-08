@@ -5,6 +5,7 @@ namespace SignalWire\Relay\Calling\Components;
 use SignalWire\Relay\Calling\Call;
 use SignalWire\Relay\Calling\RecordState;
 use SignalWire\Relay\Calling\Notification;
+use SignalWire\Relay\Calling\Event;
 
 class Record extends Controllable {
   public $eventType = Notification::Record;
@@ -40,7 +41,7 @@ class Record extends Controllable {
     $this->completed = $this->state !== RecordState::Recording;
     if ($this->completed) {
       $this->successful = $this->state === RecordState::Finished;
-      $this->event = $params;
+      $this->event = new Event($params->state, $params);
       $this->url = $params->url;
       $this->duration = $params->duration;
       $this->size = $params->size;

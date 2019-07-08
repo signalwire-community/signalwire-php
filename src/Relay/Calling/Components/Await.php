@@ -3,12 +3,12 @@
 namespace SignalWire\Relay\Calling\Components;
 
 use SignalWire\Relay\Calling\Call;
-use SignalWire\Relay\Calling\CallState;
 use SignalWire\Relay\Calling\Notification;
 use SignalWire\Relay\Calling\Event;
 
-class Answer extends BaseComponent {
+class Await extends BaseComponent {
   public $eventType = Notification::State;
+  public $event;
 
   public function __construct(Call $call) {
     parent::__construct($call);
@@ -17,24 +17,18 @@ class Answer extends BaseComponent {
   }
 
   public function method() {
-    return 'call.answer';
+    return null;
   }
 
   public function payload() {
-    return [
-      'node_id' => $this->call->nodeId,
-      'call_id' => $this->call->id
-    ];
+    return null;
   }
 
   public function notificationHandler($params) {
-    if ($params->call_state === CallState::Answered) {
+    if ($this->_hasBlocker() && in_array($params->call_state, $this->_eventsToWait)) {
       $this->completed = true;
       $this->successful = true;
       $this->event = new Event($params->call_state, $params);
-    }
-
-    if ($this->_hasBlocker() && in_array($params->call_state, $this->_eventsToWait)) {
       ($this->blocker->resolve)();
     }
   }

@@ -6,6 +6,7 @@ use SignalWire\Relay\Calling\Call;
 use SignalWire\Relay\Calling\Blocker;
 use SignalWire\Messages\Execute;
 use Ramsey\Uuid\Uuid;
+use SignalWire\Relay\Calling\Event;
 
 abstract class BaseComponent {
 
@@ -18,7 +19,7 @@ abstract class BaseComponent {
   /** ControlId to identify the component among the notifications */
   public $controlId;
 
-  /** Blocker to wait some evens */
+  /** Blocker to wait some events */
   public $blocker;
 
   /** Current component state */
@@ -68,9 +69,13 @@ abstract class BaseComponent {
   abstract function notificationHandler($params);
 
   public function execute() {
+    $method = $this->method();
+    if ($method === null) {
+      return \React\Promise\resolve();
+    }
     $msg = new Execute([
       'protocol' => $this->call->relayInstance->client->relayProtocol,
-      'method' => $this->method(),
+      'method' => $method,
       'params' => $this->payload()
     ]);
 
@@ -79,7 +84,7 @@ abstract class BaseComponent {
 
       return $this->_executeResult;
     }, function($error) {
-      $this->_failure();
+      $this->terminate();
     });
   }
 
@@ -92,16 +97,19 @@ abstract class BaseComponent {
     });
   }
 
-  protected function _hasBlocker() {
-    return $this->blocker instanceof Blocker;
-  }
-
-  protected function _failure() {
+  public function terminate($params = null) {
     $this->completed = true;
     $this->successful = false;
     $this->state = 'failed';
+    if ($params && isset($params->call_state)) {
+      $this->event = new Event($params->call_state, $params);
+    }
     if ($this->_hasBlocker()) {
       ($this->blocker->resolve)();
     }
+  }
+
+  protected function _hasBlocker() {
+    return $this->blocker instanceof Blocker;
   }
 }

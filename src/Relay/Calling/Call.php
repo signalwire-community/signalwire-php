@@ -219,6 +219,25 @@ class Call {
     });
   }
 
+  public function waitFor(...$events) {
+    if (!count($events)) {
+      $events = [CallState::Ended];
+    }
+    $currentStateIndex = array_search($this->state, CallState::STATES);
+    foreach ($events as $event) {
+      $index = array_search($event, CallState::STATES);
+      if ($index <= $currentStateIndex) {
+        return \React\Promise\resolve(new Event($event, null));
+      }
+    }
+    $component = new Components\Await($this);
+    $this->_addComponent($component);
+
+    return $component->_waitFor(...$events)->then(function () use (&$component) {
+      return $component->event;
+    });
+  }
+
   public function on(String $event, Callable $fn) {
     $this->_cbQueue[$event] = $fn;
     return $this;
@@ -259,6 +278,7 @@ class Call {
       case CallState::Ended:
         $this->active = false;
         $this->ended = true;
+        $this->_terminateComponents($params);
         $this->relayInstance->removeCall($this);
         break;
     }
@@ -304,6 +324,14 @@ class Call {
       }
       if ($controlId === $component->controlId && $eventType === $component->eventType) {
         $component->notificationHandler($params);
+      }
+    }
+  }
+
+  private function _terminateComponents($params) {
+    foreach ($this->_components as $component) {
+      if (!$component->completed) {
+        $component->terminate($params);
       }
     }
   }
