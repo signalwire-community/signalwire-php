@@ -34,11 +34,11 @@ abstract class RelayCallingBaseActionCase extends TestCase
   protected function setUpClient() {
     $this->client = new Client(array('host' => 'host', 'project' => 'project', 'token' => 'token'));
     $this->client->connection = $this->createMock(SignalWire\Relay\Connection::class, ['send']);
+    $this->client->relayProtocol = 'signalwire_calling_proto';
   }
 
   protected function setUpCall() {
     $this->calling = new Calling($this->client);
-    $this->calling->protocol = 'signalwire_calling_proto';
 
     $options = (object)[
       'device' => (object)[

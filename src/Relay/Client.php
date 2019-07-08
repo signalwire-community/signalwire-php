@@ -59,6 +59,12 @@ class Client {
   public $eventLoop = null;
 
   /**
+   * Relay protocol setup
+   * @var String
+   */
+  public $relayProtocol = null;
+
+  /**
    * Relay Calling service
    * @var SignalWire\Relay\Service\Calling
    */
@@ -134,20 +140,19 @@ class Client {
   public function _onSocketOpen() {
     $this->_idle = false;
     $bladeConnect = new Connect($this->project, $this->token, $this->sessionid);
-    $this->execute($bladeConnect)->then(
-      function($result) {
-        $this->_autoReconnect = true;
-        $this->sessionid = $result->sessionid;
-        $this->nodeid = $result->nodeid;
-        // if ($result->session_restored) { TODO: }
-
+    $this->execute($bladeConnect)->then(function($result) {
+      $this->_autoReconnect = true;
+      $this->sessionid = $result->sessionid;
+      $this->nodeid = $result->nodeid;
+      Setup::protocol($this)->then(function(String $protocol) {
+        $this->relayProtocol = $protocol;
         $this->_emptyExecuteQueue();
         Handler::trigger(Events::Ready, $this, $this->uuid);
         Log::info("Session Ready!");
-      }, function($error) {
-        Handler::trigger(Events::Error, $error, $this->uuid);
-      }
-    );
+      });
+    }, function($error) {
+      Handler::trigger(Events::Error, $error, $this->uuid);
+    });
   }
 
   public function _onSocketClose(Array $param = array()) {
@@ -163,16 +168,10 @@ class Client {
     Handler::trigger(Events::Error, $error, $this->uuid);
   }
 
-  public function _onSocketMessage($msg) {
-    switch ($msg->method) {
+  public function _onSocketMessage($message) {
+    switch ($message->method) {
       case BladeMethod::Broadcast:
-        $protocol = $msg->params->protocol;
-        $event = $msg->params->event;
-        $channel = $msg->params->channel;
-        $params = $msg->params->params;
-        if (Handler::trigger($protocol, $params, $channel) === false) {
-          Log::warning('Unknown broadcast message', [$protocol, $event, $channel, $params]);
-        }
+        BroadcastHandler::notification($this, $message->params);
         break;
       case BladeMethod::Disconnect:
         $this->_idle = true;
@@ -212,6 +211,13 @@ class Client {
     });
   }
 
+  public function getCalling() {
+    if (!$this->_calling) {
+      $this->_calling = new \SignalWire\Relay\Calling\Calling($this);
+    }
+    return $this->_calling;
+  }
+
   private function _existsSubscription(String $protocol, String $channel) {
     return isset($this->_subscriptions[$protocol . $channel]);
   }
@@ -232,13 +238,6 @@ class Client {
     if (is_callable($handler)) {
       Handler::register($protocol, $handler, $channel);
     }
-  }
-
-  protected function getCalling() {
-    if (!$this->_calling) {
-      $this->_calling = new \SignalWire\Relay\Calling\Calling($this);
-    }
-    return $this->_calling;
   }
 
   private function _attachListeners() {

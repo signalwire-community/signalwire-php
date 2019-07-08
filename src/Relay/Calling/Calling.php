@@ -5,13 +5,8 @@ use SignalWire\Handler;
 use SignalWire\Log;
 
 class Calling extends \SignalWire\Relay\BaseRelay {
-  const Service = 'calling';
 
   private $_calls = array();
-
-  public function getServiceName(): String {
-    return self::Service;
-  }
 
   public function notificationHandler($notification): void {
     $notification->params->event_type = $notification->event_type;
@@ -34,7 +29,7 @@ class Calling extends \SignalWire\Relay\BaseRelay {
         break;
       case Notification::Receive:
         $call = new Call($this, $notification->params);
-        Handler::trigger($this->protocol, $call, $this->_prefixCtx($call->context));
+        Handler::trigger($this->client->relayProtocol, $call, $this->_prefixCtx($call->context));
         break;
     }
   }
@@ -50,34 +45,27 @@ class Calling extends \SignalWire\Relay\BaseRelay {
         ]
       ]
     ];
-    return $this->ready->then(function($protocol) use ($options) {
-      return new Call($this, $options);
-    })->otherwise([$this, '_onError']);
+    return new Call($this, $options);
   }
 
   public function onInbound(String $context, Callable $handler) {
-    if (!$context || !is_callable($handler)) {
-      throw new Exception("Invalid parameters");
-    }
-    return $this->ready->then(function($protocol) use ($context, $handler) {
-      $msg = new Execute([
-        'protocol' => $protocol,
-        'method' => 'call.receive',
-        'params' => [ 'context' => $context ]
-      ]);
-      return $this->client->execute($msg)->then(function($response) use ($protocol, $context, $handler) {
-        Handler::register($protocol, $handler, $this->_prefixCtx($context));
-        return $response->result;
-      }, [$this, '_onError']);
-    }, [$this, '_onError']);
-  }
-
-  public function _onError($error) {
-    throw new \Exception($error->message, $error->code);
+    $msg = new Execute([
+      'protocol' => $this->client->relayProtocol,
+      'method' => 'call.receive',
+      'params' => [ 'context' => $context ]
+    ]);
+    return $this->client->execute($msg)->then(function($response) use ($context, $handler) {
+      Log::info($response->result->message);
+      Handler::register($this->client->relayProtocol, $handler, $this->_prefixCtx($context));
+      return $response->result;
+    }, function ($error) {
+      Log::error("Calling onInbound error: {$error->message}. [code: {$error->code}]");
+      return $error;
+    });
   }
 
   private function _prefixCtx(String $context) {
-    return "ctx:$context";
+    return "calling.context.$context";
   }
 
   public function addCall(Call $call) {

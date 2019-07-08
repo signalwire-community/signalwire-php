@@ -69,7 +69,7 @@ abstract class BaseComponent {
 
   public function execute() {
     $msg = new Execute([
-      'protocol' => $this->call->relayInstance->protocol,
+      'protocol' => $this->call->relayInstance->client->relayProtocol,
       'method' => $this->method(),
       'params' => $this->payload()
     ]);

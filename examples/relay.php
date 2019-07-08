@@ -4,7 +4,6 @@ error_reporting(E_ALL);
 require dirname(__FILE__) . '/../vendor/autoload.php';
 $loop = React\EventLoop\Factory::create();
 
-$space_url = isset($_ENV['HOST']) ? $_ENV['HOST'] : '';
 $project = isset($_ENV['PROJECT']) ? $_ENV['PROJECT'] : '';
 $token = isset($_ENV['TOKEN']) ? $_ENV['TOKEN'] : '';
 if (empty($project) || empty($token)) {
@@ -12,7 +11,6 @@ if (empty($project) || empty($token)) {
 }
 
 $client = new SignalWire\Relay\Client(array(
-  "host" => $space_url,
   "project" => $project,
   "token" => $token,
   "eventLoop" => $loop
@@ -55,14 +53,7 @@ $client->on('signalwire.ready', function($session) use ($loop) {
     })
     ->answer();
 
-  })->then(
-    function($response) {
-      echo PHP_EOL . $response->message . PHP_EOL;
-    },
-    function($error) {
-      echo PHP_EOL . $error->getMessage() . PHP_EOL;
-    }
-  );
+  })->done();
 
   return;
 

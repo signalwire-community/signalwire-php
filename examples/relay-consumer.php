@@ -19,9 +19,13 @@ class CustomConsumer extends Consumer {
     print "\n - onIncomingCall on context: {$call->context}, from: {$call->from} to: {$call->to} !\n";
 
     yield $call->answer();
-    yield $call->playAudio('https://cdn.signalwire.com/default-music/welcome.mp3');
-    yield $call->playTTS([ 'text' => 'Goodbye Sir!' ]);
-    yield $call->hangup();
+    $action = yield $call->playAudioAsync('https://cdn.signalwire.com/default-music/welcome.mp3');
+
+    $this->loop->addTimer(3, yield Consumer::callback(function() use ($call, $action) {
+      yield $action->stop();
+      yield $call->playTTS(['text' => 'Goodbye Sir!']);
+      yield $call->hangup();
+    }));
   }
 }
 
