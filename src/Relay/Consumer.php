@@ -32,6 +32,10 @@ abstract class Consumer {
   protected $client = null;
   private $_kernel = null;
 
+  public static function callback(Callable $cb) {
+    return Recoil::callback($cb);
+  }
+
   public function setup() {
   }
 
@@ -40,6 +44,10 @@ abstract class Consumer {
   }
 
   public function teardown(): Coroutine {
+    yield;
+  }
+
+  public function onIncomingCall($call): Coroutine {
     yield;
   }
 
@@ -87,22 +95,19 @@ abstract class Consumer {
     if (!property_exists($this, 'contexts')) {
       return false;
     }
-    if (!method_exists($this, 'onIncomingCall')) {
-      throw new LogicException(get_class($this) . ' missing onIncomingCall() method to handle incoming calls.');
-    }
+
+    $callback = yield Recoil::callback(function ($call) {
+      try {
+        yield $this->onIncomingCall($call);
+      } catch (\Throwable $error) {
+        echo PHP_EOL;
+        echo PHP_EOL . $error->getMessage();
+        echo PHP_EOL . $error->getTraceAsString() . PHP_EOL;
+      }
+    });
     $promises = [];
     foreach ((array)$this->contexts as $context) {
-      // $promises[] = $this->client->calling->onInbound($context, yield Recoil::callback([$this, 'onIncomingCall']));
-      $promises[] = $this->client->calling->onInbound($context, yield Recoil::callback(function($call) {
-        try {
-          yield $this->onIncomingCall($call);
-        } catch (\Throwable $error) {
-          echo PHP_EOL;
-          echo PHP_EOL . $error->getMessage();
-          echo PHP_EOL . $error->getTraceAsString();
-          echo PHP_EOL;
-        }
-      }));
+      $promises[] = $this->client->calling->onInbound($context, $callback);
     }
     $results = yield $promises;
     return $results;
