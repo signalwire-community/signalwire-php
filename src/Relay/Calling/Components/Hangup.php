@@ -5,6 +5,7 @@ namespace SignalWire\Relay\Calling\Components;
 use SignalWire\Relay\Calling\Call;
 use SignalWire\Relay\Calling\CallState;
 use SignalWire\Relay\Calling\Notification;
+use SignalWire\Relay\Calling\Event;
 
 class Hangup extends BaseComponent {
   public $eventType = Notification::State;
@@ -35,7 +36,7 @@ class Hangup extends BaseComponent {
     $this->completed = $this->state === CallState::Ended;
     if ($this->completed) {
       $this->successful = true;
-      $this->event = $params;
+      $this->event = new Event($params->call_state, $params);
 
       if (isset($params->end_reason)) {
         $this->reason = $params->end_reason;

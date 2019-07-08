@@ -5,6 +5,7 @@ namespace SignalWire\Relay\Calling\Components;
 use SignalWire\Relay\Calling\Call;
 use SignalWire\Relay\Calling\PromptState;
 use SignalWire\Relay\Calling\Notification;
+use SignalWire\Relay\Calling\Event;
 
 class Prompt extends Controllable {
   public $eventType = Notification::Collect;
@@ -41,8 +42,8 @@ class Prompt extends Controllable {
   public function notificationHandler($params) {
     $this->completed = true;
 
-    $this->event = $params->result;
     $this->type = $params->result->type;
+    $this->event = new Event($this->type, $params->result);
     switch ($this->type) {
       case PromptState::Digit:
         $this->state = 'successful';
