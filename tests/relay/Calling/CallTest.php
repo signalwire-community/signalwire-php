@@ -984,9 +984,6 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
       $this->assertEquals($event->name, 'ringing');
       $this->assertNull($event->payload);
     });
-
-    $this->calling->notificationHandler($this->stateNotificationCreated);
-    $this->calling->notificationHandler($this->stateNotificationAnswered);
   }
 
   public function testWaitForEnded(): void {
