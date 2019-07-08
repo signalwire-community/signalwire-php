@@ -227,7 +227,6 @@ class Call {
     foreach ($events as $event) {
       $index = array_search($event, CallState::STATES);
       if ($index <= $currentStateIndex) {
-
         return \React\Promise\resolve(new Event($event, null));
       }
     }
