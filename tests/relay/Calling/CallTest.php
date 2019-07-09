@@ -966,10 +966,8 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
   }
 
   public function testWaitForAnswered(): void {
-    $this->call->waitFor('answered')->done(function($event) {
-      $this->assertInstanceOf('SignalWire\Relay\Calling\Event', $event);
-      $this->assertEquals($event->name, 'answered');
-      $this->assertEquals($event->payload, $this->stateNotificationAnswered->params);
+    $this->call->waitFor('answered')->done(function($check) {
+      $this->assertTrue($check);
     });
 
     $this->calling->notificationHandler($this->stateNotificationCreated);
@@ -979,18 +977,14 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
   public function testWaitForAnsweredAlreadyDone(): void {
     $this->call->state = 'answered';
 
-    $this->call->waitFor('ringing', 'answered')->done(function($event) {
-      $this->assertInstanceOf('SignalWire\Relay\Calling\Event', $event);
-      $this->assertEquals($event->name, 'ringing');
-      $this->assertNull($event->payload);
+    $this->call->waitFor('ringing', 'answered')->done(function($check) {
+      $this->assertTrue($check);
     });
   }
 
   public function testWaitForEnded(): void {
-    $this->call->waitFor('ending', 'ended')->done(function($event) {
-      $this->assertInstanceOf('SignalWire\Relay\Calling\Event', $event);
-      $this->assertEquals($event->name, 'ended');
-      $this->assertEquals($event->payload, $this->stateNotificationEnded->params);
+    $this->call->waitFor('ending', 'ended')->done(function($check) {
+      $this->assertTrue($check);
     });
 
     $this->calling->notificationHandler($this->stateNotificationCreated);
@@ -998,10 +992,8 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
   }
 
   public function testWaitForUnansweredCall(): void {
-    $this->call->waitFor('answered')->done(function($event) {
-      $this->assertInstanceOf('SignalWire\Relay\Calling\Event', $event);
-      $this->assertEquals($event->name, 'ended');
-      $this->assertEquals($event->payload, $this->stateNotificationEnded->params);
+    $this->call->waitFor('answered')->done(function($check) {
+      $this->assertFalse($check);
     });
 
     $this->calling->notificationHandler($this->stateNotificationCreated);
