@@ -106,6 +106,8 @@ class Client {
     }
     if (isset($options['eventLoop']) && $options['eventLoop'] instanceof \React\EventLoop\LoopInterface) {
       $this->eventLoop = $options['eventLoop'];
+    } else {
+      $this->eventLoop = \React\EventLoop\Factory::create();
     }
 
     $this->uuid = Uuid::uuid4()->toString();
