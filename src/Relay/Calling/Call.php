@@ -292,6 +292,10 @@ class Call {
         $this->active = false;
         break;
       case CallState::Ended:
+        if (isset($params->end_reason)) {
+          $this->failed = $params->end_reason === DisconnectReason::Error;
+          $this->busy = $params->end_reason === DisconnectReason::Busy;
+        }
         $this->active = false;
         $this->ended = true;
         $this->_terminateComponents($params);
