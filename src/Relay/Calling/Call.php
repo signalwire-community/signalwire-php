@@ -227,15 +227,31 @@ class Call {
     foreach ($events as $event) {
       $index = array_search($event, CallState::STATES);
       if ($index <= $currentStateIndex) {
-        return \React\Promise\resolve(new Event($event, null));
+        return \React\Promise\resolve(true);
       }
     }
     $component = new Components\Await($this);
     $this->_addComponent($component);
 
     return $component->_waitFor(...$events)->then(function () use (&$component) {
-      return $component->event;
+      return $component->successful;
     });
+  }
+
+  public function waitForRinging() {
+    return $this->waitFor(CallState::Ringing);
+  }
+
+  public function waitForAnswered() {
+    return $this->waitFor(CallState::Answered);
+  }
+
+  public function waitForEnding() {
+    return $this->waitFor(CallState::Ending);
+  }
+
+  public function waitForEnded() {
+    return $this->waitFor(CallState::Ended);
   }
 
   public function on(String $event, Callable $fn) {
@@ -276,6 +292,10 @@ class Call {
         $this->active = false;
         break;
       case CallState::Ended:
+        if (isset($params->end_reason)) {
+          $this->failed = $params->end_reason === DisconnectReason::Error;
+          $this->busy = $params->end_reason === DisconnectReason::Busy;
+        }
         $this->active = false;
         $this->ended = true;
         $this->_terminateComponents($params);
