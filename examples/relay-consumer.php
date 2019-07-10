@@ -15,6 +15,11 @@ class CustomConsumer extends Consumer {
     $this->token = isset($_ENV['TOKEN']) ? $_ENV['TOKEN'] : '';
   }
 
+  public function teardown(): Coroutine {
+    yield;
+    echo "\n General cleanup here.. \n";
+  }
+
   public function onIncomingCall($call): Coroutine {
     print "\n - onIncomingCall on context: {$call->context}, from: {$call->from} to: {$call->to} !\n";
 

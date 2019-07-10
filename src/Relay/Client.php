@@ -120,6 +120,7 @@ class Client {
   }
 
   public function disconnect() {
+    Log::info("Disconnecting..");
     $this->_idle = true;
     $this->_autoReconnect = false;
     if ($this->connection) {
@@ -248,6 +249,13 @@ class Client {
     $this->on(Events::SocketClose, [$this, "_onSocketClose"], $this->uuid);
     $this->on(Events::SocketError, [$this, "_onSocketError"], $this->uuid);
     $this->on(Events::SocketMessage, [$this, "_onSocketMessage"], $this->uuid);
+
+    if (defined('SIGINT')) {
+      $this->eventLoop->addSignal(SIGINT, [$this, "disconnect"]);
+    }
+    if (defined('SIGTERM')) {
+      $this->eventLoop->addSignal(SIGTERM, [$this, "disconnect"]);
+    }
   }
 
   private function _detachListeners() {
@@ -255,6 +263,13 @@ class Client {
     $this->off(Events::SocketClose, [$this, "_onSocketClose"], $this->uuid);
     $this->off(Events::SocketError, [$this, "_onSocketError"], $this->uuid);
     $this->off(Events::SocketMessage, [$this, "_onSocketMessage"], $this->uuid);
+
+    if (defined('SIGINT')) {
+      $this->eventLoop->removeSignal(SIGINT, [$this, "disconnect"]);
+    }
+    if (defined('SIGTERM')) {
+      $this->eventLoop->removeSignal(SIGTERM, [$this, "disconnect"]);
+    }
   }
 
   private function _emptyExecuteQueue() {
