@@ -1,7 +1,7 @@
 # SignalWire PHP
 
 
-![Packagist Version](https://img.shields.io/packagist/v/signalwire/signalwire.svg)
+![Packagist Version](https://img.shields.io/packagist/v/signalwire/signalwire.svg?color=brightgreen)
 ![Drone CI](https://ci.signalwire.com/api/badges/signalwire/signalwire-php/status.svg)
 
 The Relay SDK for PHP enables PHP developers to connect and use SignalWire's Relay APIs within their own PHP code. Our Relay SDK allows developers to build or add robust and innovative communication services to their applications.
