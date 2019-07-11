@@ -143,11 +143,11 @@ class Client {
   public function _onSocketOpen() {
     $this->_idle = false;
     $bladeConnect = new Connect($this->project, $this->token, $this->sessionid);
-    $this->execute($bladeConnect)->then(function($result) {
+    $this->execute($bladeConnect)->done(function($result) {
       $this->_autoReconnect = true;
       $this->sessionid = $result->sessionid;
       $this->nodeid = $result->nodeid;
-      Setup::protocol($this)->then(function(String $protocol) {
+      Setup::protocol($this)->done(function(String $protocol) {
         $this->relayProtocol = $protocol;
         $this->_emptyExecuteQueue();
         Handler::trigger(Events::Ready, $this, $this->uuid);

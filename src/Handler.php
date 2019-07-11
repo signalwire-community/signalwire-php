@@ -61,7 +61,7 @@ class Handler {
     $event = self::_cleanEventName($evt, $uniqueId);
     if (isset(self::$queue[$event])) {
       foreach (self::$queue[$event] as $callable){
-        call_user_func_array($callable, [$params]);
+        $callable($params);
       }
     }
     return true;
