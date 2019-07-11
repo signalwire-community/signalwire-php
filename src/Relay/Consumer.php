@@ -105,12 +105,8 @@ abstract class Consumer {
         echo PHP_EOL . $error->getTraceAsString() . PHP_EOL;
       }
     });
-    $promises = [];
-    foreach ((array)$this->contexts as $context) {
-      $promises[] = $this->client->calling->onInbound($context, $callback);
-    }
-    $results = yield $promises;
-    return $results;
+
+    yield $this->client->calling->onInbound((array)$this->contexts, $callback);
   }
 
   private function _checkProjectAndToken() {
