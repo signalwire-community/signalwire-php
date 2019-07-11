@@ -25,7 +25,7 @@ class Connection {
       function(\Ratchet\Client\WebSocket $webSocket) {
         $this->_ws = $webSocket;
         $this->_ws->on('message', function($msg) {
-          Log::debug("RECV " . str_replace(' ', '', $msg->getPayload()));
+          Log::debug("RECV " . $msg->getPayload());
           $obj = json_decode($msg->getPayload());
           if (!is_object($obj) || !isset($obj->id)) {
             return;
