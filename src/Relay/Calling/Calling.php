@@ -43,15 +43,20 @@ class Calling extends \SignalWire\Relay\BaseRelay {
     return $call->dial();
   }
 
-  public function onInbound(String $context, Callable $handler) {
+  public function onInbound($contexts, Callable $handler) {
+    if (gettype($contexts) === 'string') {
+      $contexts = [$contexts];
+    }
     $msg = new Execute([
       'protocol' => $this->client->relayProtocol,
       'method' => 'call.receive',
-      'params' => [ 'context' => $context ]
+      'params' => [ 'contexts' => $contexts ]
     ]);
-    return $this->client->execute($msg)->then(function($response) use ($context, $handler) {
+    return $this->client->execute($msg)->done(function($response) use ($contexts, $handler) {
       Log::info($response->result->message);
-      Handler::register($this->client->relayProtocol, $handler, $this->_prefixCtx($context));
+      foreach ($contexts as $context) {
+        Handler::register($this->client->relayProtocol, $handler, $this->_prefixCtx($context));
+      }
       return $response->result;
     }, function ($error) {
       Log::error("Calling onInbound error: {$error->message}. [code: {$error->code}]");
