@@ -9,6 +9,7 @@ final class Notification {
   const Play = 'calling.call.play';
   const Collect = 'calling.call.collect';
   const Receive = 'calling.call.receive';
+  const Fax = 'calling.call.fax';
 
   private function __construct() {
     throw new Exception('Invalid class Notification');

@@ -13,7 +13,7 @@ abstract class BaseResult {
   }
 
   public function isSuccessful() {
-    return $this->component-> successful;
+    return $this->component->successful;
   }
 
   public function getEvent() {
