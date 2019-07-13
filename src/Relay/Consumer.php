@@ -77,6 +77,7 @@ abstract class Consumer {
     $this->client->on('signalwire.ready', yield Recoil::callback(function($client) {
       try {
         yield $this->_registerCallingContexts();
+        yield $this->_registerTaskingContexts();
         yield $this->ready();
       } catch (\Throwable $th) {
         Log::error($th->getMessage());
@@ -103,6 +104,25 @@ abstract class Consumer {
     });
 
     yield $this->client->calling->onInbound((array)$this->contexts, $callback);
+  }
+
+  private function _registerTaskingContexts(): Coroutine {
+    if (!property_exists($this, 'contexts')) {
+      return false;
+    }
+
+    $callback = yield Recoil::callback(function ($message) {
+      try {
+        yield $this->onTask($message);
+      } catch (\Throwable $error) {
+        echo PHP_EOL;
+        echo PHP_EOL . $error->getMessage();
+        echo PHP_EOL . $error->getTraceAsString() . PHP_EOL;
+      }
+    });
+    foreach ((array)$this->contexts as $context) {
+      $this->client->tasking->onTask($context, $callback);
+    }
   }
 
   private function _checkProjectAndToken() {
