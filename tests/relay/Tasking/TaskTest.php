@@ -1,7 +1,7 @@
 <?php
 
 use PHPUnit\Framework\TestCase;
-use SignalWire\Relay\Task;
+use SignalWire\Relay\Tasking\Task;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\Handler\MockHandler;
