@@ -1085,6 +1085,93 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
     });
   }
 
+  public function testFaxSendSuccess(): void {
+    $this->_setCallReady();
+
+    $msg = new Execute([
+      'protocol' => 'signalwire_calling_proto',
+      'method' => 'call.send_fax',
+      'params' => [
+        'call_id' => 'call-id',
+        'node_id' => 'node-id',
+        'control_id' => self::UUID,
+        'document' => 'document.pdf'
+      ]
+    ]);
+
+    $this->client->connection->expects($this->once())->method('send')->with($msg)->willReturn($this->_successResponse);
+
+    $this->call->faxSend('document.pdf')->done([$this, '__syncFaxCheck']);
+    $this->calling->notificationHandler($this->faxNotificationFinished);
+  }
+
+  public function testFaxSendFail(): void {
+    $this->_setCallReady();
+
+    $msg = new Execute([
+      'protocol' => 'signalwire_calling_proto',
+      'method' => 'call.send_fax',
+      'params' => [
+        'call_id' => 'call-id',
+        'node_id' => 'node-id',
+        'control_id' => self::UUID,
+        'document' => 'document.pdf'
+      ]
+    ]);
+
+    $this->client->connection->expects($this->once())->method('send')->with($msg)->willReturn($this->_failResponse);
+
+    $this->call->faxSend('document.pdf')->done(function ($result) {
+      $this->assertInstanceOf('SignalWire\Relay\Calling\Results\FaxResult', $result);
+      $this->assertFalse($result->isSuccessful());
+    });
+    $this->calling->notificationHandler($this->faxNotificationFinished);
+  }
+
+  public function testFaxSendAsyncSuccess(): void {
+    $this->_setCallReady();
+
+    $msg = new Execute([
+      'protocol' => 'signalwire_calling_proto',
+      'method' => 'call.send_fax',
+      'params' => [
+        'call_id' => 'call-id',
+        'node_id' => 'node-id',
+        'control_id' => self::UUID,
+        'document' => 'document.pdf',
+        'header_info' => 'custom header'
+      ]
+    ]);
+
+    $this->client->connection->expects($this->once())->method('send')->with($msg)->willReturn($this->_successResponse);
+
+    $this->call->faxSendAsync('document.pdf', null, 'custom header')->done([$this, '__asyncFaxCheck']);
+  }
+
+  public function testFaxSendAsyncFail(): void {
+    $this->_setCallReady();
+
+    $msg = new Execute([
+      'protocol' => 'signalwire_calling_proto',
+      'method' => 'call.send_fax',
+      'params' => [
+        'call_id' => 'call-id',
+        'node_id' => 'node-id',
+        'control_id' => self::UUID,
+        'document' => 'document.pdf',
+        'header_info' => 'custom header'
+      ]
+    ]);
+
+    $this->client->connection->expects($this->once())->method('send')->with($msg)->willReturn($this->_failResponse);
+
+    $this->call->faxSendAsync('document.pdf', null, 'custom header')->done(function ($action) {
+      $this->assertInstanceOf('SignalWire\Relay\Calling\Actions\FaxAction', $action);
+      $this->assertTrue($action->isCompleted());
+      $this->assertEquals($action->getState(), 'failed');
+    });
+  }
+
   /**
    * Callable to not repeat the same function for every SYNC play test
    */
