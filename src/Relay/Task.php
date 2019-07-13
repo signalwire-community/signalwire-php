@@ -30,16 +30,16 @@ final class Task {
       'context' => $context,
       'message' => $msg
     ];
-    print_r($params);
+    // print_r($params);
     try {
       $uri = "{$this->host}/api/relay/private/tasks";
       $response = $this->_httpClient->request('POST', $uri, ['json' => $params]);
       $body = json_decode($response->getBody());
-      print_r($body);
+      // print_r($body);
 
       return true;
     } catch (\Throwable $th) {
-      print_r($th->getRequest());
+      // print_r($th->getRequest());
       echo PHP_EOL . $th->getMessage() . PHP_EOL;
 
       return false;
