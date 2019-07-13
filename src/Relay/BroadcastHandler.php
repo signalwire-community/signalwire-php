@@ -13,7 +13,21 @@ class BroadcastHandler {
       return;
     }
 
-    switch ($notification->params->event_type) {
+    switch ($notification->event) {
+      case 'queuing.relay.tasks':
+        $client->getTasking()->notificationHandler($notification->params);
+        break;
+      case 'queuing.relay.events':
+        self::switchEventType($client, $notification->params->event_type, $notification->params);
+        break;
+      default:
+        Log::warning("Unknown notification event: {$notification->event}");
+        break;
+    }
+  }
+
+  static function switchEventType(Client $client, string $eventType, $params) {
+    switch ($eventType) {
       case CallNotification::State:
       case CallNotification::Receive:
       case CallNotification::Connect:
@@ -21,10 +35,10 @@ class BroadcastHandler {
       case CallNotification::Play:
       case CallNotification::Collect:
       case CallNotification::Fax:
-        $client->getCalling()->notificationHandler($notification->params);
+        $client->getCalling()->notificationHandler($params);
         break;
       default:
-        Log::warning("Unknown notification type: {$notification->params->event_type}");
+        Log::warning("Unknown notification type: {$eventType}");
         break;
     }
   }
