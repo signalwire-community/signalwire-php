@@ -254,6 +254,42 @@ class Call {
     return $this->waitFor(CallState::Ended);
   }
 
+  public function faxReceive() {
+    $component = new Components\FaxReceive($this);
+    $this->_addComponent($component);
+
+    return $component->_waitFor(FaxState::Error, FaxState::Finished)->then(function() use (&$component) {
+      return new Results\FaxResult($component);
+    });
+  }
+
+  public function faxReceiveAsync() {
+    $component = new Components\FaxReceive($this);
+    $this->_addComponent($component);
+
+    return $component->execute()->then(function() use (&$component) {
+      return new Actions\FaxAction($component);
+    });
+  }
+
+  public function faxSend(string $url, string $identity = null, string $header = null) {
+    $component = new Components\FaxSend($this, $url, $identity, $header);
+    $this->_addComponent($component);
+
+    return $component->_waitFor(FaxState::Error, FaxState::Finished)->then(function() use (&$component) {
+      return new Results\FaxResult($component);
+    });
+  }
+
+  public function faxSendAsync(string $url, string $identity = null, string $header = null) {
+    $component = new Components\FaxSend($this, $url, $identity, $header);
+    $this->_addComponent($component);
+
+    return $component->execute()->then(function() use (&$component) {
+      return new Actions\FaxAction($component);
+    });
+  }
+
   public function on(String $event, Callable $fn) {
     $this->_cbQueue[$event] = $fn;
     return $this;
@@ -325,6 +361,14 @@ class Call {
   public function _collectChange($params) {
     $this->_notifyComponents(Notification::Collect, $params->control_id, $params);
     $this->_dispatchCallback('collect', $params);
+  }
+
+  public function _faxChange($params) {
+    $this->_notifyComponents(Notification::Fax, $params->control_id, $params);
+    $this->_dispatchCallback('fax.stateChange', $params);
+    if (isset($params->fax->type)) {
+      $this->_dispatchCallback("fax.{$params->fax->type}", $params);
+    }
   }
 
   private function _dispatchCallback(string $key, ...$params) {
