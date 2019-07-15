@@ -74,10 +74,6 @@ abstract class Consumer {
       'eventLoop' => yield \Recoil\Recoil::eventLoop()
     ]);
 
-    $this->client->on('signalwire.error', function($error) {
-      Log::error($error->getMessage());
-    });
-
     $this->client->on('signalwire.ready', yield Recoil::callback(function($client) {
       try {
         yield $this->_registerCallingContexts();

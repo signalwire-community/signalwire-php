@@ -154,7 +154,8 @@ class Client {
         Log::info("Session Ready!");
       });
     }, function($error) {
-      Handler::trigger(Events::Error, $error, $this->uuid);
+      Log::error("Auth error: {$error->message}. [code: {$error->code}]");
+      $this->eventLoop->stop();
     });
   }
 
@@ -167,8 +168,8 @@ class Client {
   }
 
   public function _onSocketError($error) {
-    Log::error($error->getMessage());
-    Handler::trigger(Events::Error, $error, $this->uuid);
+    Log::error("WebSocket error: {$error->getMessage()}. [code: {$error->getCode()}]");
+    $this->eventLoop->stop();
   }
 
   public function _onSocketMessage($message) {

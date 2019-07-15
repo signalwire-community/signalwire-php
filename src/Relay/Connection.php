@@ -5,6 +5,8 @@ use SignalWire\Handler;
 use SignalWire\Util\Events;
 use SignalWire\Log;
 use Ratchet\RFC6455\Messaging\Frame;
+use Ratchet\Client\WebSocket;
+use Ratchet\Client\Connector;
 
 class Connection {
   const PING_INTERVAL = 5.0;
@@ -21,8 +23,9 @@ class Connection {
     $host = \SignalWire\checkWebSocketHost($this->client->host);
     Log::debug("Connecting to: $host");
 
-    \Ratchet\Client\connect($host, [], [], $this->client->eventLoop)->done(
-      function(\Ratchet\Client\WebSocket $webSocket) {
+    $connector = new Connector($this->client->eventLoop);
+    $connector($host)->done(
+      function(WebSocket $webSocket) {
         $this->_ws = $webSocket;
         $this->_ws->on('message', function($msg) {
           Log::debug("RECV " . $msg->getPayload());
