@@ -32,7 +32,7 @@ $client->on('signalwire.ready', function($session) {
       print_r($params);
     });
 
-    $call->faxSend('https://www.antennahouse.com/XSLsample/pdf-v32/Sample-multi-pdf3.pdf')->done(function($result) {
+    $call->faxSend('https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf')->done(function($result) {
       print PHP_EOL . 'isSuccessful: ' . $result->isSuccessful() . PHP_EOL;
       print PHP_EOL . 'getDirection: ' . $result->getDirection() . PHP_EOL;
       print PHP_EOL . 'getIdentity: ' . $result->getIdentity() . PHP_EOL;
