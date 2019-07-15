@@ -6,7 +6,7 @@ require dirname(__FILE__) . '/../vendor/autoload.php';
 $project = isset($_ENV['PROJECT']) ? $_ENV['PROJECT'] : '';
 $token = isset($_ENV['TOKEN']) ? $_ENV['TOKEN'] : '';
 if (empty($project) || empty($token)) {
-  throw new \Exception('Set your SignalWire project and token before run the example!');
+  throw new \Exception('Set your SignalWire project and token before running the example!');
 }
 
 $client = new SignalWire\Relay\Client(array(
