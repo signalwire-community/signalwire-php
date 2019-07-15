@@ -23,12 +23,7 @@ class RelayTaskTest extends TestCase
   }
 
   private function _mockResponse($responses) {
-    $mock = new MockHandler($responses
-      // [
-      //   new Response(200, ['X-Foo' => 'Bar']),
-      //   new Response(202, ['Content-Length' => 0]),
-      // ]
-    );
+    $mock = new MockHandler($responses);
 
     $handlerStack = HandlerStack::create($mock);
     $this->task->_httpClient = new Client(['handler' => $handlerStack]);
@@ -36,7 +31,7 @@ class RelayTaskTest extends TestCase
 
   public function testDeliverWithSuccess(): void {
     $this->_mockResponse([
-      new Response(200, ['Content-Type' => 'application/json'])
+      new Response(204)
     ]);
 
     $success = $this->task->deliver('context', ['key' => 'value']);
@@ -46,7 +41,7 @@ class RelayTaskTest extends TestCase
 
   public function testDeliverWithException(): void {
     $this->_mockResponse([
-      new ClientException('POST 400 Bad Request', new Request('POST', '/api/relay/private/tasks'))
+      new ClientException('POST 400 Bad Request', new Request('POST', '/api/relay/rest/tasks'))
     ]);
 
     $success = $this->task->deliver('context', ['key' => 'value']);
