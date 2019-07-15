@@ -51,6 +51,10 @@ abstract class Consumer {
     yield;
   }
 
+  public function onTask($message): Coroutine {
+    yield;
+  }
+
   public final function run() {
     $this->setup();
     $this->_checkProjectAndToken();

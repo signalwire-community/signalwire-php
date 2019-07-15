@@ -7,13 +7,8 @@ use SignalWire\Log;
 class Tasking extends \SignalWire\Relay\BaseRelay {
 
   public function notificationHandler($notification): void {
-    switch ($notification->event_type)
-    {
-      case Notification::Receive:
-        Log::info("Receive task in context: {$notification->context}");
-        Handler::trigger($this->client->relayProtocol, $notification->message, $this->_prefixCtx($notification->context));
-        break;
-    }
+    Log::info("Receive task in context: {$notification->context}");
+    Handler::trigger($this->client->relayProtocol, $notification->message, $this->_prefixCtx($notification->context));
   }
 
   public function onTask(string $context, callable $handler) {

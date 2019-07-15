@@ -20,6 +20,12 @@ class CustomConsumer extends Consumer {
     echo "\n General cleanup here.. \n";
   }
 
+  public function onTask($message): Coroutine {
+    yield;
+    echo "\n Task payload \n";
+    print_r($message);
+  }
+
   public function onIncomingCall($call): Coroutine {
     print "\n - onIncomingCall on context: {$call->context}, from: {$call->from} to: {$call->to} !\n";
 
