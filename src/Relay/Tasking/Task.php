@@ -12,37 +12,23 @@ final class Task {
   public $_httpClient;
 
   public function __construct(string $project, string $token) {
-    $this->host = 'https://' . Constants::Host;
+    $this->host = Constants::Host;
     $this->project = $project;
     $this->token = $token;
-
-
-    $this->_httpClient = new Client([
-      'timeout' => 5,
-      'defaults' => [
-        'auth' => [ $this->project, $this->token ]
-      ]
-    ]);
-
+    $this->_httpClient = new Client(['timeout' => 5]);
   }
 
-  public function deliver(string $context, $msg) {
-    $params = [
-      'context' => $context,
-      'message' => $msg
-    ];
-    // print_r($params);
+  public function deliver(string $context, $message) {
+    $params = [ 'context' => $context, 'message' => $message ];
     try {
-      $uri = "{$this->host}/api/relay/private/tasks";
-      $response = $this->_httpClient->request('POST', $uri, ['json' => $params]);
-      $body = json_decode($response->getBody());
-      // print_r($body);
-
-      return true;
+      $uri = "https://{$this->host}/api/relay/rest/tasks";
+      $response = $this->_httpClient->request('POST', $uri, [
+        'auth' => [$this->project, $this->token],
+        'json' => $params
+      ]);
+      return $response->getStatusCode() === 204;
     } catch (\Throwable $th) {
-      // print_r($th->getRequest());
       echo PHP_EOL . $th->getMessage() . PHP_EOL;
-
       return false;
     }
   }
