@@ -9,7 +9,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [2.0.0-RC1] - 2019-07-10
 ### Added
-- Review Relay Calling.
+- Released new Relay Client interface.
 - Add RelayConsumer.
 - Handle SIGINT/SIGTERM signals.
 - Add Relay calling `waitFor`, `waitForRinging`, `waitForAnswered`, `waitForEnding`, `waitForEnded` methods.
