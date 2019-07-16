@@ -3,8 +3,15 @@ All notable changes to this project will be documented in this file.
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.0.0-RC2] - 2019-07-10
+## [2.0.0] - 2019-07-16
 ### Added
+- Add support for faxing. New call methods: `faxReceive`, `faxReceiveAsync`, `faxSend`, `faxSendAsync`.
+
+## [2.0.0-RC1] - 2019-07-10
+### Added
+- Review Relay Calling.
+- Add RelayConsumer.
+- Handle SIGINT/SIGTERM signals.
 - Add Relay calling `waitFor`, `waitForRinging`, `waitForAnswered`, `waitForEnding`, `waitForEnded` methods.
 ### Fixed
 - Default React EventLoop
