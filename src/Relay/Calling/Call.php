@@ -371,6 +371,19 @@ class Call {
     }
   }
 
+  public function _detectChange($params) {
+    $this->_notifyComponents(Notification::Detect, $params->control_id, $params);
+
+    if (isset($params->detect->params) && isset($params->detect->params->event)) {
+      $event = $params->detect->params->event;
+      if ($event === DetectState::Finished || $event === DetectState::Error) {
+        $this->_dispatchCallback("detect.{$event}", $params);
+      } else {
+        $this->_dispatchCallback('detect.update', $params);
+      }
+    }
+  }
+
   public function detect(String $type, Array $params = [], Int $timeout = null) {
     $detect = ['type' => $type, 'params' => $params];
     $component = new Components\Detect($this, $detect, $timeout);
