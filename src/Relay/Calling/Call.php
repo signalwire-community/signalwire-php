@@ -371,6 +371,56 @@ class Call {
     }
   }
 
+  public function detect(String $type, Array $params = [], Int $timeout = null) {
+    $detect = ['type' => $type, 'params' => $params];
+    $component = new Components\Detect($this, $detect, $timeout);
+    $this->_addComponent($component);
+
+    return $component->_waitFor(DetectState::Error, DetectState::Finished)->then(function() use (&$component) {
+      return new Results\DetectResult($component);
+    });
+  }
+
+  public function detectAsync(String $type, Array $params = [], Int $timeout = null) {
+    $detect = ['type' => $type, 'params' => $params];
+    $component = new Components\Detect($this, $detect, $timeout);
+    $this->_addComponent($component);
+
+    return $component->execute()->then(function() use (&$component) {
+      return new Actions\DetectAction($component);
+    });
+  }
+
+  // TODO: detectHuman/detectHumanAsync
+
+  public function detectMachine(Array $params = [], Int $timeout = null) {
+    return $this->detect(DetectType::Machine, $params, $timeout);
+  }
+
+  public function detectMachineAsync(Array $params = [], Int $timeout = null) {
+    return $this->detectAsync(DetectType::Machine, $params, $timeout);
+  }
+
+  public function detectFax(String $tone = null, Int $timeout = null) {
+    $params = is_null($tone) ? [] : ['tone' => $tone];
+    return $this->detect(DetectType::Fax, $params, $timeout);
+  }
+
+  public function detectFaxAsync(String $tone = null, Int $timeout = null) {
+    $params = is_null($tone) ? [] : ['tone' => $tone];
+    return $this->detectAsync(DetectType::Fax, $params, $timeout);
+  }
+
+  public function detectDigit(String $digits = null, Int $timeout = null) {
+    $params = is_null($digits) ? [] : ['digits' => $digits];
+    return $this->detect(DetectType::Digit, $params, $timeout);
+  }
+
+  public function detectDigitAsync(String $digits = null, Int $timeout = null) {
+    $params = is_null($digits) ? [] : ['digits' => $digits];
+    return $this->detectAsync(DetectType::Digit, $params, $timeout);
+  }
+
   private function _dispatchCallback(string $key, ...$params) {
     if (isset($this->_cbQueue[$key]) && is_callable($this->_cbQueue[$key])) {
       call_user_func($this->_cbQueue[$key], $this, ...$params);
