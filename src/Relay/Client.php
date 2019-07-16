@@ -163,7 +163,7 @@ class Client {
     if ($this->_autoReconnect) {
       unset($this->_calling);
       $this->_calling = null;
-      $this->eventLoop->addTimer(1, [$this, 'connect']);
+      $this->eventLoop->addTimer(5.0, [$this, 'connect']);
     }
   }
 
