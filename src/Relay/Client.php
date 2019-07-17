@@ -71,6 +71,12 @@ class Client {
   protected $_calling = null;
 
   /**
+   * Relay Tasking service
+   * @var SignalWire\Relay\Tasking\Tasking
+   */
+  protected $_tasking = null;
+
+  /**
    * Check to auto reconnect when the socket goes down
    * @var Boolean
    */
@@ -220,6 +226,13 @@ class Client {
       $this->_calling = new \SignalWire\Relay\Calling\Calling($this);
     }
     return $this->_calling;
+  }
+
+  public function getTasking() {
+    if (!$this->_tasking) {
+      $this->_tasking = new \SignalWire\Relay\Tasking\Tasking($this);
+    }
+    return $this->_tasking;
   }
 
   private function _existsSubscription(String $protocol, String $channel) {
