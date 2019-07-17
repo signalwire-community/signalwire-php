@@ -53,4 +53,14 @@ abstract class RelayCallingBaseActionCase extends TestCase
     $this->call->id = 'call-id';
     $this->call->nodeId = 'node-id';
   }
+
+  protected function _mockSuccessResponse($msg) {
+    $success = \React\Promise\resolve(json_decode('{"result":{"code":"200","message":"message","control_id":"' . self::UUID . '"}}'));
+    $this->client->connection->expects($this->once())->method('send')->with($msg)->willReturn($success);
+  }
+
+  protected function _mockFailResponse($msg) {
+    $fail = \React\Promise\reject(json_decode('{"result":{"code":"400","message":"some error","control_id":"' . self::UUID . '"}}'));
+    $this->client->connection->expects($this->once())->method('send')->with($msg)->willReturn($fail);
+  }
 }

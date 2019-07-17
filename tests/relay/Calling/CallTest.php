@@ -5,8 +5,6 @@ use SignalWire\Messages\Execute;
 
 class RelayCallingCallTest extends RelayCallingBaseActionCase
 {
-  protected $stub;
-
   protected function setUp() {
     parent::setUp();
     $this->_successResponse = \React\Promise\resolve(json_decode('{"result":{"code":"200","message":"message","control_id":"' . self::UUID . '"}}'));
@@ -1183,7 +1181,7 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
 
   /**
    * Callable to not repeat the same function for every ASYNC play test
-  */
+   */
   public function __asyncPlayCheck($action) {
     $this->assertInstanceOf('SignalWire\Relay\Calling\Actions\PlayAction', $action);
     $this->assertInstanceOf('SignalWire\Relay\Calling\Results\PlayResult', $action->getResult());
@@ -1208,7 +1206,7 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
 
   /**
    * Callable to not repeat the same function for every ASYNC prompt test
-  */
+   */
   public function __asyncPromptCheck($action) {
     $this->assertInstanceOf('SignalWire\Relay\Calling\Actions\PromptAction', $action);
     $this->assertInstanceOf('SignalWire\Relay\Calling\Results\PromptResult', $action->getResult());
@@ -1246,7 +1244,7 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
 
   /**
    * Callable to not repeat the same function for every ASYNC fax test
-  */
+   */
   public function __asyncFaxCheck($action) {
     $this->assertInstanceOf('SignalWire\Relay\Calling\Actions\FaxAction', $action);
     $this->assertInstanceOf('SignalWire\Relay\Calling\Results\FaxResult', $action->getResult());
