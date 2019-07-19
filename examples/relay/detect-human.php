@@ -9,11 +9,11 @@ if (empty($project) || empty($token)) {
   throw new \Exception('Set your SignalWire project and token before run the example!');
 }
 
-$client = new SignalWire\Relay\Client([ 'host' => 'relay.swire.io', 'project' => $project, 'token' => $token ]);
+$client = new SignalWire\Relay\Client([ 'project' => $project, 'token' => $token ]);
 
 $client->on('signalwire.ready', function($client) {
 
-  $params = array('type' => 'phone', 'from' => '+12014296600', 'to' => '+12044000543');
+  $params = array('type' => 'phone', 'from' => '+1xxx', 'to' => '+1yyy');
 
   $client->calling->dial($params)->done(function($dialResult) {
     if (!$dialResult->isSuccessful()) {
