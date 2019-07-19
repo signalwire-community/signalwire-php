@@ -13,6 +13,8 @@ class Detect extends Controllable {
   public $type;
   public $result;
 
+  protected $_eventsToWait = [DetectState::Finished, DetectState::Error];
+
   private $_events = [];
   private $_detect;
   private $_timeout;
@@ -45,9 +47,9 @@ class Detect extends Controllable {
     $detect = $params->detect;
     $this->type = $detect->type;
     $this->state = $detect->params->event;
-    $this->completed = in_array($this->state, [DetectState::Finished, DetectState::Error]);
+    $this->completed = in_array($this->state, $this->_eventsToWait);
     if ($this->completed) {
-      $this->successful = $this->state === DetectState::Finished;
+      $this->successful = $this->state !== DetectState::Error;
       $this->result = join('', $this->_events);
       $this->event = new Event($this->state, $detect);
     } else {

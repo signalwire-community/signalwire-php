@@ -310,7 +310,26 @@ class Call {
     });
   }
 
-  // TODO: detectHuman/detectHumanAsync
+  public function detectHuman(Array $params = [], Int $timeout = null) {
+    $detect = ['type' => DetectType::Machine, 'params' => $params];
+    $component = new Components\Detect($this, $detect, $timeout);
+    $this->_addComponent($component);
+
+    return $component->_waitFor(DetectState::Human, DetectState::Error, DetectState::Finished)->then(function() use (&$component) {
+      return new Results\DetectResult($component);
+    });
+  }
+
+  public function detectHumanAsync(Array $params = [], Int $timeout = null) {
+    $detect = ['type' => DetectType::Machine, 'params' => $params];
+    $component = new Components\Detect($this, $detect, $timeout);
+    $component->setEventsToWait([DetectState::Human, DetectState::Error, DetectState::Finished]);
+    $this->_addComponent($component);
+
+    return $component->execute()->then(function() use (&$component) {
+      return new Actions\DetectAction($component);
+    });
+  }
 
   public function detectMachine(Array $params = [], Int $timeout = null) {
     return $this->detect(DetectType::Machine, $params, $timeout);

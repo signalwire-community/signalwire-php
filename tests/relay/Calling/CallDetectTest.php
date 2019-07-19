@@ -74,6 +74,45 @@ class RelayCallingCallDetectTest extends RelayCallingBaseActionCase
     $this->call->detectAsync('fax', ['tone' => 'CED'], 45)->done([$this, '__detectAsyncFailCheck']);
   }
 
+  public function testDetectHumanSuccess(): void {
+    $msg = $this->_detectMsg('machine');
+    $this->_mockSuccessResponse($msg);
+    $this->call->detectHuman([], 25)->done(function($result) {
+      $this->assertInstanceOf('SignalWire\Relay\Calling\Results\DetectResult', $result);
+      $this->assertTrue($result->isSuccessful());
+      $this->assertEquals($result->getType(), 'machine');
+      $this->assertEmpty($result->getResult());
+      $this->assertObjectHasAttribute('type', $result->getEvent()->payload);
+      $this->assertObjectHasAttribute('params', $result->getEvent()->payload);
+    });
+    $this->calling->notificationHandler(self::$notificationMachineHuman);
+    // $this->calling->notificationHandler(self::$notificationFaxFinished);
+  }
+
+  public function testDetectHumanFail(): void {
+    $msg = $this->_detectMsg('machine');
+    $this->_mockFailResponse($msg);
+    $this->call->detectHuman([], 25)->done([$this, '__detectFailCheck']);
+  }
+
+  public function testDetectHumanAsyncSuccess(): void {
+    $msg = $this->_detectMsg('machine', ['initial_timeout' => 5], 45);
+    $this->_mockSuccessResponse($msg);
+    $this->call->detectHumanAsync(['initial_timeout' => 5], 45)->done(function($action) {
+      $this->assertInstanceOf('SignalWire\Relay\Calling\Actions\DetectAction', $action);
+      $this->assertInstanceOf('SignalWire\Relay\Calling\Results\DetectResult', $action->getResult());
+      $this->assertFalse($action->isCompleted());
+      $this->calling->notificationHandler(self::$notificationMachineHuman);
+      $this->assertTrue($action->isCompleted());
+    });
+  }
+
+  public function testDetectHumanAsyncFail(): void {
+    $msg = $this->_detectMsg('machine', ['initial_timeout' => 5], 45);
+    $this->_mockFailResponse($msg);
+    $this->call->detectHumanAsync(['initial_timeout' => 5], 45)->done([$this, '__detectAsyncFailCheck']);
+  }
+
   public function testDetectMachineSuccess(): void {
     $msg = $this->_detectMsg('machine');
     $this->_mockSuccessResponse($msg);
