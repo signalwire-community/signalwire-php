@@ -68,6 +68,10 @@ abstract class BaseComponent {
    */
   abstract function notificationHandler($params);
 
+  public function setEventsToWait(Array $events) {
+    $this->_eventsToWait = $events;
+  }
+
   public function execute() {
     $method = $this->method();
     if ($method === null) {

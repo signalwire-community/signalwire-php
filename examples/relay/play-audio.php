@@ -1,7 +1,7 @@
 <?php
 error_reporting(E_ALL);
 
-require dirname(__FILE__) . '/../vendor/autoload.php';
+require dirname(__FILE__) . '/../../vendor/autoload.php';
 
 $project = isset($_ENV['PROJECT']) ? $_ENV['PROJECT'] : '';
 $token = isset($_ENV['TOKEN']) ? $_ENV['TOKEN'] : '';
@@ -31,7 +31,7 @@ $client->on('signalwire.ready', function($session) {
       echo PHP_EOL . $call->id . " GLOBAL play changed to " . $params->state . PHP_EOL;
     });
 
-    $call->playAudio('https://sample-videos.com/audio/mp3/crowd-cheering.mp3');
+    $call->playAudio('https://cdn.signalwire.com/default-music/welcome.mp3');
 
   })->done(function ($response) {
     echo PHP_EOL . $response->message . PHP_EOL;

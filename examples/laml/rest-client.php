@@ -1,7 +1,7 @@
 <?php
-require dirname(__FILE__) . '/../vendor/autoload.php';
+require dirname(__FILE__) . '/../../vendor/autoload.php';
 
-$space_url = "your-space.signalwire.com";
+$space_url = "<your-space>.signalwire.com";
 $project = "";
 $token = "";
 if (empty($project) || empty($token)) {

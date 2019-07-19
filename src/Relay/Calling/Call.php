@@ -290,6 +290,183 @@ class Call {
     });
   }
 
+  /**
+   * Start a detector. Wait until the detector has finished/failed/timed out
+   *
+   * @param String $type 'machine' | 'fax' | 'digit'
+   * @param Array Detector params
+   * @param Int Max time to run detector
+   */
+  public function detect(String $type, Array $params = [], Int $timeout = null) {
+    $detect = ['type' => $type, 'params' => $params];
+    $component = new Components\Detect($this, $detect, $timeout);
+    $this->_addComponent($component);
+
+    return $component->_waitFor(DetectState::Error, DetectState::Finished)->then(function() use (&$component) {
+      return new Results\DetectResult($component);
+    });
+  }
+
+  /**
+   * Start a detector in async mode. DetectAction will be completed when the detector has finished/failed/timed out
+   *
+   * @param String $type 'machine' | 'fax' | 'digit'
+   * @param Array Detector params
+   * @param Int Max time to run detector
+   */
+  public function detectAsync(String $type, Array $params = [], Int $timeout = null) {
+    $detect = ['type' => $type, 'params' => $params];
+    $component = new Components\Detect($this, $detect, $timeout);
+    $this->_addComponent($component);
+
+    return $component->execute()->then(function() use (&$component) {
+      return new Actions\DetectAction($component);
+    });
+  }
+
+  /**
+   * Detect human. Wait for the first 'human' event or when the detector has finished/failed/timed out
+   *
+   * @param Array Detector params
+   * @param Int Max time to run detector
+   */
+  public function detectHuman(Array $params = [], Int $timeout = null) {
+    $detect = ['type' => DetectType::Machine, 'params' => $params];
+    $component = new Components\Detect($this, $detect, $timeout);
+    $this->_addComponent($component);
+
+    $events = [DetectState::Human, DetectState::Error, DetectState::Finished];
+    return $component->_waitFor(...$events)->then(function() use (&$component) {
+      return new Results\DetectResult($component);
+    });
+  }
+
+  /**
+   * Detect human in async mode. DetectAction will be completed with the first 'human' event or when the detector has finished/failed/timed out
+   *
+   * @param Array Detector params
+   * @param Int Max time to run detector
+   */
+  public function detectHumanAsync(Array $params = [], Int $timeout = null) {
+    $detect = ['type' => DetectType::Machine, 'params' => $params];
+    $component = new Components\Detect($this, $detect, $timeout);
+    $events = [DetectState::Human, DetectState::Error, DetectState::Finished];
+    $component->setEventsToWait($events);
+    $this->_addComponent($component);
+
+    return $component->execute()->then(function() use (&$component) {
+      return new Actions\DetectAction($component);
+    });
+  }
+
+  /**
+   * Detect a machine. Wait for the first machine/ready/not_ready event or when the detector has finished/failed/timed out
+   *
+   * @param Array Detector params
+   * @param Int Max time to run detector
+   */
+  public function detectMachine(Array $params = [], Int $timeout = null) {
+    $detect = ['type' => DetectType::Machine, 'params' => $params];
+    $component = new Components\Detect($this, $detect, $timeout);
+    $this->_addComponent($component);
+
+    $events = [DetectState::Machine, DetectState::Ready, DetectState::NotReady, DetectState::Error, DetectState::Finished];
+    return $component->_waitFor(...$events)->then(function () use (&$component) {
+      return new Results\DetectResult($component);
+    });
+  }
+
+  /**
+   * Detect a machine in async mode. DetectAction will be completed with the first machine/ready/not_ready event or when the detector has finished/failed/timed out
+   *
+   * @param Array Detector params
+   * @param Int Max time to run detector
+   */
+  public function detectMachineAsync(Array $params = [], Int $timeout = null) {
+    $detect = ['type' => DetectType::Machine, 'params' => $params];
+    $component = new Components\Detect($this, $detect, $timeout);
+    $events = [DetectState::Machine, DetectState::Ready, DetectState::NotReady, DetectState::Error, DetectState::Finished];
+    $component->setEventsToWait($events);
+    $this->_addComponent($component);
+
+    return $component->execute()->then(function() use (&$component) {
+      return new Actions\DetectAction($component);
+    });
+  }
+
+  /**
+   * Detect a fax. Wait for the first Fax tone (or $tone passed in) or when the detector has finished/failed/timed out
+   *
+   * @param String Tone to detect 'CED' | 'CNG'
+   * @param Int Max time to run detector
+   */
+  public function detectFax(String $tone = null, Int $timeout = null) {
+    $params = [];
+    $faxEvents = [DetectState::CED, DetectState::CNG];
+    $events = [DetectState::Error, DetectState::Finished];
+    if ($tone && in_array($tone, $faxEvents)) {
+      $params = ['tone' => $tone];
+      array_push($events, $tone);
+    } else {
+      array_push($events, ...$faxEvents);
+    }
+    $detect = ['type' => DetectType::Fax, 'params' => $params];
+    $component = new Components\Detect($this, $detect, $timeout);
+    $this->_addComponent($component);
+
+    return $component->_waitFor(...$events)->then(function () use (&$component) {
+      return new Results\DetectResult($component);
+    });
+  }
+
+  /**
+   * Detect a fax in async mode. DetectAction will be completed with the first Fax tone (or $tone passed in) or when the detector has finished/failed/timed out
+   *
+   * @param String Tone to detect 'CED' | 'CNG'
+   * @param Int Max time to run detector
+   */
+  public function detectFaxAsync(String $tone = null, Int $timeout = null) {
+    $params = [];
+    $faxEvents = [DetectState::CED, DetectState::CNG];
+    $events = [DetectState::Error, DetectState::Finished];
+    if ($tone && in_array($tone, $faxEvents)) {
+      $params = ['tone' => $tone];
+      array_push($events, $tone);
+    } else {
+      array_push($events, ...$faxEvents);
+    }
+    $detect = ['type' => DetectType::Fax, 'params' => $params];
+    $component = new Components\Detect($this, $detect, $timeout);
+    $component->setEventsToWait($events);
+    $this->_addComponent($component);
+
+    return $component->execute()->then(function() use (&$component) {
+      return new Actions\DetectAction($component);
+    });
+  }
+
+  /**
+   * Detect digits. Wait until the detector has finished/failed/timed out
+   *
+   * @param String To filter digits to detect. Default to "0123456789#*"
+   * @param Int Max time to run detector
+   */
+  public function detectDigit(String $digits = null, Int $timeout = null) {
+    $params = is_null($digits) ? [] : ['digits' => $digits];
+    return $this->detect(DetectType::Digit, $params, $timeout);
+  }
+
+  /**
+   * Detect digits in async mode. DetectAction will be completed when the detector has finished/failed/timed out
+   *
+   * @param String To filter digits to detect. Default to "0123456789#*"
+   * @param Int Max time to run detector
+   */
+  public function detectDigitAsync(String $digits = null, Int $timeout = null) {
+    $params = is_null($digits) ? [] : ['digits' => $digits];
+    return $this->detectAsync(DetectType::Digit, $params, $timeout);
+  }
+
   public function on(String $event, Callable $fn) {
     $this->_cbQueue[$event] = $fn;
     return $this;
@@ -368,6 +545,19 @@ class Call {
     $this->_dispatchCallback('fax.stateChange', $params);
     if (isset($params->fax->type)) {
       $this->_dispatchCallback("fax.{$params->fax->type}", $params);
+    }
+  }
+
+  public function _detectChange($params) {
+    $this->_notifyComponents(Notification::Detect, $params->control_id, $params);
+
+    if (isset($params->detect->params) && isset($params->detect->params->event)) {
+      $event = $params->detect->params->event;
+      if ($event === DetectState::Finished || $event === DetectState::Error) {
+        $this->_dispatchCallback("detect.{$event}", $params->detect);
+      } else {
+        $this->_dispatchCallback('detect.update', $params->detect);
+      }
     }
   }
 

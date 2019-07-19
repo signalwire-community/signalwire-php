@@ -1,7 +1,7 @@
 <?php
 error_reporting(E_ALL);
 
-require dirname(__FILE__) . '/../vendor/autoload.php';
+require dirname(__FILE__) . '/../../vendor/autoload.php';
 
 $project = isset($_ENV['PROJECT']) ? $_ENV['PROJECT'] : '';
 $token = isset($_ENV['TOKEN']) ? $_ENV['TOKEN'] : '';

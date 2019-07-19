@@ -1,6 +1,6 @@
 <?php
 
-require dirname(__FILE__) . '/../vendor/autoload.php';
+require dirname(__FILE__) . '/../../vendor/autoload.php';
 
 use Generator as Coroutine;
 use SignalWire\Relay\Consumer;
