@@ -290,6 +290,13 @@ class Call {
     });
   }
 
+  /**
+   * Start a detector. Wait until the detector has finished/failed/timed out
+   *
+   * @param String $type 'machine' | 'fax' | 'digit'
+   * @param Array Detector params
+   * @param Int Max time to run detector
+   */
   public function detect(String $type, Array $params = [], Int $timeout = null) {
     $detect = ['type' => $type, 'params' => $params];
     $component = new Components\Detect($this, $detect, $timeout);
@@ -300,6 +307,13 @@ class Call {
     });
   }
 
+  /**
+   * Start a detector in async mode. DetectAction will be completed when the detector has finished/failed/timed out
+   *
+   * @param String $type 'machine' | 'fax' | 'digit'
+   * @param Array Detector params
+   * @param Int Max time to run detector
+   */
   public function detectAsync(String $type, Array $params = [], Int $timeout = null) {
     $detect = ['type' => $type, 'params' => $params];
     $component = new Components\Detect($this, $detect, $timeout);
@@ -310,6 +324,12 @@ class Call {
     });
   }
 
+  /**
+   * Detect human. Wait for the first 'human' event or when the detector has finished/failed/timed out
+   *
+   * @param Array Detector params
+   * @param Int Max time to run detector
+   */
   public function detectHuman(Array $params = [], Int $timeout = null) {
     $detect = ['type' => DetectType::Machine, 'params' => $params];
     $component = new Components\Detect($this, $detect, $timeout);
@@ -321,6 +341,12 @@ class Call {
     });
   }
 
+  /**
+   * Detect human in async mode. DetectAction will be completed with the first 'human' event or when the detector has finished/failed/timed out
+   *
+   * @param Array Detector params
+   * @param Int Max time to run detector
+   */
   public function detectHumanAsync(Array $params = [], Int $timeout = null) {
     $detect = ['type' => DetectType::Machine, 'params' => $params];
     $component = new Components\Detect($this, $detect, $timeout);
@@ -333,6 +359,12 @@ class Call {
     });
   }
 
+  /**
+   * Detect a machine. Wait for the first machine/ready/not_ready event or when the detector has finished/failed/timed out
+   *
+   * @param Array Detector params
+   * @param Int Max time to run detector
+   */
   public function detectMachine(Array $params = [], Int $timeout = null) {
     $detect = ['type' => DetectType::Machine, 'params' => $params];
     $component = new Components\Detect($this, $detect, $timeout);
@@ -344,6 +376,12 @@ class Call {
     });
   }
 
+  /**
+   * Detect a machine in async mode. DetectAction will be completed with the first machine/ready/not_ready event or when the detector has finished/failed/timed out
+   *
+   * @param Array Detector params
+   * @param Int Max time to run detector
+   */
   public function detectMachineAsync(Array $params = [], Int $timeout = null) {
     $detect = ['type' => DetectType::Machine, 'params' => $params];
     $component = new Components\Detect($this, $detect, $timeout);
@@ -356,6 +394,12 @@ class Call {
     });
   }
 
+  /**
+   * Detect a fax. Wait for the first Fax tone (or $tone passed in) or when the detector has finished/failed/timed out
+   *
+   * @param String Tone to detect 'CED' | 'CNG'
+   * @param Int Max time to run detector
+   */
   public function detectFax(String $tone = null, Int $timeout = null) {
     $params = [];
     $faxEvents = [DetectState::CED, DetectState::CNG];
@@ -375,6 +419,12 @@ class Call {
     });
   }
 
+  /**
+   * Detect a fax in async mode. DetectAction will be completed with the first Fax tone (or $tone passed in) or when the detector has finished/failed/timed out
+   *
+   * @param String Tone to detect 'CED' | 'CNG'
+   * @param Int Max time to run detector
+   */
   public function detectFaxAsync(String $tone = null, Int $timeout = null) {
     $params = [];
     $faxEvents = [DetectState::CED, DetectState::CNG];
@@ -395,11 +445,23 @@ class Call {
     });
   }
 
+  /**
+   * Detect digits. Wait until the detector has finished/failed/timed out
+   *
+   * @param String To filter digits to detect. Default to "0123456789#*"
+   * @param Int Max time to run detector
+   */
   public function detectDigit(String $digits = null, Int $timeout = null) {
     $params = is_null($digits) ? [] : ['digits' => $digits];
     return $this->detect(DetectType::Digit, $params, $timeout);
   }
 
+  /**
+   * Detect digits in async mode. DetectAction will be completed when the detector has finished/failed/timed out
+   *
+   * @param String To filter digits to detect. Default to "0123456789#*"
+   * @param Int Max time to run detector
+   */
   public function detectDigitAsync(String $digits = null, Int $timeout = null) {
     $params = is_null($digits) ? [] : ['digits' => $digits];
     return $this->detectAsync(DetectType::Digit, $params, $timeout);
