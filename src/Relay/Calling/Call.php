@@ -446,9 +446,9 @@ class Call {
     if (isset($params->detect->params) && isset($params->detect->params->event)) {
       $event = $params->detect->params->event;
       if ($event === DetectState::Finished || $event === DetectState::Error) {
-        $this->_dispatchCallback("detect.{$event}", $params);
+        $this->_dispatchCallback("detect.{$event}", $params->detect);
       } else {
-        $this->_dispatchCallback('detect.update', $params);
+        $this->_dispatchCallback('detect.update', $params->detect);
       }
     }
   }
