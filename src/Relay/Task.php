@@ -1,5 +1,5 @@
 <?php
-namespace SignalWire\Relay\Tasking;
+namespace SignalWire\Relay;
 
 use SignalWire\Relay\Constants;
 use GuzzleHttp\Client;
