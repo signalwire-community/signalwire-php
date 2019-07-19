@@ -220,7 +220,7 @@ class RelayCallingCallDetectTest extends RelayCallingBaseActionCase
         'call_id' => 'call-id',
         'node_id' => 'node-id',
         'control_id' => self::UUID,
-        'detect' => ['type' => $type, 'params' => $params],
+        'detect' => ['type' => $type, 'params' => (object)$params],
         'timeout' => $timeout
       ]
     ]);

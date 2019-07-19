@@ -315,7 +315,8 @@ class Call {
     $component = new Components\Detect($this, $detect, $timeout);
     $this->_addComponent($component);
 
-    return $component->_waitFor(DetectState::Human, DetectState::Error, DetectState::Finished)->then(function() use (&$component) {
+    $events = [DetectState::Human, DetectState::Error, DetectState::Finished];
+    return $component->_waitFor(...$events)->then(function() use (&$component) {
       return new Results\DetectResult($component);
     });
   }
@@ -323,7 +324,8 @@ class Call {
   public function detectHumanAsync(Array $params = [], Int $timeout = null) {
     $detect = ['type' => DetectType::Machine, 'params' => $params];
     $component = new Components\Detect($this, $detect, $timeout);
-    $component->setEventsToWait([DetectState::Human, DetectState::Error, DetectState::Finished]);
+    $events = [DetectState::Human, DetectState::Error, DetectState::Finished];
+    $component->setEventsToWait($events);
     $this->_addComponent($component);
 
     return $component->execute()->then(function() use (&$component) {
@@ -332,21 +334,65 @@ class Call {
   }
 
   public function detectMachine(Array $params = [], Int $timeout = null) {
-    return $this->detect(DetectType::Machine, $params, $timeout);
+    $detect = ['type' => DetectType::Machine, 'params' => $params];
+    $component = new Components\Detect($this, $detect, $timeout);
+    $this->_addComponent($component);
+
+    $events = [DetectState::Machine, DetectState::Ready, DetectState::NotReady, DetectState::Error, DetectState::Finished];
+    return $component->_waitFor(...$events)->then(function () use (&$component) {
+      return new Results\DetectResult($component);
+    });
   }
 
   public function detectMachineAsync(Array $params = [], Int $timeout = null) {
-    return $this->detectAsync(DetectType::Machine, $params, $timeout);
+    $detect = ['type' => DetectType::Machine, 'params' => $params];
+    $component = new Components\Detect($this, $detect, $timeout);
+    $events = [DetectState::Machine, DetectState::Ready, DetectState::NotReady, DetectState::Error, DetectState::Finished];
+    $component->setEventsToWait($events);
+    $this->_addComponent($component);
+
+    return $component->execute()->then(function() use (&$component) {
+      return new Actions\DetectAction($component);
+    });
   }
 
   public function detectFax(String $tone = null, Int $timeout = null) {
-    $params = is_null($tone) ? [] : ['tone' => $tone];
-    return $this->detect(DetectType::Fax, $params, $timeout);
+    $params = [];
+    $faxEvents = [DetectState::CED, DetectState::CNG];
+    $events = [DetectState::Error, DetectState::Finished];
+    if ($tone && in_array($tone, $faxEvents)) {
+      $params = ['tone' => $tone];
+      array_push($events, $tone);
+    } else {
+      array_push($events, ...$faxEvents);
+    }
+    $detect = ['type' => DetectType::Fax, 'params' => $params];
+    $component = new Components\Detect($this, $detect, $timeout);
+    $this->_addComponent($component);
+
+    return $component->_waitFor(...$events)->then(function () use (&$component) {
+      return new Results\DetectResult($component);
+    });
   }
 
   public function detectFaxAsync(String $tone = null, Int $timeout = null) {
-    $params = is_null($tone) ? [] : ['tone' => $tone];
-    return $this->detectAsync(DetectType::Fax, $params, $timeout);
+    $params = [];
+    $faxEvents = [DetectState::CED, DetectState::CNG];
+    $events = [DetectState::Error, DetectState::Finished];
+    if ($tone && in_array($tone, $faxEvents)) {
+      $params = ['tone' => $tone];
+      array_push($events, $tone);
+    } else {
+      array_push($events, ...$faxEvents);
+    }
+    $detect = ['type' => DetectType::Fax, 'params' => $params];
+    $component = new Components\Detect($this, $detect, $timeout);
+    $component->setEventsToWait($events);
+    $this->_addComponent($component);
+
+    return $component->execute()->then(function() use (&$component) {
+      return new Actions\DetectAction($component);
+    });
   }
 
   public function detectDigit(String $digits = null, Int $timeout = null) {

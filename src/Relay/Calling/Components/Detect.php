@@ -31,9 +31,7 @@ class Detect extends Controllable {
   }
 
   public function payload() {
-    if (!isset($this->_detect['params']) || is_null($this->_detect['params']) || (is_array($this->_detect['params']) && !count($this->_detect['params']))) {
-      $this->_detect['params'] = new \stdClass;
-    }
+    $this->_detect['params'] = (object) $this->_detect['params'];
     $payload = [
       'node_id' => $this->call->nodeId,
       'call_id' => $this->call->id,
