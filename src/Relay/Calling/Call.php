@@ -561,6 +561,11 @@ class Call {
     }
   }
 
+  public function _tapChange($params) {
+    $this->_notifyComponents(Notification::Tap, $params->control_id, $params);
+    $this->_dispatchCallback("tap.$params->state", $params);
+  }
+
   private function _dispatchCallback(string $key, ...$params) {
     if (isset($this->_cbQueue[$key]) && is_callable($this->_cbQueue[$key])) {
       call_user_func($this->_cbQueue[$key], $this, ...$params);

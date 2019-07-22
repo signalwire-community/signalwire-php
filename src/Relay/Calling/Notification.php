@@ -11,6 +11,7 @@ final class Notification {
   const Receive = 'calling.call.receive';
   const Fax = 'calling.call.fax';
   const Detect = 'calling.call.detect';
+  const Tap = 'calling.call.tap';
 
   private function __construct() {
     throw new Exception('Invalid class Notification');
