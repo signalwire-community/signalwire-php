@@ -467,6 +467,24 @@ class Call {
     return $this->detectAsync(DetectType::Digit, $params, $timeout);
   }
 
+  public function tap(Array $tap, Array $device) {
+    $component = new Components\Tap($this, $tap, $device);
+    $this->_addComponent($component);
+
+    return $component->_waitFor(TapState::Finished)->then(function() use (&$component) {
+      return new Results\TapResult($component);
+    });
+  }
+
+  public function tapAsync(Array $tap, Array $device) {
+    $component = new Components\Tap($this, $tap, $device);
+    $this->_addComponent($component);
+
+    return $component->execute()->then(function() use (&$component) {
+      return new Actions\TapAction($component);
+    });
+  }
+
   public function on(String $event, Callable $fn) {
     $this->_cbQueue[$event] = $fn;
     return $this;
