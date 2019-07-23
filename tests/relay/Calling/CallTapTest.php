@@ -15,8 +15,8 @@ class RelayCallingCallTapTest extends RelayCallingBaseActionCase
     self::$notificationFinished = json_decode('{"event_type":"calling.call.tap","params":{"control_id":"'.self::UUID.'","call_id":"call-id","node_id":"node-id","state":"finished","tap":{"type":"audio","params":{"direction":"listen"}},"device":{"type":"rtp","params":{"addr":"127.0.0.1","port":"1234","codec":"PCMU","ptime":"20"}}}}');
     self::$success = json_decode('{"result":{"code":"200","message":"message","control_id":"'.self::UUID.'","source_device":{"type":"rtp","params":{"addr":"10.10.10.10","port":3000,"codec":"PCMU","rate":8000}}}}');
     self::$fail = json_decode('{"result":{"code":"400","message":"some error","control_id":"'.self::UUID.'"}}');
-    self::$tap = ['type' => 'audio', 'params' => []];
-    self::$device = ['type' => 'rtp', 'params' => ['addr' => '127.0.0.1', 'port' => 1234]];
+    self::$tap = ['type' => 'audio'];
+    self::$device = ['type' => 'rtp', 'addr' => '127.0.0.1', 'port' => 1234];
   }
 
   protected function setUp() {
@@ -80,7 +80,7 @@ class RelayCallingCallTapTest extends RelayCallingBaseActionCase
         'node_id' => 'node-id',
         'control_id' => self::UUID,
         'tap' => ['type' => 'audio', 'params' => new \stdClass],
-        'device' => ['type' => 'rtp', 'params' => (object)self::$device['params']]
+        'device' => ['type' => 'rtp', 'params' => (object)['addr' => '127.0.0.1', 'port' => 1234]]
       ]
     ]);
   }
