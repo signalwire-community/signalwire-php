@@ -54,13 +54,17 @@ abstract class RelayCallingBaseActionCase extends TestCase
     $this->call->nodeId = 'node-id';
   }
 
-  protected function _mockSuccessResponse($msg) {
-    $success = \React\Promise\resolve(json_decode('{"result":{"code":"200","message":"message","control_id":"' . self::UUID . '"}}'));
-    $this->client->connection->expects($this->once())->method('send')->with($msg)->willReturn($success);
+  protected function _mockSuccessResponse($msg, $success = null) {
+    if (is_null($success)) {
+      $success = json_decode('{"result":{"code":"200","message":"message","control_id":"' . self::UUID . '"}}');
+    }
+    $this->client->connection->expects($this->once())->method('send')->with($msg)->willReturn(\React\Promise\resolve($success));
   }
 
-  protected function _mockFailResponse($msg) {
-    $fail = \React\Promise\reject(json_decode('{"result":{"code":"400","message":"some error","control_id":"' . self::UUID . '"}}'));
-    $this->client->connection->expects($this->once())->method('send')->with($msg)->willReturn($fail);
+  protected function _mockFailResponse($msg, $fail = null) {
+    if (is_null($fail)) {
+      $fail = json_decode('{"result":{"code":"400","message":"some error","control_id":"' . self::UUID . '"}}');
+    }
+    $this->client->connection->expects($this->once())->method('send')->with($msg)->willReturn(\React\Promise\reject($fail));
   }
 }
