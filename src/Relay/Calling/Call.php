@@ -297,8 +297,8 @@ class Call {
    * @param Array Detector params
    * @param Int Max time to run detector
    */
-  public function detect(String $type, Array $params = [], Int $timeout = null) {
-    $detect = ['type' => $type, 'params' => $params];
+  public function detect(array $params) {
+    list($detect, $timeout) = $this->_prepareDetectParams($params);
     $component = new Components\Detect($this, $detect, $timeout);
     $this->_addComponent($component);
 
@@ -314,8 +314,8 @@ class Call {
    * @param Array Detector params
    * @param Int Max time to run detector
    */
-  public function detectAsync(String $type, Array $params = [], Int $timeout = null) {
-    $detect = ['type' => $type, 'params' => $params];
+  public function detectAsync(array $params) {
+    list($detect, $timeout) = $this->_prepareDetectParams($params);
     $component = new Components\Detect($this, $detect, $timeout);
     $this->_addComponent($component);
 
@@ -330,8 +330,9 @@ class Call {
    * @param Array Detector params
    * @param Int Max time to run detector
    */
-  public function detectHuman(Array $params = [], Int $timeout = null) {
-    $detect = ['type' => DetectType::Machine, 'params' => $params];
+  public function detectHuman(array $params = []) {
+    $params['type'] = DetectType::Machine;
+    list($detect, $timeout) = $this->_prepareDetectParams($params);
     $component = new Components\Detect($this, $detect, $timeout);
     $this->_addComponent($component);
 
@@ -347,8 +348,9 @@ class Call {
    * @param Array Detector params
    * @param Int Max time to run detector
    */
-  public function detectHumanAsync(Array $params = [], Int $timeout = null) {
-    $detect = ['type' => DetectType::Machine, 'params' => $params];
+  public function detectHumanAsync(array $params = []) {
+    $params['type'] = DetectType::Machine;
+    list($detect, $timeout) = $this->_prepareDetectParams($params);
     $component = new Components\Detect($this, $detect, $timeout);
     $events = [DetectState::Human, DetectState::Error, DetectState::Finished];
     $component->setEventsToWait($events);
@@ -365,8 +367,9 @@ class Call {
    * @param Array Detector params
    * @param Int Max time to run detector
    */
-  public function detectMachine(Array $params = [], Int $timeout = null) {
-    $detect = ['type' => DetectType::Machine, 'params' => $params];
+  public function detectMachine(array $params = []) {
+    $params['type'] = DetectType::Machine;
+    list($detect, $timeout) = $this->_prepareDetectParams($params);
     $component = new Components\Detect($this, $detect, $timeout);
     $this->_addComponent($component);
 
@@ -382,8 +385,9 @@ class Call {
    * @param Array Detector params
    * @param Int Max time to run detector
    */
-  public function detectMachineAsync(Array $params = [], Int $timeout = null) {
-    $detect = ['type' => DetectType::Machine, 'params' => $params];
+  public function detectMachineAsync(array $params = []) {
+    $params['type'] = DetectType::Machine;
+    list($detect, $timeout) = $this->_prepareDetectParams($params);
     $component = new Components\Detect($this, $detect, $timeout);
     $events = [DetectState::Machine, DetectState::Ready, DetectState::NotReady, DetectState::Error, DetectState::Finished];
     $component->setEventsToWait($events);
@@ -400,17 +404,8 @@ class Call {
    * @param String Tone to detect 'CED' | 'CNG'
    * @param Int Max time to run detector
    */
-  public function detectFax(String $tone = null, Int $timeout = null) {
-    $params = [];
-    $faxEvents = [DetectState::CED, DetectState::CNG];
-    $events = [DetectState::Error, DetectState::Finished];
-    if ($tone && in_array($tone, $faxEvents)) {
-      $params = ['tone' => $tone];
-      array_push($events, $tone);
-    } else {
-      array_push($events, ...$faxEvents);
-    }
-    $detect = ['type' => DetectType::Fax, 'params' => $params];
+  public function detectFax(array $params = []) {
+    list($detect, $timeout, $events) = $this->_prepareDetectFaxParamsAndEvents($params);
     $component = new Components\Detect($this, $detect, $timeout);
     $this->_addComponent($component);
 
@@ -425,17 +420,8 @@ class Call {
    * @param String Tone to detect 'CED' | 'CNG'
    * @param Int Max time to run detector
    */
-  public function detectFaxAsync(String $tone = null, Int $timeout = null) {
-    $params = [];
-    $faxEvents = [DetectState::CED, DetectState::CNG];
-    $events = [DetectState::Error, DetectState::Finished];
-    if ($tone && in_array($tone, $faxEvents)) {
-      $params = ['tone' => $tone];
-      array_push($events, $tone);
-    } else {
-      array_push($events, ...$faxEvents);
-    }
-    $detect = ['type' => DetectType::Fax, 'params' => $params];
+  public function detectFaxAsync(array $params = []) {
+    list($detect, $timeout, $events) = $this->_prepareDetectFaxParamsAndEvents($params);
     $component = new Components\Detect($this, $detect, $timeout);
     $component->setEventsToWait($events);
     $this->_addComponent($component);
@@ -451,9 +437,9 @@ class Call {
    * @param String To filter digits to detect. Default to "0123456789#*"
    * @param Int Max time to run detector
    */
-  public function detectDigit(String $digits = null, Int $timeout = null) {
-    $params = is_null($digits) ? [] : ['digits' => $digits];
-    return $this->detect(DetectType::Digit, $params, $timeout);
+  public function detectDigit(array $params = []) {
+    $params['type'] = DetectType::Digit;
+    return $this->detect($params);
   }
 
   /**
@@ -462,9 +448,9 @@ class Call {
    * @param String To filter digits to detect. Default to "0123456789#*"
    * @param Int Max time to run detector
    */
-  public function detectDigitAsync(String $digits = null, Int $timeout = null) {
-    $params = is_null($digits) ? [] : ['digits' => $digits];
-    return $this->detectAsync(DetectType::Digit, $params, $timeout);
+  public function detectDigitAsync(array $params = []) {
+    $params['type'] = DetectType::Digit;
+    return $this->detectAsync($params);
   }
 
   public function tap(Array $tap, Array $device) {
@@ -625,5 +611,31 @@ class Call {
     $_device = ['type' => $deviceType, 'params' => $device];
 
     return [$_tap, $_device];
+  }
+
+  private function _prepareDetectParams(array $params) {
+    $timeout = isset($params['timeout']) ? $params['timeout'] : null;
+    $type = isset($params['type']) ? $params['type'] : null;
+    unset($params['type'], $params['timeout']);
+    $detect = ['type' => $type, 'params' => $params];
+
+    return [$detect, $timeout];
+  }
+
+  private function _prepareDetectFaxParamsAndEvents(array $params) {
+    $params['type'] = DetectType::Fax;
+    list($detect, $timeout) = $this->_prepareDetectParams($params);
+    $faxEvents = [DetectState::CED, DetectState::CNG];
+    $events = [DetectState::Error, DetectState::Finished];
+    $tone = isset($detect['params']['tone']) ? $detect['params']['tone'] : null;
+    if ($tone && in_array($tone, $faxEvents)) {
+      $detect['params'] = ['tone' => $tone];
+      array_push($events, $tone);
+    } else {
+      $detect['params'] = [];
+      array_push($events, ...$faxEvents);
+    }
+
+    return [$detect, $timeout, $events];
   }
 }

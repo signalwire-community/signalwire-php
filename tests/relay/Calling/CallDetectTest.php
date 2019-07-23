@@ -38,7 +38,8 @@ class RelayCallingCallDetectTest extends RelayCallingBaseActionCase
   public function testDetectSuccess(): void {
     $msg = $this->_detectMsg('fax');
     $this->_mockSuccessResponse($msg);
-    $this->call->detect('fax', [], 25)->done(function($result) {
+    $params = [ 'type' => 'fax', 'timeout' => 25];
+    $this->call->detect($params)->done(function($result) {
       $this->assertInstanceOf('SignalWire\Relay\Calling\Results\DetectResult', $result);
       $this->assertTrue($result->isSuccessful());
       $this->assertEquals($result->getType(), 'fax');
@@ -53,13 +54,15 @@ class RelayCallingCallDetectTest extends RelayCallingBaseActionCase
   public function testDetectFail(): void {
     $msg = $this->_detectMsg('fax');
     $this->_mockFailResponse($msg);
-    $this->call->detect('fax', [], 25)->done([$this, '__detectFailCheck']);
+    $params = [ 'type' => 'fax', 'timeout' => 25];
+    $this->call->detect($params)->done([$this, '__detectFailCheck']);
   }
 
   public function testDetectAsyncSuccess(): void {
     $msg = $this->_detectMsg('fax',['tone' => 'CED'], 45);
     $this->_mockSuccessResponse($msg);
-    $this->call->detectAsync('fax', ['tone' => 'CED'], 45)->done(function($action) {
+    $params = [ 'type' => 'fax', 'timeout' => 45, 'tone' => 'CED' ];
+    $this->call->detectAsync($params)->done(function($action) {
       $this->assertInstanceOf('SignalWire\Relay\Calling\Actions\DetectAction', $action);
       $this->assertInstanceOf('SignalWire\Relay\Calling\Results\DetectResult', $action->getResult());
       $this->assertFalse($action->isCompleted());
@@ -71,13 +74,14 @@ class RelayCallingCallDetectTest extends RelayCallingBaseActionCase
   public function testDetectAsyncFail(): void {
     $msg = $this->_detectMsg('fax',['tone' => 'CED'], 45);
     $this->_mockFailResponse($msg);
-    $this->call->detectAsync('fax', ['tone' => 'CED'], 45)->done([$this, '__detectAsyncFailCheck']);
+    $params = [ 'type' => 'fax', 'timeout' => 45, 'tone' => 'CED' ];
+    $this->call->detectAsync($params)->done([$this, '__detectAsyncFailCheck']);
   }
 
   public function testDetectHumanSuccess(): void {
     $msg = $this->_detectMsg('machine');
     $this->_mockSuccessResponse($msg);
-    $this->call->detectHuman([], 25)->done(function($result) {
+    $this->call->detectHuman(['timeout' => 25])->done(function($result) {
       $this->assertInstanceOf('SignalWire\Relay\Calling\Results\DetectResult', $result);
       $this->assertTrue($result->isSuccessful());
       $this->assertEquals($result->getType(), 'machine');
@@ -86,19 +90,18 @@ class RelayCallingCallDetectTest extends RelayCallingBaseActionCase
       $this->assertObjectHasAttribute('params', $result->getEvent()->payload);
     });
     $this->calling->notificationHandler(self::$notificationMachineHuman);
-    // $this->calling->notificationHandler(self::$notificationFaxFinished);
   }
 
   public function testDetectHumanFail(): void {
     $msg = $this->_detectMsg('machine');
     $this->_mockFailResponse($msg);
-    $this->call->detectHuman([], 25)->done([$this, '__detectFailCheck']);
+    $this->call->detectHuman(['timeout' => 25])->done([$this, '__detectFailCheck']);
   }
 
   public function testDetectHumanAsyncSuccess(): void {
     $msg = $this->_detectMsg('machine', ['initial_timeout' => 5], 45);
     $this->_mockSuccessResponse($msg);
-    $this->call->detectHumanAsync(['initial_timeout' => 5], 45)->done(function($action) {
+    $this->call->detectHumanAsync(['initial_timeout' => 5, 'timeout' => 45])->done(function($action) {
       $this->assertInstanceOf('SignalWire\Relay\Calling\Actions\DetectAction', $action);
       $this->assertInstanceOf('SignalWire\Relay\Calling\Results\DetectResult', $action->getResult());
       $this->assertFalse($action->isCompleted());
@@ -110,14 +113,14 @@ class RelayCallingCallDetectTest extends RelayCallingBaseActionCase
   public function testDetectHumanAsyncFail(): void {
     $msg = $this->_detectMsg('machine', ['initial_timeout' => 5], 45);
     $this->_mockFailResponse($msg);
-    $this->call->detectHumanAsync(['initial_timeout' => 5], 45)->done([$this, '__detectAsyncFailCheck']);
+    $this->call->detectHumanAsync(['initial_timeout' => 5, 'timeout' => 45])->done([$this, '__detectAsyncFailCheck']);
   }
 
   public function testDetectMachineSuccess(): void {
     $msg = $this->_detectMsg('machine');
     $this->_mockSuccessResponse($msg);
 
-    $this->call->detectMachine([], 25)->done(function($result) {
+    $this->call->detectMachine(['timeout' => 25])->done(function($result) {
       $this->assertInstanceOf('SignalWire\Relay\Calling\Results\DetectResult', $result);
       $this->assertTrue($result->isSuccessful());
       $this->assertEquals($result->getType(), 'machine');
@@ -132,14 +135,14 @@ class RelayCallingCallDetectTest extends RelayCallingBaseActionCase
   public function testDetectMachineFail(): void {
     $msg = $this->_detectMsg('machine');
     $this->_mockFailResponse($msg);
-    $this->call->detectMachine([], 25)->done([$this, '__detectFailCheck']);
+    $this->call->detectMachine(['timeout' => 25])->done([$this, '__detectFailCheck']);
   }
 
   public function testDetectMachineAsyncSuccess(): void {
     $msg = $this->_detectMsg('machine',['initial_timeout' => 4], 45);
     $this->_mockSuccessResponse($msg);
 
-    $this->call->detectMachineAsync(['initial_timeout' => 4], 45)->done(function($action) {
+    $this->call->detectMachineAsync(['initial_timeout' => 4, 'timeout' => 45])->done(function($action) {
       $this->assertInstanceOf('SignalWire\Relay\Calling\Actions\DetectAction', $action);
       $this->assertInstanceOf('SignalWire\Relay\Calling\Results\DetectResult', $action->getResult());
       $this->assertFalse($action->isCompleted());
@@ -151,14 +154,14 @@ class RelayCallingCallDetectTest extends RelayCallingBaseActionCase
   public function testDetectMachineAsyncFail(): void {
     $msg = $this->_detectMsg('machine',['initial_timeout' => 4], 45);
     $this->_mockFailResponse($msg);
-    $this->call->detectMachineAsync(['initial_timeout' => 4], 45)->done([$this, '__detectAsyncFailCheck']);
+    $this->call->detectMachineAsync(['initial_timeout' => 4, 'timeout' => 45])->done([$this, '__detectAsyncFailCheck']);
   }
 
   public function testDetectDigitSuccess(): void {
     $msg = $this->_detectMsg('digit');
     $this->_mockSuccessResponse($msg);
 
-    $this->call->detectDigit(null, 25)->done(function($result) {
+    $this->call->detectDigit(['timeout' => 25])->done(function($result) {
       $this->assertInstanceOf('SignalWire\Relay\Calling\Results\DetectResult', $result);
       $this->assertTrue($result->isSuccessful());
       $this->assertEquals($result->getType(), 'digit');
@@ -173,14 +176,14 @@ class RelayCallingCallDetectTest extends RelayCallingBaseActionCase
   public function testDetectDigitFail(): void {
     $msg = $this->_detectMsg('digit');
     $this->_mockFailResponse($msg);
-    $this->call->detectDigit(null, 25)->done([$this, '__detectFailCheck']);
+    $this->call->detectDigit(['timeout' => 25])->done([$this, '__detectFailCheck']);
   }
 
   public function testDetectDigitAsyncSuccess(): void {
     $msg = $this->_detectMsg('digit', ['digits' => '123'], 45);
     $this->_mockSuccessResponse($msg);
 
-    $this->call->detectDigitAsync('123', 45)->done(function($action) {
+    $this->call->detectDigitAsync(['digits' => '123', 'timeout' => 45])->done(function($action) {
       $this->assertInstanceOf('SignalWire\Relay\Calling\Actions\DetectAction', $action);
       $this->assertInstanceOf('SignalWire\Relay\Calling\Results\DetectResult', $action->getResult());
       $this->assertFalse($action->isCompleted());
@@ -192,7 +195,7 @@ class RelayCallingCallDetectTest extends RelayCallingBaseActionCase
   public function testDetectDigitAsyncFail(): void {
     $msg = $this->_detectMsg('digit', ['digits' => '123'], 45);
     $this->_mockFailResponse($msg);
-    $this->call->detectDigitAsync('123', 45)->done([$this, '__detectAsyncFailCheck']);
+    $this->call->detectDigitAsync(['digits' => '123', 'timeout' => 45])->done([$this, '__detectAsyncFailCheck']);
   }
 
   /**
