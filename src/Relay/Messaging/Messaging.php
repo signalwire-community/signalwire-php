@@ -28,12 +28,12 @@ class Messaging extends \SignalWire\Relay\BaseRelay {
       'method' => 'messaging.send',
       'params' => $params
     ]);
-    return $this->client->execute($msg)->done(function($response) {
+    return $this->client->execute($msg)->then(function($response) {
       Log::info($response->result->message);
-      return $response->result;
+      return new SendResult($response->result);
     }, function ($error) {
       Log::error("Messaging send error: {$error->message}. [code: {$error->code}]");
-      return $error;
+      return new SendResult($error);
     });
   }
 
