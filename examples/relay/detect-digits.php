@@ -28,7 +28,7 @@ $client->on('signalwire.ready', function($client) {
       echo "\nDetect Update\n";
     });
 
-    $call->detectDigit('123')->done(function($result) use ($call) {
+    $call->detectDigit(['digits' => '123'])->done(function($result) use ($call) {
       print PHP_EOL . 'isSuccessful: ' . $result->isSuccessful() . PHP_EOL;
       print PHP_EOL . 'getType: ' . $result->getType() . PHP_EOL;
       print PHP_EOL . 'getResult: ' . $result->getResult() . PHP_EOL;
