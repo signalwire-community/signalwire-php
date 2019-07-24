@@ -11,11 +11,11 @@ class Tasking extends \SignalWire\Relay\BaseRelay {
     Handler::trigger($this->client->relayProtocol, $notification->message, $this->_prefixCtx($notification->context));
   }
 
-  public function onTask(string $context, callable $handler) {
-    Handler::register($this->client->relayProtocol, $handler, $this->_prefixCtx($context));
-  }
+  // public function onTask(string $context, callable $handler) {
+  //   Handler::register($this->client->relayProtocol, $handler, $this->_prefixCtx($context));
+  // }
 
-  private function _prefixCtx(string $context) {
-    return "tasking.context.$context";
-  }
+  // private function _prefixCtx(string $context) {
+  //   return "tasking.context.$context";
+  // }
 }

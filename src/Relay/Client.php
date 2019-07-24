@@ -65,6 +65,12 @@ class Client {
   public $relayProtocol = null;
 
   /**
+   * Array containing the contexts this client is receiving.
+   * @var Array
+   */
+  public $contexts = [];
+
+  /**
    * Relay Calling service
    * @var SignalWire\Relay\Service\Calling
    */
@@ -90,15 +96,15 @@ class Client {
 
   /**
    * Queue of the execute messages that must be sent when the session turns up
-   * @var Boolean
+   * @var Array
    */
-  private $_executeQueue = array();
+  private $_executeQueue = [];
 
   /**
    * Hash with proto+channel this session is subscribed to
-   * @var Boolean
+   * @var Array
    */
-  private $_subscriptions = array();
+  private $_subscriptions = [];
 
   public function __construct(Array $options) {
     if (isset($options['host'])) {
