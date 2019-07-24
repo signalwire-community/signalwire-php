@@ -10,7 +10,7 @@ class Setup {
   const Protocol = 'signalwire';
   const Method = 'setup';
   const Channels = ['notifications'];
-  const Receive = 'call.receive'; // FIXME: change with signalwire.receive
+  const Receive = 'signalwire.receive';
 
   static function protocol(Client $client) {
     $msg = new Execute(array(
