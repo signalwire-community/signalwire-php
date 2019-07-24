@@ -20,7 +20,6 @@ abstract class BaseRelay {
       if ($success) {
         foreach ((array) $contexts as $context) {
           Handler::register($this->client->relayProtocol, $handler, $this->_prefixCtx($context));
-          print PHP_EOL . Handler::queueCount($this->client->relayProtocol, $this->_prefixCtx($context)) . PHP_EOL;
         }
       }
     });

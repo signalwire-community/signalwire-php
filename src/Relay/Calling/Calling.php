@@ -1,6 +1,7 @@
 <?php
+
 namespace SignalWire\Relay\Calling;
-use SignalWire\Messages\Execute;
+
 use SignalWire\Handler;
 use SignalWire\Log;
 
@@ -52,30 +53,8 @@ class Calling extends \SignalWire\Relay\BaseRelay {
     return $call->dial();
   }
 
-  // TODO: support backward compat.
   // public function onInbound($contexts, Callable $handler) {
-  //   if (gettype($contexts) === 'string') {
-  //     $contexts = [$contexts];
-  //   }
-  //   $msg = new Execute([
-  //     'protocol' => $this->client->relayProtocol,
-  //     'method' => 'call.receive',
-  //     'params' => [ 'contexts' => $contexts ]
-  //   ]);
-  //   return $this->client->execute($msg)->done(function($response) use ($contexts, $handler) {
-  //     Log::info($response->result->message);
-  //     foreach ($contexts as $context) {
-  //       Handler::register($this->client->relayProtocol, $handler, $this->_prefixCtx($context));
-  //     }
-  //     return $response->result;
-  //   }, function ($error) {
-  //     Log::error("Calling onInbound error: {$error->message}. [code: {$error->code}]");
-  //     return $error;
-  //   });
-  // }
-
-  // private function _prefixCtx(String $context) {
-  //   return "calling.context.$context";
+  //   $this->registerContexts($contexts, $handler);
   // }
 
   public function addCall(Call $call) {
