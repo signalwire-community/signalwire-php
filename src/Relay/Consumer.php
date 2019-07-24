@@ -28,6 +28,12 @@ abstract class Consumer {
    */
   public $token;
 
+  /**
+   * Contexts to listen on
+   * @var Array
+   */
+  public $contexts = [];
+
   protected $loop = null;
   protected $client = null;
   private $_kernel = null;
@@ -57,7 +63,7 @@ abstract class Consumer {
 
   public final function run() {
     $this->setup();
-    $this->_checkProjectAndToken();
+    $this->_checkRequirements();
 
     if (!($this->loop instanceof LoopInterface)) {
       $this->loop = ReactFactory::create();
@@ -80,9 +86,12 @@ abstract class Consumer {
 
     $this->client->on('signalwire.ready', yield Recoil::callback(function($client) {
       try {
-        yield $this->_registerCallingContexts();
-        yield $this->_registerTaskingContexts();
-        yield $this->ready();
+        $success = yield Setup::receive($client, $this->contexts);
+        if ($success) {
+          yield $this->_registerCallingContexts();
+          yield $this->_registerTaskingContexts();
+          yield $this->ready();
+        }
       } catch (\Throwable $th) {
         Log::error($th->getMessage());
         throw $th;
@@ -93,10 +102,6 @@ abstract class Consumer {
   }
 
   private function _registerCallingContexts(): Coroutine {
-    if (!property_exists($this, 'contexts')) {
-      return false;
-    }
-
     $callback = yield Recoil::callback(function ($call) {
       try {
         yield $this->onIncomingCall($call);
@@ -107,14 +112,10 @@ abstract class Consumer {
       }
     });
 
-    yield $this->client->calling->onInbound((array)$this->contexts, $callback);
+    yield $this->client->calling->registerContexts($this->contexts, $callback);
   }
 
   private function _registerTaskingContexts(): Coroutine {
-    if (!property_exists($this, 'contexts')) {
-      return false;
-    }
-
     $callback = yield Recoil::callback(function ($message) {
       try {
         yield $this->onTask($message);
@@ -124,17 +125,19 @@ abstract class Consumer {
         echo PHP_EOL . $error->getTraceAsString() . PHP_EOL;
       }
     });
-    foreach ((array)$this->contexts as $context) {
-      $this->client->tasking->onTask($context, $callback);
-    }
+
+    yield $this->client->tasking->registerContexts($this->contexts, $callback);
   }
 
-  private function _checkProjectAndToken() {
+  private function _checkRequirements() {
     if (!isset($this->project)) {
       throw new \InvalidArgumentException(get_class($this) . ' must have a $project.');
     }
     if (!isset($this->token)) {
       throw new \InvalidArgumentException(get_class($this) . ' must have a $token.');
+    }
+    if (!isset($this->contexts) || !count($this->contexts)) {
+      throw new \InvalidArgumentException(get_class($this) . ' must have one or more $contexts.');
     }
   }
 }

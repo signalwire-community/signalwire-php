@@ -39,7 +39,6 @@ class Setup {
     }
     $contexts = array_diff($newContexts, $client->contexts);
     if (!count($contexts)) {
-      Log::info("Already receiving these contexts.");
       return \React\Promise\resolve(true);
     }
     $msg = new Execute([
