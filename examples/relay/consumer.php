@@ -26,6 +26,12 @@ class CustomConsumer extends Consumer {
     print_r($message);
   }
 
+  public function onIncomingMessage($message): Coroutine {
+    yield;
+    echo "\n onIncomingMessage \n";
+    print_r($message);
+  }
+
   public function onIncomingCall($call): Coroutine {
     print "\n - onIncomingCall on context: {$call->context}, from: {$call->from} to: {$call->to} !\n";
 

@@ -16,8 +16,7 @@ class Message {
   public $tags;
   public $reason;
 
-  public function __construct(Messaging $relayInstance, $options) {
-    $this->relayInstance = $relayInstance;
+  public function __construct($options) {
 
     if (isset($options->message_id)) {
       $this->id = $options->message_id;

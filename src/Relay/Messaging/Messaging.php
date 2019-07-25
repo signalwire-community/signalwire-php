@@ -13,10 +13,13 @@ class Messaging extends \SignalWire\Relay\BaseRelay {
     switch ($notification->event_type)
     {
       case Notification::State:
-        // $this->_onState($notification->params);
+        $message = new Message($notification->params);
+        Log::info(":: Message state ::");
+        print_r($message);
+        // Handler::trigger($this->client->relayProtocol, $message, "messaging.state.{$message->context}");
         break;
       case Notification::Receive:
-        $message = new Message($this, $notification->params);
+        $message = new Message($notification->params);
         Handler::trigger($this->client->relayProtocol, $message, $this->_prefixCtx($message->context));
         break;
     }

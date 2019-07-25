@@ -57,6 +57,10 @@ abstract class Consumer {
     yield;
   }
 
+  public function onIncomingMessage($message): Coroutine {
+    yield;
+  }
+
   public function onTask($message): Coroutine {
     yield;
   }

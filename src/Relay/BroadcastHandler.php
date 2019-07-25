@@ -17,6 +17,9 @@ class BroadcastHandler {
       case 'queuing.relay.tasks':
         $client->getTasking()->notificationHandler($notification->params);
         break;
+      case 'queuing.relay.messaging':
+        $client->getMessaging()->notificationHandler($notification->params);
+        break;
       case 'queuing.relay.events':
         self::switchEventType($client, $notification->params->event_type, $notification->params);
         break;
