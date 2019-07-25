@@ -53,10 +53,6 @@ class Calling extends \SignalWire\Relay\BaseRelay {
     return $call->dial();
   }
 
-  // public function onInbound($contexts, Callable $handler) {
-  //   $this->registerContexts($contexts, $handler);
-  // }
-
   public function addCall(Call $call) {
     array_push($this->_calls, $call);
   }

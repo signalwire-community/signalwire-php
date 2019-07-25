@@ -16,7 +16,7 @@ abstract class BaseRelay {
   }
 
   public function registerContexts($contexts, Callable $handler) {
-    Setup::receive($this->client, $contexts)->done(function($success) use ($contexts, $handler) {
+    return Setup::receive($this->client, $contexts)->then(function($success) use ($contexts, $handler) {
       if ($success) {
         foreach ((array) $contexts as $context) {
           Handler::register($this->client->relayProtocol, $handler, $this->_prefixCtx($context));
