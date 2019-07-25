@@ -53,7 +53,6 @@ class Connection {
         Handler::trigger(Events::SocketError, $error, $this->client->uuid);
       }
     );
-    $this->client->eventLoop->run();
   }
 
   public function close() {
