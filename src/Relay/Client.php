@@ -89,6 +89,12 @@ class Client {
   private $_autoReconnect = false;
 
   /**
+   * Whether the loop is running
+   * @var Boolean
+   */
+  private $_loopIsRunning = false;
+
+  /**
    * Session idle state. If true we've to save every execute and dispatch them when a new connection will be active
    * @var Boolean
    */
@@ -128,7 +134,14 @@ class Client {
   }
 
   public function connect() {
+    if (!$this->connection) {
+      return;
+    }
     $this->connection->connect();
+    if ($this->_loopIsRunning === false) {
+      $this->_loopIsRunning = true;
+      $this->eventLoop->run();
+    }
   }
 
   public function disconnect() {
@@ -138,7 +151,7 @@ class Client {
     if ($this->connection) {
       $this->connection->close();
     }
-    unset($this->connection);
+    $this->connection = null;
     $this->_executeQueue = array();
     $this->_detachListeners();
   }

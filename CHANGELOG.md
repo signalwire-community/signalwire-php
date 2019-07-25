@@ -9,6 +9,9 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - Methods to start a detector on a Call: `detect`, `detectAsync`, `detectMachine`, `detectMachineAsync`, `detectFax`, `detectFaxAsync`, `detectDigit`, `detectDigitAsync`
 - Methods to tap media in a Call: `tap` and `tapAsync`
 
+### Fixed
+- Possible issue on WebSocket reconnect due to a race condition on the EventLoop.
+
 ## [2.0.0] - 2019-07-16
 ### Added
 - Add support for faxing. New call methods: `faxReceive`, `faxReceiveAsync`, `faxSend`, `faxSendAsync`.
