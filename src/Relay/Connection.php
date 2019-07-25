@@ -53,13 +53,14 @@ class Connection {
         Handler::trigger(Events::SocketError, $error, $this->client->uuid);
       }
     );
-    $this->client->eventLoop->run();
   }
 
   public function close() {
     if (isset($this->_ws)) {
       $this->_ws->close();
       unset($this->_ws);
+    } else {
+      $this->client->eventLoop->addTimer(0.5, [$this, 'close']);
     }
   }
 
