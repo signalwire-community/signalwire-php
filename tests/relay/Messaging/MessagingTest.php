@@ -34,7 +34,7 @@ class RelayMessagingTest extends BaseRelayCase
       $this->assertTrue(Handler::isQueued('relay-proto', 'messaging.ctxState.home'));
       $this->assertTrue(Handler::isQueued('relay-proto', 'messaging.ctxState.office'));
 
-      $msg = json_decode('{"jsonrpc":"2.0","id":"req-id","method":"blade.broadcast","params":{"broadcaster_nodeid":"uuid","protocol":"relay-proto","channel":"notifications","event":"queuing.relay.messaging","params":{"event_type":"messaging.state","space_id":"uuid","project_id":"uuid","context":"office","params":{"message_id":"224d1192-b266-4ca2-bd8e-48c64a44d830","context":"other","direction":"outbound","tags":["message","outbound","SMS","office","relay-client"],"from_number":"+1xxx","to_number":"+1yyy","body":"Welcome at SignalWire!","media":[],"segments":1,"message_state":"queued"}}}}');
+      $msg = json_decode('{"jsonrpc":"2.0","id":"req-id","method":"blade.broadcast","params":{"broadcaster_nodeid":"uuid","protocol":"relay-proto","channel":"notifications","event":"queuing.relay.messaging","params":{"event_type":"messaging.state","space_id":"uuid","project_id":"uuid","context":"office","params":{"message_id":"224d1192-b266-4ca2-bd8e-48c64a44d830","context":"office","direction":"outbound","tags":["message","outbound","SMS","office","relay-client"],"from_number":"+1xxx","to_number":"+1yyy","body":"Welcome at SignalWire!","media":[],"segments":1,"message_state":"queued"}}}}');
       Handler::trigger(Events::SocketMessage, $msg, $this->client->uuid);
     });
   }
