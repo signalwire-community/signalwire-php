@@ -1,8 +1,6 @@
 <?php
 namespace SignalWire\Relay\Messaging;
 
-use SignalWire\Log;
-
 class Message {
   public $id;
   public $state;
@@ -51,7 +49,5 @@ class Message {
     if (isset($options->reason)) {
       $this->reason = $options->reason;
     }
-
-    Log::info("New Relay message {$this->id} in context {$this->context}");
   }
 }

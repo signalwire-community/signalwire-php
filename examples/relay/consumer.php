@@ -28,7 +28,13 @@ class CustomConsumer extends Consumer {
 
   public function onIncomingMessage($message): Coroutine {
     yield;
-    echo "\n onIncomingMessage \n";
+    echo "\n New inbound message \n";
+    print_r($message);
+  }
+
+  public function onMessageStateChange($message): Coroutine {
+    yield;
+    echo "\n Message state changed \n";
     print_r($message);
   }
 

@@ -14,11 +14,11 @@ class Messaging extends \SignalWire\Relay\BaseRelay {
     switch ($notification->event_type)
     {
       case Notification::State:
-        Log::info("Relay message '{$message->direction}' changes state to '{$message->state}'");
+        Log::info("Relay message '{$message->id}' changes state to '{$message->state}'");
         Handler::trigger($this->client->relayProtocol, $message, $this->_ctxStateUniqueId($message->context));
         break;
       case Notification::Receive:
-        Log::info("New Relay '{$message->direction}' message in context '{$message->context}'");
+        Log::info("New Relay {$message->direction} message in context '{$message->context}'");
         Handler::trigger($this->client->relayProtocol, $message, $this->_ctxReceiveUniqueId($message->context));
         break;
     }
