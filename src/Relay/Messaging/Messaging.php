@@ -10,17 +10,16 @@ class Messaging extends \SignalWire\Relay\BaseRelay {
 
   public function notificationHandler($notification): void {
     $notification->params->event_type = $notification->event_type;
+    $message = new Message($notification->params);
     switch ($notification->event_type)
     {
       case Notification::State:
-        $message = new Message($notification->params);
-        Log::info(":: Message state ::");
-        print_r($message);
-        // Handler::trigger($this->client->relayProtocol, $message, "messaging.state.{$message->context}");
+        Log::info("Relay message '{$message->direction}' changes state to '{$message->state}'");
+        Handler::trigger($this->client->relayProtocol, $message, $this->_ctxStateUniqueId($message->context));
         break;
       case Notification::Receive:
-        $message = new Message($notification->params);
-        Handler::trigger($this->client->relayProtocol, $message, $this->_prefixCtx($message->context));
+        Log::info("New Relay '{$message->direction}' message in context '{$message->context}'");
+        Handler::trigger($this->client->relayProtocol, $message, $this->_ctxReceiveUniqueId($message->context));
         break;
     }
   }
@@ -38,9 +37,5 @@ class Messaging extends \SignalWire\Relay\BaseRelay {
       Log::error("Messaging send error: {$error->message}. [code: {$error->code}]");
       return new SendResult($error);
     });
-  }
-
-  private function _prefixCtx(String $context) {
-    return "messaging.context.$context";
   }
 }
