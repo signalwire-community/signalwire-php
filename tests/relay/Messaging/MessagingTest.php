@@ -62,11 +62,5 @@ class RelayMessagingTest extends BaseRelayCase
       $this->assertFalse($result->successful);
       $this->assertFalse($result->isSuccessful());
     });
-
-    // $mock = $this->getMockBuilder(\stdClass::class)->setMethods(['foo'])->getMock();
-    // $mock->expects($this->once())->method('foo');
-    // $mock->foo();
-    // $mock->foo();
-    // $mock->foo();
   }
 }
