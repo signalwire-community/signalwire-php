@@ -43,7 +43,7 @@ class RelayMessagingTest extends BaseRelayCase
     $response = json_decode('{"requester_nodeid":"uuid","responder_nodeid":"uuid","result":{"message":"Message accepted","code":"200","message_id":"2c0e265d-4597-470e-9d5d-00581e0874a2"}}');
     $this->_mockResponse([$response]);
 
-    $params = [ 'context' => 'office', 'from_number' => '8992222222', 'to_number' => '8991111111', 'body' => 'Hello' ];
+    $params = [ 'context' => 'office', 'from' => '8992222222', 'to' => '8991111111', 'body' => 'Hello' ];
     $this->client->messaging->send($params)->done(function($result) {
       $this->assertInstanceOf('SignalWire\Relay\Messaging\SendResult', $result);
       $this->assertTrue($result->successful);
@@ -56,7 +56,7 @@ class RelayMessagingTest extends BaseRelayCase
     $response = json_decode('{"requester_nodeid":"uuid","responder_nodeid":"uuid","result":{"message":"Some error","code":"400"}}');
     $this->_mockResponse([$response]);
 
-    $params = [ 'context' => 'office', 'from_number' => '8992222222', 'to_number' => '8991111111', 'body' => 'Hello' ];
+    $params = [ 'context' => 'office', 'from' => '8992222222', 'to' => '8991111111', 'body' => 'Hello' ];
     $this->client->messaging->send($params)->done(function($result) {
       $this->assertInstanceOf('SignalWire\Relay\Messaging\SendResult', $result);
       $this->assertFalse($result->successful);
