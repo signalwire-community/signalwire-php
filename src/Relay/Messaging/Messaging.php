@@ -25,6 +25,9 @@ class Messaging extends \SignalWire\Relay\BaseRelay {
   }
 
   public function send(Array $params) {
+    $params['from_number'] = isset($params['from']) ? $params['from'] : '';
+    $params['to_number'] = isset($params['to']) ? $params['to'] : '';
+    unset($params['from'], $params['to']);
     $msg = new Execute([
       'protocol' => $this->client->relayProtocol,
       'method' => 'messaging.send',
