@@ -57,6 +57,14 @@ abstract class Consumer {
     yield;
   }
 
+  public function onIncomingMessage($message): Coroutine {
+    yield;
+  }
+
+  public function onMessageStateChange($message): Coroutine {
+    yield;
+  }
+
   public function onTask($message): Coroutine {
     yield;
   }
@@ -90,6 +98,7 @@ abstract class Consumer {
         if ($success) {
           yield $this->_registerCallingContexts();
           yield $this->_registerTaskingContexts();
+          yield $this->_registerMessagingContexts();
           yield $this->ready();
         }
       } catch (\Throwable $th) {
@@ -112,7 +121,7 @@ abstract class Consumer {
       }
     });
 
-    yield $this->client->calling->registerContexts($this->contexts, $callback);
+    yield $this->client->calling->onReceive($this->contexts, $callback);
   }
 
   private function _registerTaskingContexts(): Coroutine {
@@ -126,7 +135,32 @@ abstract class Consumer {
       }
     });
 
-    yield $this->client->tasking->registerContexts($this->contexts, $callback);
+    yield $this->client->tasking->onReceive($this->contexts, $callback);
+  }
+
+  private function _registerMessagingContexts(): Coroutine {
+    $receiveCallback = yield Recoil::callback(function ($message) {
+      try {
+        yield $this->onIncomingMessage($message);
+      } catch (\Throwable $error) {
+        echo PHP_EOL;
+        echo PHP_EOL . $error->getMessage();
+        echo PHP_EOL . $error->getTraceAsString() . PHP_EOL;
+      }
+    });
+
+    $changeStateCallback = yield Recoil::callback(function ($message) {
+      try {
+        yield $this->onMessageStateChange($message);
+      } catch (\Throwable $error) {
+        echo PHP_EOL;
+        echo PHP_EOL . $error->getMessage();
+        echo PHP_EOL . $error->getTraceAsString() . PHP_EOL;
+      }
+    });
+
+    yield $this->client->messaging->onReceive($this->contexts, $receiveCallback);
+    yield $this->client->messaging->onStateChange($this->contexts, $changeStateCallback);
   }
 
   private function _checkRequirements() {

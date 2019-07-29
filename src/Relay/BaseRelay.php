@@ -15,17 +15,31 @@ abstract class BaseRelay {
     $this->service = strtolower((new \ReflectionClass($this))->getShortName());
   }
 
-  public function registerContexts($contexts, Callable $handler) {
+  public function onReceive(Array $contexts, Callable $handler) {
     return Setup::receive($this->client, $contexts)->then(function($success) use ($contexts, $handler) {
       if ($success) {
-        foreach ((array) $contexts as $context) {
-          Handler::register($this->client->relayProtocol, $handler, $this->_prefixCtx($context));
+        foreach ($contexts as $context) {
+          Handler::register($this->client->relayProtocol, $handler, $this->_ctxReceiveUniqueId($context));
         }
       }
     });
   }
 
-  protected function _prefixCtx(String $context) {
-    return "{$this->service}.context.{$context}";
+  public function onStateChange(Array $contexts, Callable $handler) {
+    return Setup::receive($this->client, $contexts)->then(function($success) use ($contexts, $handler) {
+      if ($success) {
+        foreach ($contexts as $context) {
+          Handler::register($this->client->relayProtocol, $handler, $this->_ctxStateUniqueId($context));
+        }
+      }
+    });
+  }
+
+  protected function _ctxReceiveUniqueId(String $context) {
+    return "{$this->service}.ctxReceive.{$context}";
+  }
+
+  protected function _ctxStateUniqueId(String $context) {
+    return "{$this->service}.ctxState.{$context}";
   }
 }

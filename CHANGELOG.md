@@ -8,6 +8,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - Create your own Relay Tasks and enable `onTask` method on RelayConsumer to receive/handle them.
 - Methods to start a detector on a Call: `detect`, `detectAsync`, `detectMachine`, `detectMachineAsync`, `detectFax`, `detectFaxAsync`, `detectDigit`, `detectDigitAsync`
 - Methods to tap media in a Call: `tap` and `tapAsync`
+- Support for Relay Messaging
 
 ### Fixed
 - Possible issue on WebSocket reconnect due to a race condition on the EventLoop.

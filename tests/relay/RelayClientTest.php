@@ -63,4 +63,15 @@ class RelayClientTest extends TestCase
     $this->assertTrue(SignalWire\Handler::isQueued('proto', 'notifications'));
     $this->assertEquals(SignalWire\Handler::queueCount('proto', 'notifications'), 1);
   }
+
+  public function testCallingProperty(): void {
+    $this->assertInstanceOf('SignalWire\Relay\Calling\Calling', $this->client->calling);
+  }
+
+  public function testTaskingProperty(): void {
+    $this->assertInstanceOf('SignalWire\Relay\Tasking\Tasking', $this->client->tasking);
+  }
+  public function testMessagingProperty(): void {
+    $this->assertInstanceOf('SignalWire\Relay\Messaging\Messaging', $this->client->messaging);
+  }
 }
