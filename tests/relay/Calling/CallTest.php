@@ -10,7 +10,7 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
     $this->_successResponse = \React\Promise\resolve(json_decode('{"result":{"code":"200","message":"message","control_id":"' . self::UUID . '"}}'));
     $this->_failResponse = \React\Promise\reject(json_decode('{"result":{"code":"400","message":"some error","control_id":"' . self::UUID . '"}}'));
 
-    $this->stateNotificationCreated = json_decode( '{"event_type":"calling.call.state","params":{"call_state":"created","direction":"inbound","device":{"type":"phone","params":{"from_number":"+1234","to_number":"15678"}},"tag":"'.self::UUID.'","call_id":"call-id","node_id":"node-id"}}');
+    $this->stateNotificationCreated = json_decode('{"event_type":"calling.call.state","params":{"call_state":"created","direction":"inbound","device":{"type":"phone","params":{"from_number":"+1234","to_number":"15678"}},"tag":"'.self::UUID.'","call_id":"call-id","node_id":"node-id"}}');
     $this->stateNotificationAnswered = json_decode('{"event_type":"calling.call.state","params":{"call_state":"answered","direction":"inbound","device":{"type":"phone","params":{"from_number":"+1234","to_number":"15678"}},"call_id":"call-id","node_id":"node-id"}}');
     $this->stateNotificationEnded = json_decode('{"event_type":"calling.call.state","params":{"call_state":"ended","end_reason":"busy","direction":"inbound","device":{"type":"phone","params":{"from_number":"+1234","to_number":"15678"}},"call_id":"call-id","node_id":"node-id"}}');
     $this->recordNotification = json_decode('{"event_type":"calling.call.record","params":{"state":"finished","record":{"audio":{"format":"mp3","direction":"speak","stereo":false}},"url":"record.mp3","control_id":"'.self::UUID.'","size":4096,"duration":4,"call_id":"call-id","node_id":"node-id"}}');
@@ -26,7 +26,7 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
   public function testDialSuccess(): void {
     $msg = new Execute([
       'protocol' => 'signalwire_calling_proto',
-      'method' => 'call.begin',
+      'method' => 'calling.begin',
       'params' => [
         'tag' => self::UUID,
         'device' => [
@@ -51,7 +51,7 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
   public function testDialFail(): void {
     $msg = new Execute([
       'protocol' => 'signalwire_calling_proto',
-      'method' => 'call.begin',
+      'method' => 'calling.begin',
       'params' => [
         'tag' => self::UUID,
         'device' => [
@@ -78,7 +78,7 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
 
     $msg = new Execute([
       'protocol' => 'signalwire_calling_proto',
-      'method' => 'call.end',
+      'method' => 'calling.end',
       'params' => [
         'call_id' => 'call-id',
         'node_id' => 'node-id',
@@ -101,7 +101,7 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
 
     $msg = new Execute([
       'protocol' => 'signalwire_calling_proto',
-      'method' => 'call.end',
+      'method' => 'calling.end',
       'params' => [
         'call_id' => 'call-id',
         'node_id' => 'node-id',
@@ -124,7 +124,7 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
 
     $msg = new Execute([
       'protocol' => 'signalwire_calling_proto',
-      'method' => 'call.answer',
+      'method' => 'calling.answer',
       'params' => [
         'call_id' => 'call-id',
         'node_id' => 'node-id'
@@ -146,7 +146,7 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
 
     $msg = new Execute([
       'protocol' => 'signalwire_calling_proto',
-      'method' => 'call.answer',
+      'method' => 'calling.answer',
       'params' => [
         'call_id' => 'call-id',
         'node_id' => 'node-id'
@@ -168,7 +168,7 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
 
     $msg = new Execute([
       'protocol' => 'signalwire_calling_proto',
-      'method' => 'call.record',
+      'method' => 'calling.record',
       'params' => [
         'call_id' => 'call-id',
         'node_id' => 'node-id',
@@ -195,7 +195,7 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
 
     $msg = new Execute([
       'protocol' => 'signalwire_calling_proto',
-      'method' => 'call.record',
+      'method' => 'calling.record',
       'params' => [
         'call_id' => 'call-id',
         'node_id' => 'node-id',
@@ -220,7 +220,7 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
 
     $msg = new Execute([
       'protocol' => 'signalwire_calling_proto',
-      'method' => 'call.record',
+      'method' => 'calling.record',
       'params' => [
         'call_id' => 'call-id',
         'node_id' => 'node-id',
@@ -248,7 +248,7 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
 
     $msg = new Execute([
       'protocol' => 'signalwire_calling_proto',
-      'method' => 'call.record',
+      'method' => 'calling.record',
       'params' => [
         'call_id' => 'call-id',
         'node_id' => 'node-id',
@@ -273,7 +273,7 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
 
     $msg = new Execute([
       'protocol' => 'signalwire_calling_proto',
-      'method' => 'call.play',
+      'method' => 'calling.play',
       'params' => [
         'call_id' => 'call-id',
         'node_id' => 'node-id',
@@ -301,7 +301,7 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
 
     $msg = new Execute([
       'protocol' => 'signalwire_calling_proto',
-      'method' => 'call.play',
+      'method' => 'calling.play',
       'params' => [
         'call_id' => 'call-id',
         'node_id' => 'node-id',
@@ -332,7 +332,7 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
 
     $msg = new Execute([
       'protocol' => 'signalwire_calling_proto',
-      'method' => 'call.play',
+      'method' => 'calling.play',
       'params' => [
         'call_id' => 'call-id',
         'node_id' => 'node-id',
@@ -359,7 +359,7 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
 
     $msg = new Execute([
       'protocol' => 'signalwire_calling_proto',
-      'method' => 'call.play',
+      'method' => 'calling.play',
       'params' => [
         'call_id' => 'call-id',
         'node_id' => 'node-id',
@@ -389,7 +389,7 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
     $this->_setCallReady();
     $msg = new Execute([
       'protocol' => 'signalwire_calling_proto',
-      'method' => 'call.play',
+      'method' => 'calling.play',
       'params' => [
         'call_id' => 'call-id',
         'node_id' => 'node-id',
@@ -410,7 +410,7 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
     $this->_setCallReady();
     $msg = new Execute([
       'protocol' => 'signalwire_calling_proto',
-      'method' => 'call.play',
+      'method' => 'calling.play',
       'params' => [
         'call_id' => 'call-id',
         'node_id' => 'node-id',
@@ -430,7 +430,7 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
     $this->_setCallReady();
     $msg = new Execute([
       'protocol' => 'signalwire_calling_proto',
-      'method' => 'call.play',
+      'method' => 'calling.play',
       'params' => [
         'call_id' => 'call-id',
         'node_id' => 'node-id',
@@ -451,7 +451,7 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
     $this->_setCallReady();
     $msg = new Execute([
       'protocol' => 'signalwire_calling_proto',
-      'method' => 'call.play',
+      'method' => 'calling.play',
       'params' => [
         'call_id' => 'call-id',
         'node_id' => 'node-id',
@@ -471,7 +471,7 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
     $this->_setCallReady();
     $msg = new Execute([
       'protocol' => 'signalwire_calling_proto',
-      'method' => 'call.play',
+      'method' => 'calling.play',
       'params' => [
         'call_id' => 'call-id',
         'node_id' => 'node-id',
@@ -492,7 +492,7 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
     $this->_setCallReady();
     $msg = new Execute([
       'protocol' => 'signalwire_calling_proto',
-      'method' => 'call.play',
+      'method' => 'calling.play',
       'params' => [
         'call_id' => 'call-id',
         'node_id' => 'node-id',
@@ -519,7 +519,7 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
     ];
     $msg = new Execute([
       'protocol' => 'signalwire_calling_proto',
-      'method' => 'call.play_and_collect',
+      'method' => 'calling.play_and_collect',
       'params' => [
         'call_id' => 'call-id',
         'node_id' => 'node-id',
@@ -547,7 +547,7 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
     ];
     $msg = new Execute([
       'protocol' => 'signalwire_calling_proto',
-      'method' => 'call.play_and_collect',
+      'method' => 'calling.play_and_collect',
       'params' => [
         'call_id' => 'call-id',
         'node_id' => 'node-id',
@@ -578,7 +578,7 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
     ];
     $msg = new Execute([
       'protocol' => 'signalwire_calling_proto',
-      'method' => 'call.play_and_collect',
+      'method' => 'calling.play_and_collect',
       'params' => [
         'call_id' => 'call-id',
         'node_id' => 'node-id',
@@ -604,7 +604,7 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
     ];
     $msg = new Execute([
       'protocol' => 'signalwire_calling_proto',
-      'method' => 'call.play_and_collect',
+      'method' => 'calling.play_and_collect',
       'params' => [
         'call_id' => 'call-id',
         'node_id' => 'node-id',
@@ -629,7 +629,7 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
     $collect = ["initial_timeout" => 10, "digits" => ["max" => 3]];
     $msg = new Execute([
       'protocol' => 'signalwire_calling_proto',
-      'method' => 'call.play_and_collect',
+      'method' => 'calling.play_and_collect',
       'params' => [
         'call_id' => 'call-id',
         'node_id' => 'node-id',
@@ -653,7 +653,7 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
     $collect = ["initial_timeout" => 10, "digits" => [ "max" => 3 ]];
     $msg = new Execute([
       'protocol' => 'signalwire_calling_proto',
-      'method' => 'call.play_and_collect',
+      'method' => 'calling.play_and_collect',
       'params' => [
         'call_id' => 'call-id',
         'node_id' => 'node-id',
@@ -676,7 +676,7 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
     $collect = ["initial_timeout" => 10, "digits" => ["max" => 3]];
     $msg = new Execute([
       'protocol' => 'signalwire_calling_proto',
-      'method' => 'call.play_and_collect',
+      'method' => 'calling.play_and_collect',
       'params' => [
         'call_id' => 'call-id',
         'node_id' => 'node-id',
@@ -700,7 +700,7 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
     $collect = ["initial_timeout" => 10, "digits" => [ "max" => 3 ]];
     $msg = new Execute([
       'protocol' => 'signalwire_calling_proto',
-      'method' => 'call.play_and_collect',
+      'method' => 'calling.play_and_collect',
       'params' => [
         'call_id' => 'call-id',
         'node_id' => 'node-id',
@@ -722,7 +722,7 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
 
     $msg = new Execute([
       'protocol' => 'signalwire_calling_proto',
-      'method' => 'call.connect',
+      'method' => 'calling.connect',
       'params' => [
         'call_id' => 'call-id',
         'node_id' => 'node-id',
@@ -756,7 +756,7 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
 
     $msg = new Execute([
       'protocol' => 'signalwire_calling_proto',
-      'method' => 'call.connect',
+      'method' => 'calling.connect',
       'params' => [
         'call_id' => 'call-id',
         'node_id' => 'node-id',
@@ -790,7 +790,7 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
 
     $msg = new Execute([
       'protocol' => 'signalwire_calling_proto',
-      'method' => 'call.connect',
+      'method' => 'calling.connect',
       'params' => [
         'call_id' => 'call-id',
         'node_id' => 'node-id',
@@ -821,7 +821,7 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
 
     $msg = new Execute([
       'protocol' => 'signalwire_calling_proto',
-      'method' => 'call.connect',
+      'method' => 'calling.connect',
       'params' => [
         'call_id' => 'call-id',
         'node_id' => 'node-id',
@@ -852,7 +852,7 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
 
     $msg = new Execute([
       'protocol' => 'signalwire_calling_proto',
-      'method' => 'call.connect',
+      'method' => 'calling.connect',
       'params' => [
         'call_id' => 'call-id',
         'node_id' => 'node-id',
@@ -895,7 +895,7 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
 
     $msg = new Execute([
       'protocol' => 'signalwire_calling_proto',
-      'method' => 'call.connect',
+      'method' => 'calling.connect',
       'params' => [
         'call_id' => 'call-id',
         'node_id' => 'node-id',
@@ -932,7 +932,7 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
 
     $msg = new Execute([
       'protocol' => 'signalwire_calling_proto',
-      'method' => 'call.connect',
+      'method' => 'calling.connect',
       'params' => [
         'call_id' => 'call-id',
         'node_id' => 'node-id',
@@ -1005,7 +1005,7 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
 
     $msg = new Execute([
       'protocol' => 'signalwire_calling_proto',
-      'method' => 'call.receive_fax',
+      'method' => 'calling.receive_fax',
       'params' => [
         'call_id' => 'call-id',
         'node_id' => 'node-id',
@@ -1024,7 +1024,7 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
 
     $msg = new Execute([
       'protocol' => 'signalwire_calling_proto',
-      'method' => 'call.receive_fax',
+      'method' => 'calling.receive_fax',
       'params' => [
         'call_id' => 'call-id',
         'node_id' => 'node-id',
@@ -1046,7 +1046,7 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
 
     $msg = new Execute([
       'protocol' => 'signalwire_calling_proto',
-      'method' => 'call.receive_fax',
+      'method' => 'calling.receive_fax',
       'params' => [
         'call_id' => 'call-id',
         'node_id' => 'node-id',
@@ -1065,7 +1065,7 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
 
     $msg = new Execute([
       'protocol' => 'signalwire_calling_proto',
-      'method' => 'call.receive_fax',
+      'method' => 'calling.receive_fax',
       'params' => [
         'call_id' => 'call-id',
         'node_id' => 'node-id',
@@ -1088,7 +1088,7 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
 
     $msg = new Execute([
       'protocol' => 'signalwire_calling_proto',
-      'method' => 'call.send_fax',
+      'method' => 'calling.send_fax',
       'params' => [
         'call_id' => 'call-id',
         'node_id' => 'node-id',
@@ -1108,7 +1108,7 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
 
     $msg = new Execute([
       'protocol' => 'signalwire_calling_proto',
-      'method' => 'call.send_fax',
+      'method' => 'calling.send_fax',
       'params' => [
         'call_id' => 'call-id',
         'node_id' => 'node-id',
@@ -1131,7 +1131,7 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
 
     $msg = new Execute([
       'protocol' => 'signalwire_calling_proto',
-      'method' => 'call.send_fax',
+      'method' => 'calling.send_fax',
       'params' => [
         'call_id' => 'call-id',
         'node_id' => 'node-id',
@@ -1151,7 +1151,7 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
 
     $msg = new Execute([
       'protocol' => 'signalwire_calling_proto',
-      'method' => 'call.send_fax',
+      'method' => 'calling.send_fax',
       'params' => [
         'call_id' => 'call-id',
         'node_id' => 'node-id',

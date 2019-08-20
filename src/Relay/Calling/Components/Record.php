@@ -23,7 +23,7 @@ class Record extends Controllable {
   }
 
   public function method() {
-    return 'call.record';
+    return 'calling.record';
   }
 
   public function payload() {

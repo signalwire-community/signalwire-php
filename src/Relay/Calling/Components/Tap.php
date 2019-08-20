@@ -23,7 +23,7 @@ class Tap extends Controllable {
   }
 
   public function method() {
-    return 'call.tap';
+    return 'calling.tap';
   }
 
   public function payload() {

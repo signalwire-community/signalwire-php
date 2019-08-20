@@ -5,7 +5,7 @@ namespace SignalWire\Relay\Calling\Components;
 class FaxReceive extends BaseFax {
 
   public function method() {
-    return 'call.receive_fax';
+    return 'calling.receive_fax';
   }
 
   public function payload() {

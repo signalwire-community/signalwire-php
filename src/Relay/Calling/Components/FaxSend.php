@@ -18,7 +18,7 @@ class FaxSend extends BaseFax {
   }
 
   public function method() {
-    return 'call.send_fax';
+    return 'calling.send_fax';
   }
 
   public function payload() {

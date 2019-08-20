@@ -17,7 +17,7 @@ class Answer extends BaseComponent {
   }
 
   public function method() {
-    return 'call.answer';
+    return 'calling.answer';
   }
 
   public function payload() {

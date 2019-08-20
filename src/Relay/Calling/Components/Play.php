@@ -19,7 +19,7 @@ class Play extends Controllable {
   }
 
   public function method() {
-    return 'call.play';
+    return 'calling.play';
   }
 
   public function payload() {

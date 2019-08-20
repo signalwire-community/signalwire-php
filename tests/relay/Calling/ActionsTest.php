@@ -17,7 +17,7 @@ class RelayCallingActionsTest extends RelayCallingBaseActionCase {
   public function testRecordActionStopWithSuccess(): void {
     $msg = new Execute([
       'protocol' => 'signalwire_calling_proto',
-      'method' => 'call.record.stop',
+      'method' => 'calling.record.stop',
       'params' => [
         'node_id' => 'node-id',
         'call_id' => 'call-id',
@@ -37,7 +37,7 @@ class RelayCallingActionsTest extends RelayCallingBaseActionCase {
   public function testRecordActionStopWithFail(): void {
     $msg = new Execute([
       'protocol' => 'signalwire_calling_proto',
-      'method' => 'call.record.stop',
+      'method' => 'calling.record.stop',
       'params' => [
         'node_id' => 'node-id',
         'call_id' => 'call-id',
@@ -59,7 +59,7 @@ class RelayCallingActionsTest extends RelayCallingBaseActionCase {
   public function testPlayActionStopWithSuccess(): void {
     $msg = new Execute([
       'protocol' => 'signalwire_calling_proto',
-      'method' => 'call.play.stop',
+      'method' => 'calling.play.stop',
       'params' => [
         'node_id' => 'node-id',
         'call_id' => 'call-id',
@@ -79,7 +79,7 @@ class RelayCallingActionsTest extends RelayCallingBaseActionCase {
   public function testPlayActionStopWithFail(): void {
     $msg = new Execute([
       'protocol' => 'signalwire_calling_proto',
-      'method' => 'call.play.stop',
+      'method' => 'calling.play.stop',
       'params' => [
         'node_id' => 'node-id',
         'call_id' => 'call-id',
@@ -101,7 +101,7 @@ class RelayCallingActionsTest extends RelayCallingBaseActionCase {
   public function testPromptActionStopWithSuccess(): void {
     $msg = new Execute([
       'protocol' => 'signalwire_calling_proto',
-      'method' => 'call.play_and_collect.stop',
+      'method' => 'calling.play_and_collect.stop',
       'params' => [
         'node_id' => 'node-id',
         'call_id' => 'call-id',
@@ -121,7 +121,7 @@ class RelayCallingActionsTest extends RelayCallingBaseActionCase {
   public function testPromptActionStopWithFail(): void {
     $msg = new Execute([
       'protocol' => 'signalwire_calling_proto',
-      'method' => 'call.play_and_collect.stop',
+      'method' => 'calling.play_and_collect.stop',
       'params' => [
         'node_id' => 'node-id',
         'call_id' => 'call-id',

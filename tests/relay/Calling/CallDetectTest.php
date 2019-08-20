@@ -218,7 +218,7 @@ class RelayCallingCallDetectTest extends RelayCallingBaseActionCase
   private function _detectMsg($type, $params = [], $timeout = 25) {
     return new Execute([
       'protocol' => 'signalwire_calling_proto',
-      'method' => 'call.detect',
+      'method' => 'calling.detect',
       'params' => [
         'call_id' => 'call-id',
         'node_id' => 'node-id',
