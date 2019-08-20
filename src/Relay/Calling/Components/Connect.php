@@ -20,7 +20,7 @@ class Connect extends BaseComponent {
   }
 
   public function method() {
-    return 'call.connect';
+    return 'calling.connect';
   }
 
   public function payload() {

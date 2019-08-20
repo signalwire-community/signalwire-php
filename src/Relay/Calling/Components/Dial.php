@@ -17,7 +17,7 @@ class Dial extends BaseComponent {
   }
 
   public function method() {
-    return 'call.begin';
+    return 'calling.begin';
   }
 
   public function payload() {

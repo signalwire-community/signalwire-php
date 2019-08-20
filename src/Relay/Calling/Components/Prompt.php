@@ -26,7 +26,7 @@ class Prompt extends Controllable {
   }
 
   public function method() {
-    return 'call.play_and_collect';
+    return 'calling.play_and_collect';
   }
 
   public function payload() {

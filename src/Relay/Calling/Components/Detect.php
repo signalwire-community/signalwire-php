@@ -27,7 +27,7 @@ class Detect extends Controllable {
   }
 
   public function method() {
-    return 'call.detect';
+    return 'calling.detect';
   }
 
   public function payload() {

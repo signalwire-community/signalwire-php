@@ -74,7 +74,7 @@ class RelayCallingCallTapTest extends RelayCallingBaseActionCase
   private function _tapMsg() {
     return new Execute([
       'protocol' => 'signalwire_calling_proto',
-      'method' => 'call.tap',
+      'method' => 'calling.tap',
       'params' => [
         'call_id' => 'call-id',
         'node_id' => 'node-id',

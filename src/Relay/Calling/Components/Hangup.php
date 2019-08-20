@@ -19,7 +19,7 @@ class Hangup extends BaseComponent {
   }
 
   public function method() {
-    return 'call.end';
+    return 'calling.end';
   }
 
   public function payload() {
