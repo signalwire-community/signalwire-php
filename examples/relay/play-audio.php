@@ -33,8 +33,6 @@ $client->on('signalwire.ready', function($session) {
 
     $call->playAudio('https://cdn.signalwire.com/default-music/welcome.mp3');
 
-  })->done(function ($response) {
-    echo PHP_EOL . $response->message . PHP_EOL;
   });
 
 });
