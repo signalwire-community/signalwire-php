@@ -473,6 +473,16 @@ class Call {
     });
   }
 
+  public function sendDigits(String $digits) {
+    $component = new Components\SendDigits($this, $digits);
+    $this->_addComponent($component);
+
+    return $component->_waitFor(SendDigitsState::Finished)->then(function() use (&$component) {
+      // return new Results\SendDigitsResult($component);
+      return $component->successful; // TODO: return a bool here?
+    });
+  }
+
   public function on(String $event, Callable $fn) {
     $this->_cbQueue[$event] = $fn;
     return $this;
