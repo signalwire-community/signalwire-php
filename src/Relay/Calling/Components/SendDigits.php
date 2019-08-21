@@ -5,6 +5,7 @@ namespace SignalWire\Relay\Calling\Components;
 use SignalWire\Relay\Calling\Call;
 use SignalWire\Relay\Calling\SendDigitsState;
 use SignalWire\Relay\Calling\Notification;
+use SignalWire\Relay\Calling\Event;
 
 class SendDigits extends BaseComponent {
   public $eventType = Notification::SendDigits;
@@ -34,6 +35,7 @@ class SendDigits extends BaseComponent {
 
     $this->completed = $this->state === SendDigitsState::Finished;
     $this->successful = $this->completed;
+    $this->event = new Event($params->state, $params);
 
     if ($this->_hasBlocker() && in_array($this->state, $this->_eventsToWait)) {
       ($this->blocker->resolve)();
