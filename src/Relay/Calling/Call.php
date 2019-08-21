@@ -572,6 +572,11 @@ class Call {
     $this->_dispatchCallback("tap.$params->state", $params);
   }
 
+  public function _sendDigitsChange($params) {
+    $this->_notifyComponents(Notification::SendDigits, $params->tag, $params); // FIXME: there's no "tag" in calling.call.send_digits events
+    // $this->_dispatchCallback("send_digits.$params->state", $params); // FIXME: is it necessary?
+  }
+
   private function _dispatchCallback(string $key, ...$params) {
     if (isset($this->_cbQueue[$key]) && is_callable($this->_cbQueue[$key])) {
       call_user_func($this->_cbQueue[$key], $this, ...$params);
