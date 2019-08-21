@@ -482,6 +482,15 @@ class Call {
     });
   }
 
+  public function sendDigitsAsync(String $digits) {
+    $component = new Components\SendDigits($this, $digits);
+    $this->_addComponent($component);
+
+    return $component->execute()->then(function() use (&$component) {
+      return new Actions\SendDigitsAction($component);
+    });
+  }
+
   public function on(String $event, Callable $fn) {
     $this->_cbQueue[$event] = $fn;
     return $this;
