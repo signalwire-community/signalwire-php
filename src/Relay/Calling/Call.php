@@ -478,8 +478,7 @@ class Call {
     $this->_addComponent($component);
 
     return $component->_waitFor(SendDigitsState::Finished)->then(function() use (&$component) {
-      // return new Results\SendDigitsResult($component);
-      return $component->successful; // TODO: return a bool here?
+      return new Results\SendDigitsResult($component);
     });
   }
 
@@ -583,8 +582,9 @@ class Call {
   }
 
   public function _sendDigitsChange($params) {
-    $this->_notifyComponents(Notification::SendDigits, $params->tag, $params); // FIXME: there's no "tag" in calling.call.send_digits events
-    // $this->_dispatchCallback("send_digits.$params->state", $params); // FIXME: is it necessary?
+    $this->_notifyComponents(Notification::SendDigits, $params->control_id, $params);
+    $this->_dispatchCallback('sendDigits.stateChange', $params);
+    $this->_dispatchCallback("sendDigits.$params->state", $params);
   }
 
   private function _dispatchCallback(string $key, ...$params) {
