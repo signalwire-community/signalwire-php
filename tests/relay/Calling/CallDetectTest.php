@@ -361,6 +361,95 @@ class RelayCallingCallDetectTest extends RelayCallingBaseActionCase
     $this->call->detectFaxAsync(['tone' => 'CED', 'timeout' => 45])->done([$this, '__detectAsyncFailCheck']);
   }
 
+  public function testDetectAnsweringMachine(): void {
+    $msg = $this->_detectMsg('machine');
+    $this->_mockSuccessResponse($msg);
+    $this->call->detectAnsweringMachine(['timeout' => 25])->done(function ($result) {
+      $this->assertInstanceOf('SignalWire\Relay\Calling\Results\DetectResult', $result);
+      $this->assertTrue($result->isSuccessful());
+      $this->assertEquals($result->getType(), 'machine');
+      $this->assertEquals($result->getResult(), 'MACHINE');
+      $this->assertObjectHasAttribute('type', $result->getEvent()->payload);
+      $this->assertObjectHasAttribute('params', $result->getEvent()->payload);
+    });
+    $this->calling->notificationHandler(self::$notificationMachineMachine);
+  }
+
+  public function testDetectAnsweringMachineFail(): void {
+    $msg = $this->_detectMsg('machine');
+    $this->_mockFailResponse($msg);
+    $this->call->detectAnsweringMachine(['timeout' => 25])->done([$this, '__detectFailCheck']);
+  }
+
+  public function testDetectAnsweringMachineWaitingForBeep(): void {
+    $msg = $this->_detectMsg('machine');
+    $this->_mockSuccessResponse($msg);
+    $this->call->detectAnsweringMachine(['timeout' => 25, 'waitForBeep' => true])->done(function($result) {
+      $this->assertInstanceOf('SignalWire\Relay\Calling\Results\DetectResult', $result);
+      $this->assertTrue($result->isSuccessful());
+      $this->assertEquals($result->getType(), 'machine');
+      $this->assertEquals($result->getResult(), 'MACHINE,NOT_READY,READY');
+      $this->assertObjectHasAttribute('type', $result->getEvent()->payload);
+      $this->assertObjectHasAttribute('params', $result->getEvent()->payload);
+    });
+    $this->calling->notificationHandler(self::$notificationMachineMachine);
+    $this->calling->notificationHandler(self::$notificationMachineNotReady);
+    $this->calling->notificationHandler(self::$notificationMachineReady);
+    $this->calling->notificationHandler(self::$notificationMachineNotReady); // This will be ignored by Detect component
+  }
+
+  public function testDetectAnsweringMachineWaitingForBeepReceivingHuman(): void {
+    $msg = $this->_detectMsg('machine');
+    $this->_mockSuccessResponse($msg);
+    $this->call->detectAnsweringMachine(['timeout' => 25, 'waitForBeep' => true])->done(function($result) {
+      $this->assertInstanceOf('SignalWire\Relay\Calling\Results\DetectResult', $result);
+      $this->assertTrue($result->isSuccessful());
+      $this->assertEquals($result->getType(), 'machine');
+      $this->assertEquals($result->getResult(), 'HUMAN');
+      $this->assertObjectHasAttribute('type', $result->getEvent()->payload);
+      $this->assertObjectHasAttribute('params', $result->getEvent()->payload);
+    });
+    $this->calling->notificationHandler(self::$notificationMachineHuman);
+  }
+
+  public function testDetectAnsweringMachineFailOnTimeout(): void {
+    $msg = $this->_detectMsg('machine');
+    $this->_mockSuccessResponse($msg);
+    $this->call->detectAnsweringMachine(['timeout' => 25])->done(function($result) {
+      $this->assertInstanceOf('SignalWire\Relay\Calling\Results\DetectResult', $result);
+      $this->assertFalse($result->isSuccessful());
+      $this->assertEquals($result->getType(), 'machine');
+      $this->assertEquals($result->getResult(), '');
+      $this->assertObjectHasAttribute('type', $result->getEvent()->payload);
+      $this->assertObjectHasAttribute('params', $result->getEvent()->payload);
+    });
+    $this->calling->notificationHandler(self::$notificationMachineFinished);
+  }
+
+  public function testDetectAnsweringMachineAsyncSuccess(): void {
+    $msg = $this->_detectMsg('machine', [], 45);
+    $this->_mockSuccessResponse($msg);
+    $this->call->detectAnsweringMachineAsync(['timeout' => 45])->done(function ($action) {
+      $this->assertInstanceOf('SignalWire\Relay\Calling\Actions\DetectAction', $action);
+      $this->assertInstanceOf('SignalWire\Relay\Calling\Results\DetectResult', $action->getResult());
+      $this->assertFalse($action->isCompleted());
+      $this->calling->notificationHandler(self::$notificationMachineMachine);
+      $this->calling->notificationHandler(self::$notificationMachineNotReady);
+      $this->calling->notificationHandler(self::$notificationMachineReady);
+      $this->calling->notificationHandler(self::$notificationMachineNotReady);
+      $this->assertFalse($action->isCompleted());
+      $this->calling->notificationHandler(self::$notificationFaxFinished);
+      $this->assertTrue($action->isCompleted());
+      $this->assertEquals($action->getResult()->getResult(), 'MACHINE,NOT_READY,READY,NOT_READY');
+    });
+  }
+
+  public function testDetectAnsweringMachineAsyncFail(): void {
+    $msg = $this->_detectMsg('machine', [], 45);
+    $this->_mockFailResponse($msg);
+    $this->call->detectAnsweringMachineAsync(['timeout' => 45])->done([$this, '__detectAsyncFailCheck']);
+  }
+
   /**
    * Private to not repeat the same function for every sync fail
    */

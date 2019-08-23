@@ -322,6 +322,53 @@ class Call {
   }
 
   /**
+   * Alias for detectAnsweringMachine
+   */
+  public function amd(array $params = []) {
+    return $this->detectAnsweringMachine($params);
+  }
+
+  /**
+   * Start a machine detector. Wait for the first machine/human/unknown event.
+   *
+   * @param Array Detector params
+   */
+  public function detectAnsweringMachine(array $params = []) {
+    $params['type'] = DetectType::Machine;
+    list($detect, $timeout, $waitForBeep) = $this->_prepareDetectParams($params);
+    $component = new Components\Detect($this, $detect, $timeout, $waitForBeep);
+    $this->_addComponent($component);
+
+    $events = [DetectState::Machine, DetectState::Human, DetectState::Unknown];
+    return $component->_waitFor(...$events)->then(function() use (&$component) {
+      return new Results\DetectResult($component);
+    });
+  }
+
+  /**
+   * Alias for detectAnsweringMachineAsync
+   */
+  public function amdAsync(array $params = []) {
+    return $this->detectAnsweringMachineAsync($params);
+  }
+
+  /**
+   * Start a machine detector. Wait for the first machine/human/unknown event.
+   *
+   * @param Array Detector params
+   */
+  public function detectAnsweringMachineAsync(array $params = []) {
+    $params['type'] = DetectType::Machine;
+    list($detect, $timeout, $waitForBeep) = $this->_prepareDetectParams($params);
+    $component = new Components\Detect($this, $detect, $timeout, $waitForBeep);
+    $this->_addComponent($component);
+
+    return $component->execute()->then(function() use (&$component) {
+      return new Actions\DetectAction($component);
+    });
+  }
+
+  /**
    * Detect human. Wait for the first 'human' event or when the detector has finished/failed/timed out
    *
    * @deprecated
@@ -610,10 +657,11 @@ class Call {
   private function _prepareDetectParams(array $params) {
     $timeout = isset($params['timeout']) ? $params['timeout'] : null;
     $type = isset($params['type']) ? $params['type'] : null;
-    unset($params['type'], $params['timeout']);
+    $waitForBeep = isset($params['waitForBeep']) ? $params['waitForBeep'] : false;
+    unset($params['type'], $params['timeout'], $params['waitForBeep']);
     $detect = ['type' => $type, 'params' => $params];
 
-    return [$detect, $timeout];
+    return [$detect, $timeout, $waitForBeep];
   }
 
   private function _prepareDetectFaxParamsAndEvents(array $params) {
