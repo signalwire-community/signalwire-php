@@ -4,6 +4,7 @@ namespace SignalWire\Relay\Calling\Components;
 
 use SignalWire\Relay\Calling\Call;
 use SignalWire\Relay\Calling\DetectState;
+use SignalWire\Relay\Calling\DetectType;
 use SignalWire\Relay\Calling\Notification;
 use SignalWire\Relay\Calling\Event;
 
@@ -18,12 +19,15 @@ class Detect extends Controllable {
   private $_events = [];
   private $_detect;
   private $_timeout;
+  private $_waitForBeep;
+  private $_waitingForReady = false;
 
-  public function __construct(Call $call, Array $detect, Int $timeout = null) {
+  public function __construct(Call $call, Array $detect, Int $timeout = null, bool $waitForBeep = false) {
     parent::__construct($call);
 
     $this->_detect = $detect;
     $this->_timeout = $timeout;
+    $this->_waitForBeep = $waitForBeep;
   }
 
   public function method() {
@@ -48,17 +52,48 @@ class Detect extends Controllable {
     $detect = $params->detect;
     $this->type = $detect->type;
     $this->state = $detect->params->event;
-    $this->completed = in_array($this->state, $this->_eventsToWait);
-    if ($this->completed) {
-      $this->successful = $this->state !== DetectState::Error;
-      $this->result = join('', $this->_events);
-      $this->event = new Event($this->state, $detect);
-    } else {
-      array_push($this->_events, $detect->params->event);
+
+    $finishedEvents = [DetectState::Finished, DetectState::Error];
+    if (in_array($this->state, $finishedEvents)) {
+      return $this->_complete($detect);
+    }
+    array_push($this->_events, $detect->params->event);
+
+    if (!$this->_hasBlocker()) {
+      return;
     }
 
-    if ($this->_hasBlocker() && in_array($this->state, $this->_eventsToWait)) {
+    if ($this->type === DetectType::Digit) {
+      return $this->_complete($detect);
+    }
+
+    if ($this->_waitingForReady) {
+      if ($this->state === DetectState::Ready) {
+        return $this->_complete($detect);
+      }
+      return;
+    }
+
+    if ($this->_waitForBeep && $this->state === DetectState::Machine) {
+      $this->_waitingForReady = true;
+      return;
+    }
+
+    if (in_array($this->state, $this->_eventsToWait)) {
+      return $this->_complete($detect);
+    }
+  }
+
+  private function _complete($detect) {
+    $this->completed = true;
+    $this->result = join(',', $this->_events);
+    $this->event = new Event($this->state, $detect);
+
+    if ($this->_hasBlocker()) {
+      $this->successful = !in_array($this->state, [DetectState::Finished, DetectState::Error]);
       ($this->blocker->resolve)();
+    } else {
+      $this->successful = $this->state !== DetectState::Error;
     }
   }
 }

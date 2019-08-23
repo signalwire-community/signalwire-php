@@ -341,6 +341,7 @@ class Call {
 
     $events = [DetectState::Machine, DetectState::Human, DetectState::Unknown];
     return $component->_waitFor(...$events)->then(function() use (&$component) {
+      $component->successful = $component->result === DetectState::Human;
       return new Results\DetectResult($component);
     });
   }
@@ -380,6 +381,7 @@ class Call {
 
     $events = [DetectState::Machine, DetectState::Human, DetectState::Unknown];
     return $component->_waitFor(...$events)->then(function () use (&$component) {
+      $component->successful = $component->result === DetectState::Machine;
       return new Results\DetectResult($component);
     });
   }
