@@ -5,3 +5,5 @@ require dirname(__FILE__) . '/../vendor/autoload.php';
   ->setMode('once')
   ->enableRequestMatchers(array('method', 'url', 'host'));
 \VCR\VCR::turnOn();
+
+\SignalWire\Log::getLogger()->pushHandler(new \Monolog\Handler\NullHandler());
