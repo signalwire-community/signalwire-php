@@ -293,9 +293,7 @@ class Call {
   /**
    * Start a detector. Wait until the detector has finished/failed/timed out
    *
-   * @param String $type 'machine' | 'fax' | 'digit'
    * @param Array Detector params
-   * @param Int Max time to run detector
    */
   public function detect(array $params) {
     list($detect, $timeout) = $this->_prepareDetectParams($params);
@@ -311,9 +309,7 @@ class Call {
   /**
    * Start a detector in async mode. DetectAction will be completed when the detector has finished/failed/timed out
    *
-   * @param String $type 'machine' | 'fax' | 'digit'
    * @param Array Detector params
-   * @param Int Max time to run detector
    */
   public function detectAsync(array $params) {
     list($detect, $timeout) = $this->_prepareDetectParams($params);
@@ -330,7 +326,6 @@ class Call {
    *
    * @deprecated
    * @param Array Detector params
-   * @param Int Max time to run detector
    */
   public function detectHuman(array $params = []) {
     trigger_error('Method ' . __METHOD__ . ' is deprecated. Use detectAnsweringMachine instead.', E_USER_DEPRECATED);
@@ -351,7 +346,6 @@ class Call {
    *
    * @deprecated
    * @param Array Detector params
-   * @param Int Max time to run detector
    */
   public function detectHumanAsync(array $params = []) {
     trigger_error('Method ' . __METHOD__ . ' is deprecated. Use detectAnsweringMachineAsync instead.', E_USER_DEPRECATED);
@@ -370,7 +364,6 @@ class Call {
    *
    * @deprecated
    * @param Array Detector params
-   * @param Int Max time to run detector
    */
   public function detectMachine(array $params = []) {
     trigger_error('Method ' . __METHOD__ . ' is deprecated. Use detectAnsweringMachine instead.', E_USER_DEPRECATED);
@@ -391,7 +384,6 @@ class Call {
    *
    * @deprecated
    * @param Array Detector params
-   * @param Int Max time to run detector
    */
   public function detectMachineAsync(array $params = []) {
     trigger_error('Method ' . __METHOD__ . ' is deprecated. Use detectAnsweringMachineAsync instead.', E_USER_DEPRECATED);
@@ -408,8 +400,7 @@ class Call {
   /**
    * Detect a fax. Wait for the first Fax tone (or $tone passed in) or when the detector has finished/failed/timed out
    *
-   * @param String Tone to detect 'CED' | 'CNG'
-   * @param Int Max time to run detector
+   * @param Array Detector params
    */
   public function detectFax(array $params = []) {
     list($detect, $timeout, $events) = $this->_prepareDetectFaxParamsAndEvents($params);
@@ -424,8 +415,7 @@ class Call {
   /**
    * Detect a fax in async mode. DetectAction will be completed with the first Fax tone (or $tone passed in) or when the detector has finished/failed/timed out
    *
-   * @param String Tone to detect 'CED' | 'CNG'
-   * @param Int Max time to run detector
+   * @param Array Detector params
    */
   public function detectFaxAsync(array $params = []) {
     list($detect, $timeout) = $this->_prepareDetectFaxParamsAndEvents($params);
@@ -440,8 +430,7 @@ class Call {
   /**
    * Detect digits. Wait until the detector has finished/failed/timed out
    *
-   * @param String To filter digits to detect. Default to "0123456789#*"
-   * @param Int Max time to run detector
+   * @param Array Detector params
    */
   public function detectDigit(array $params = []) {
     $params['type'] = DetectType::Digit;
@@ -451,8 +440,7 @@ class Call {
   /**
    * Detect digits in async mode. DetectAction will be completed when the detector has finished/failed/timed out
    *
-   * @param String To filter digits to detect. Default to "0123456789#*"
-   * @param Int Max time to run detector
+   * @param Array Detector params
    */
   public function detectDigitAsync(array $params = []) {
     $params['type'] = DetectType::Digit;
