@@ -630,7 +630,7 @@ class Call {
     $params['type'] = DetectType::Fax;
     list($detect, $timeout) = $this->_prepareDetectParams($params);
     $faxEvents = [DetectState::CED, DetectState::CNG];
-    $events = [DetectState::Error, DetectState::Finished];
+    $events = [];
     $tone = isset($detect['params']['tone']) ? $detect['params']['tone'] : null;
     if ($tone && in_array($tone, $faxEvents)) {
       $detect['params'] = ['tone' => $tone];
