@@ -302,7 +302,8 @@ class Call {
     $component = new Components\Detect($this, $detect, $timeout);
     $this->_addComponent($component);
 
-    return $component->_waitFor(DetectState::Error, DetectState::Finished)->then(function() use (&$component) {
+    $events = [DetectState::Machine, DetectState::Human, DetectState::Unknown, DetectState::CED, DetectState::CNG];
+    return $component->_waitFor(...$events)->then(function() use (&$component) {
       return new Results\DetectResult($component);
     });
   }
@@ -327,16 +328,18 @@ class Call {
   /**
    * Detect human. Wait for the first 'human' event or when the detector has finished/failed/timed out
    *
+   * @deprecated
    * @param Array Detector params
    * @param Int Max time to run detector
    */
   public function detectHuman(array $params = []) {
+    trigger_error('Method ' . __METHOD__ . ' is deprecated. Use detectAnsweringMachine instead.', E_USER_DEPRECATED);
     $params['type'] = DetectType::Machine;
     list($detect, $timeout) = $this->_prepareDetectParams($params);
     $component = new Components\Detect($this, $detect, $timeout);
     $this->_addComponent($component);
 
-    $events = [DetectState::Human, DetectState::Error, DetectState::Finished];
+    $events = [DetectState::Machine, DetectState::Human, DetectState::Unknown];
     return $component->_waitFor(...$events)->then(function() use (&$component) {
       return new Results\DetectResult($component);
     });
@@ -345,15 +348,15 @@ class Call {
   /**
    * Detect human in async mode. DetectAction will be completed with the first 'human' event or when the detector has finished/failed/timed out
    *
+   * @deprecated
    * @param Array Detector params
    * @param Int Max time to run detector
    */
   public function detectHumanAsync(array $params = []) {
+    trigger_error('Method ' . __METHOD__ . ' is deprecated. Use detectAnsweringMachineAsync instead.', E_USER_DEPRECATED);
     $params['type'] = DetectType::Machine;
     list($detect, $timeout) = $this->_prepareDetectParams($params);
     $component = new Components\Detect($this, $detect, $timeout);
-    $events = [DetectState::Human, DetectState::Error, DetectState::Finished];
-    $component->setEventsToWait($events);
     $this->_addComponent($component);
 
     return $component->execute()->then(function() use (&$component) {
@@ -364,16 +367,18 @@ class Call {
   /**
    * Detect a machine. Wait for the first machine/ready/not_ready event or when the detector has finished/failed/timed out
    *
+   * @deprecated
    * @param Array Detector params
    * @param Int Max time to run detector
    */
   public function detectMachine(array $params = []) {
+    trigger_error('Method ' . __METHOD__ . ' is deprecated. Use detectAnsweringMachine instead.', E_USER_DEPRECATED);
     $params['type'] = DetectType::Machine;
     list($detect, $timeout) = $this->_prepareDetectParams($params);
     $component = new Components\Detect($this, $detect, $timeout);
     $this->_addComponent($component);
 
-    $events = [DetectState::Machine, DetectState::Ready, DetectState::NotReady, DetectState::Error, DetectState::Finished];
+    $events = [DetectState::Machine, DetectState::Human, DetectState::Unknown];
     return $component->_waitFor(...$events)->then(function () use (&$component) {
       return new Results\DetectResult($component);
     });
@@ -382,15 +387,15 @@ class Call {
   /**
    * Detect a machine in async mode. DetectAction will be completed with the first machine/ready/not_ready event or when the detector has finished/failed/timed out
    *
+   * @deprecated
    * @param Array Detector params
    * @param Int Max time to run detector
    */
   public function detectMachineAsync(array $params = []) {
+    trigger_error('Method ' . __METHOD__ . ' is deprecated. Use detectAnsweringMachineAsync instead.', E_USER_DEPRECATED);
     $params['type'] = DetectType::Machine;
     list($detect, $timeout) = $this->_prepareDetectParams($params);
     $component = new Components\Detect($this, $detect, $timeout);
-    $events = [DetectState::Machine, DetectState::Ready, DetectState::NotReady, DetectState::Error, DetectState::Finished];
-    $component->setEventsToWait($events);
     $this->_addComponent($component);
 
     return $component->execute()->then(function() use (&$component) {
@@ -421,9 +426,8 @@ class Call {
    * @param Int Max time to run detector
    */
   public function detectFaxAsync(array $params = []) {
-    list($detect, $timeout, $events) = $this->_prepareDetectFaxParamsAndEvents($params);
+    list($detect, $timeout) = $this->_prepareDetectFaxParamsAndEvents($params);
     $component = new Components\Detect($this, $detect, $timeout);
-    $component->setEventsToWait($events);
     $this->_addComponent($component);
 
     return $component->execute()->then(function() use (&$component) {
