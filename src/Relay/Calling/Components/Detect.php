@@ -57,9 +57,9 @@ class Detect extends Controllable {
     if (in_array($this->state, $finishedEvents)) {
       return $this->_complete($detect);
     }
-    array_push($this->_events, $detect->params->event);
 
     if (!$this->_hasBlocker()) {
+      array_push($this->_events, $detect->params->event);
       return;
     }
 
@@ -86,13 +86,19 @@ class Detect extends Controllable {
 
   private function _complete($detect) {
     $this->completed = true;
-    $this->result = join(',', $this->_events);
     $this->event = new Event($this->state, $detect);
 
     if ($this->_hasBlocker()) {
+      // force READY/NOT_READY to MACHINE
+      if (in_array($this->state, [DetectState::Ready, DetectState::NotReady])) {
+        $this->result = DetectState::Machine;
+      } elseif (!in_array($this->state, [DetectState::Finished, DetectState::Error])) {
+        $this->result = $this->state;
+      }
       $this->successful = !in_array($this->state, [DetectState::Finished, DetectState::Error]);
       ($this->blocker->resolve)();
     } else {
+      $this->result = join(',', $this->_events);
       $this->successful = $this->state !== DetectState::Error;
     }
   }

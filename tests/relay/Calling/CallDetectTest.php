@@ -388,7 +388,7 @@ class RelayCallingCallDetectTest extends RelayCallingBaseActionCase
       $this->assertInstanceOf('SignalWire\Relay\Calling\Results\DetectResult', $result);
       $this->assertTrue($result->isSuccessful());
       $this->assertEquals($result->getType(), 'machine');
-      $this->assertEquals($result->getResult(), 'MACHINE,NOT_READY,READY');
+      $this->assertEquals($result->getResult(), 'MACHINE');
       $this->assertObjectHasAttribute('type', $result->getEvent()->payload);
       $this->assertObjectHasAttribute('params', $result->getEvent()->payload);
     });
