@@ -23,12 +23,10 @@ $client->on('signalwire.ready', function($client) {
     $call = $dialResult->getCall();
 
     $call->on('detect.update', function ($call, $params) {
-      echo "\nDetect Update\n";
       print_r($params);
-      echo "\nDetect Update\n";
     });
 
-    $call->detectMachine()->done(function($result) use ($call) {
+    $call->amd()->done(function($result) use ($call) {
       print PHP_EOL . 'isSuccessful: ' . $result->isSuccessful() . PHP_EOL;
       print PHP_EOL . 'getType: ' . $result->getType() . PHP_EOL;
       print PHP_EOL . 'getResult: ' . $result->getResult() . PHP_EOL;
