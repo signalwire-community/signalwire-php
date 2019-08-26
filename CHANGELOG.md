@@ -11,6 +11,9 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ### Deprecated
 - Deprecated the following methods on Call: `detectHuman`, `detectHumanAsync`, `detectMachine`, `detectMachineAsync`.
 
+### Added
+- Methods to send digits on a Call: `sendDigits`, `sendDigitsAsync`.
+
 ## [2.1.0] - 2019-07-30
 ### Added
 - Create your own Relay Tasks and enable `onTask` method on RelayConsumer to receive/handle them.

@@ -514,6 +514,24 @@ class Call {
     });
   }
 
+  public function sendDigits(String $digits) {
+    $component = new Components\SendDigits($this, $digits);
+    $this->_addComponent($component);
+
+    return $component->_waitFor(SendDigitsState::Finished)->then(function() use (&$component) {
+      return new Results\SendDigitsResult($component);
+    });
+  }
+
+  public function sendDigitsAsync(String $digits) {
+    $component = new Components\SendDigits($this, $digits);
+    $this->_addComponent($component);
+
+    return $component->execute()->then(function() use (&$component) {
+      return new Actions\SendDigitsAction($component);
+    });
+  }
+
   public function on(String $event, Callable $fn) {
     $this->_cbQueue[$event] = $fn;
     return $this;
@@ -611,6 +629,12 @@ class Call {
   public function _tapChange($params) {
     $this->_notifyComponents(Notification::Tap, $params->control_id, $params);
     $this->_dispatchCallback("tap.$params->state", $params);
+  }
+
+  public function _sendDigitsChange($params) {
+    $this->_notifyComponents(Notification::SendDigits, $params->control_id, $params);
+    $this->_dispatchCallback('sendDigits.stateChange', $params);
+    $this->_dispatchCallback("sendDigits.$params->state", $params);
   }
 
   private function _dispatchCallback(string $key, ...$params) {

@@ -37,6 +37,9 @@ class Calling extends \SignalWire\Relay\BaseRelay {
       case Notification::Tap:
         $this->_onTap($notification->params);
         break;
+      case Notification::SendDigits:
+        $this->_onSendDigits($notification->params);
+        break;
       case Notification::Receive:
         $call = new Call($this, $notification->params);
         Handler::trigger($this->client->relayProtocol, $call, $this->_ctxReceiveUniqueId($call->context));
@@ -151,6 +154,13 @@ class Calling extends \SignalWire\Relay\BaseRelay {
         $call->peer = $this->getCallById($params->peer->call_id);
       }
       $call->_connectChange($params);
+    }
+  }
+
+  private function _onSendDigits($params) {
+    $call = $this->getCallById($params->call_id);
+    if ($call) {
+      $call->_sendDigitsChange($params);
     }
   }
 
