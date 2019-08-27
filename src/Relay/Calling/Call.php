@@ -185,21 +185,13 @@ class Call {
     });
   }
 
-  public function promptAudio(Array $collect, String $url = '') {
-    $url = isset($collect['url']) ? $collect['url'] : $url;
-    unset($collect['url']);
-    $collect['media'] = [
-      ['type' => PlayType::Audio, 'params' => ['url' => $url]]
-    ];
+  public function promptAudio(Array $params, String $url = '') {
+    $collect = \SignalWire\preparePromptAudioParams($params, $url);
     return $this->prompt($collect);
   }
 
-  public function promptAudioAsync(Array $collect, String $url = '') {
-    $url = isset($collect['url']) ? $collect['url'] : $url;
-    unset($collect['url']);
-    $collect['media'] = [
-      ['type' => PlayType::Audio, 'params' => ['url' => $url]]
-    ];
+  public function promptAudioAsync(Array $params, String $url = '') {
+    $collect = \SignalWire\preparePromptAudioParams($params, $url);
     return $this->promptAsync($collect);
   }
 

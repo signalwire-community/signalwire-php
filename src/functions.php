@@ -99,3 +99,12 @@ function preparePromptParams(Array $params, Array $mediaList = []): Array {
   }
   return [$collect, preparePlayParams($mediaToPlay)];
 }
+
+function preparePromptAudioParams(Array $params, String $url): Array {
+  $url = isset($params['url']) ? $params['url'] : $url;
+  unset($params['url']);
+  $params['media'] = [
+    ['type' => PlayType::Audio, 'params' => ['url' => $url]]
+  ];
+  return $params;
+}
