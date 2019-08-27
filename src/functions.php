@@ -4,6 +4,7 @@ namespace SignalWire;
 
 use SignalWire\Relay\Calling\RecordType;
 use SignalWire\Relay\Calling\PromptType;
+use SignalWire\Relay\Calling\PlayType;
 
 function reduceConnectParams(Array $devices, String $defaultFrom, Int $defaultTimeout, $nested = false) {
   $final = [];
