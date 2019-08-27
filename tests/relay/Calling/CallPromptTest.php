@@ -22,7 +22,7 @@ class RelayCallingCallPromptTest extends RelayCallingBaseActionCase
   }
 
   public function testPromptSuccess(): void {
-    $collect = ["initial_timeout" => 10, "digits" => [ "max" => 3 ]];
+    $collect = ['initial_timeout' => 10, 'digits' => [ 'max' => 3 ]];
     $play = [
       ['type' => 'audio', 'params' => ['url' => 'audio.mp3']],
       ['type' => 'tts', 'params' => ['text' => 'Welcome', 'gender' => 'male']],
@@ -36,8 +36,32 @@ class RelayCallingCallPromptTest extends RelayCallingBaseActionCase
     $this->calling->notificationHandler(self::$notificationFinished);
   }
 
+  public function testPromptSuccessWithFlattenedParameters(): void {
+    $collect = ['initial_timeout' => 10, 'digits' => [ 'max' => 3 ]];
+    $play = [
+      ['type' => 'audio', 'params' => ['url' => 'audio.mp3']],
+      ['type' => 'tts', 'params' => ['text' => 'Welcome', 'gender' => 'male']],
+      ['type' => 'silence', 'params' => ['duration' => 5]]
+    ];
+    $msg = $this->_promptMsg($collect, $play);
+    $this->_mockSuccessResponse($msg, self::$success);
+
+    $params = [
+      'initial_timeout' => 10,
+      'digits_max' => 3,
+      'media' => [
+        ['type' => 'audio', 'url' => 'audio.mp3'],
+        ['type' => 'tts', 'text' => 'Welcome', 'gender' => 'male'],
+        ['type' => 'silence', 'duration' => 5]
+      ]
+    ];
+    $this->call->prompt($params)->done([$this, '__syncPromptCheck']);
+
+    $this->calling->notificationHandler(self::$notificationFinished);
+  }
+
   public function testPromptFail(): void {
-    $collect = ["initial_timeout" => 10, "digits" => [ "max" => 3 ]];
+    $collect = ['initial_timeout' => 10, 'digits' => [ 'max' => 3 ]];
     $play = [
       ['type' => 'audio', 'params' => ['url' => 'audio.mp3']],
       ['type' => 'tts', 'params' => ['text' => 'Welcome', 'gender' => 'male']],
@@ -55,7 +79,7 @@ class RelayCallingCallPromptTest extends RelayCallingBaseActionCase
   }
 
   public function testPromptAsyncSuccess(): void {
-    $collect = ["initial_timeout" => 10, "digits" => [ "max" => 3 ]];
+    $collect = ['initial_timeout' => 10, 'digits' => [ 'max' => 3 ]];
     $play = [
       ['type' => 'audio', 'params' => ['url' => 'audio.mp3']],
       ['type' => 'tts', 'params' => ['text' => 'Welcome', 'gender' => 'male']],
@@ -68,7 +92,7 @@ class RelayCallingCallPromptTest extends RelayCallingBaseActionCase
   }
 
   public function testPromptAsyncFail(): void {
-    $collect = ["initial_timeout" => 10, "digits" => [ "max" => 3 ]];
+    $collect = ['initial_timeout' => 10, 'digits' => [ 'max' => 3 ]];
     $play = [
       ['type' => 'audio', 'params' => ['url' => 'audio.mp3']],
       ['type' => 'tts', 'params' => ['text' => 'Welcome', 'gender' => 'male']],
@@ -85,7 +109,7 @@ class RelayCallingCallPromptTest extends RelayCallingBaseActionCase
   }
 
   public function testPromptTTS(): void {
-    $collect = ["initial_timeout" => 10, "digits" => [ "max" => 3 ]];
+    $collect = ['initial_timeout' => 10, 'digits' => [ 'max' => 3 ]];
     $play = [
       ['type' => 'tts', 'params' => ['text' => 'Welcome', 'gender' => 'male']]
     ];
@@ -97,7 +121,7 @@ class RelayCallingCallPromptTest extends RelayCallingBaseActionCase
   }
 
   public function testPromptTTSAsync(): void {
-    $collect = ["initial_timeout" => 10, "digits" => [ "max" => 3 ]];
+    $collect = ['initial_timeout' => 10, 'digits' => [ 'max' => 3 ]];
     $play = [
       ['type' => 'tts', 'params' => ['text' => 'Welcome', 'gender' => 'male']]
     ];
@@ -108,7 +132,7 @@ class RelayCallingCallPromptTest extends RelayCallingBaseActionCase
   }
 
   public function testPromptAudio(): void {
-    $collect = ["initial_timeout" => 10, "digits" => [ "max" => 3 ]];
+    $collect = ['initial_timeout' => 10, 'digits' => [ 'max' => 3 ]];
     $play = [
       ['type' => 'audio', 'params' => ['url' => 'audio.mp3']]
     ];
@@ -119,8 +143,21 @@ class RelayCallingCallPromptTest extends RelayCallingBaseActionCase
     $this->calling->notificationHandler(self::$notificationFinished);
   }
 
+  public function testPromptAudioWithFlattenedParams(): void {
+    $collect = ['initial_timeout' => 10, 'digits' => [ 'max' => 3 ]];
+    $play = [
+      ['type' => 'audio', 'params' => ['url' => 'audio.mp3']]
+    ];
+    $msg = $this->_promptMsg($collect, $play);
+    $this->_mockSuccessResponse($msg, self::$success);
+
+    $params = ['initial_timeout' => 10, 'digits_max' => 3, 'url' => 'audio.mp3'];
+    $this->call->promptAudio($params)->done([$this, '__syncPromptCheck']);
+    $this->calling->notificationHandler(self::$notificationFinished);
+  }
+
   public function testPromptAudioAsync(): void {
-    $collect = ["initial_timeout" => 10, "digits" => [ "max" => 3 ]];
+    $collect = ['initial_timeout' => 10, 'digits' => [ 'max' => 3 ]];
     $play = [
       ['type' => 'audio', 'params' => ['url' => 'audio.mp3']]
     ];
@@ -128,6 +165,18 @@ class RelayCallingCallPromptTest extends RelayCallingBaseActionCase
     $this->_mockSuccessResponse($msg, self::$success);
 
     $this->call->promptAudioAsync($collect, 'audio.mp3')->done([$this, '__asyncPromptCheck']);
+  }
+
+  public function testPromptAudioAsyncWithFlattenedParams(): void {
+    $collect = ['initial_timeout' => 10, 'digits' => [ 'max' => 3 ]];
+    $play = [
+      ['type' => 'audio', 'params' => ['url' => 'audio.mp3']]
+    ];
+    $msg = $this->_promptMsg($collect, $play);
+    $this->_mockSuccessResponse($msg, self::$success);
+
+    $params = ['initial_timeout' => 10, 'digits_max' => 3, 'url' => 'audio.mp3'];
+    $this->call->promptAudioAsync($params)->done([$this, '__asyncPromptCheck']);
   }
 
   /**
