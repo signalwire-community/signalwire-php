@@ -681,8 +681,8 @@ class Call {
   private function _prepareDetectParams(array $params) {
     $timeout = isset($params['timeout']) ? $params['timeout'] : null;
     $type = isset($params['type']) ? $params['type'] : null;
-    $waitForBeep = isset($params['waitForBeep']) ? $params['waitForBeep'] : false;
-    unset($params['type'], $params['timeout'], $params['waitForBeep']);
+    $waitForBeep = isset($params['wait_for_beep']) ? $params['wait_for_beep'] : false;
+    unset($params['type'], $params['timeout'], $params['wait_for_beep']);
     $detect = ['type' => $type, 'params' => $params];
 
     return [$detect, $timeout, $waitForBeep];
