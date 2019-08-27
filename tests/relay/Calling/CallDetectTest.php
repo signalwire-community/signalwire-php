@@ -384,7 +384,7 @@ class RelayCallingCallDetectTest extends RelayCallingBaseActionCase
   public function testDetectAnsweringMachineWaitingForBeep(): void {
     $msg = $this->_detectMsg('machine');
     $this->_mockSuccessResponse($msg);
-    $this->call->detectAnsweringMachine(['timeout' => 25, 'waitForBeep' => true])->done(function($result) {
+    $this->call->detectAnsweringMachine(['timeout' => 25, 'wait_for_beep' => true])->done(function($result) {
       $this->assertInstanceOf('SignalWire\Relay\Calling\Results\DetectResult', $result);
       $this->assertTrue($result->isSuccessful());
       $this->assertEquals($result->getType(), 'machine');
@@ -401,7 +401,7 @@ class RelayCallingCallDetectTest extends RelayCallingBaseActionCase
   public function testDetectAnsweringMachineWaitingForBeepReceivingHuman(): void {
     $msg = $this->_detectMsg('machine');
     $this->_mockSuccessResponse($msg);
-    $this->call->detectAnsweringMachine(['timeout' => 25, 'waitForBeep' => true])->done(function($result) {
+    $this->call->detectAnsweringMachine(['timeout' => 25, 'wait_for_beep' => true])->done(function($result) {
       $this->assertInstanceOf('SignalWire\Relay\Calling\Results\DetectResult', $result);
       $this->assertTrue($result->isSuccessful());
       $this->assertEquals($result->getType(), 'machine');
