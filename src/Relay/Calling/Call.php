@@ -164,7 +164,8 @@ class Call {
     return $this->playAsync(['type' => PlayType::TTS, 'params' => $options]);
   }
 
-  public function prompt(Array $collect, ...$play) {
+  public function prompt(Array $params, ...$mediaList) {
+    list($collect, $play) = \SignalWire\preparePromptParams($params, $mediaList);
     $component = new Components\Prompt($this, $collect, $play);
     $this->_addComponent($component);
 
@@ -174,7 +175,8 @@ class Call {
     });
   }
 
-  public function promptAsync(Array $collect, ...$play) {
+  public function promptAsync(Array $params, ...$mediaList) {
+    list($collect, $play) = \SignalWire\preparePromptParams($params, $mediaList);
     $component = new Components\Prompt($this, $collect, $play);
     $this->_addComponent($component);
 

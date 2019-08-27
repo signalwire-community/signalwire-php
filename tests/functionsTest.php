@@ -257,4 +257,102 @@ class FunctionsTest extends TestCase
 
     $this->assertEquals(\SignalWire\preparePlayParams($input), $expected);
   }
+
+  public function testPreparePromptParamsWithEmptyArray(): void {
+    $expected = [[], []];
+    $input = [];
+    $this->assertEquals(\SignalWire\preparePromptParams($input), $expected);
+  }
+
+  public function testPreparePromptParamsWithDigitsKey(): void {
+    $collectExpected = [
+      'initial_timeout' => 5,
+      'digits' => [
+        'max' => 3, 'digit_timeout' => 2, 'terminators' => '#'
+      ]
+    ];
+    $playExpected = [
+      [ 'type' => 'audio', 'params' => ['url' => 'audio.mp3'] ],
+      [ 'type' => 'silence', 'params' => ['duration' => 5] ],
+      [ 'type' => 'tts', 'params' => ['text' => 'hello', 'gender' => 'male'] ]
+    ];
+    list($collect, $play) = \SignalWire\preparePromptParams($collectExpected, $playExpected);
+    $this->assertEquals($collect, $collectExpected);
+    $this->assertEquals($play, $playExpected);
+  }
+
+  public function testPreparePromptParamsWithSpeechKeyAndFlattenedMedia(): void {
+    $collectExpected = [
+      'initial_timeout' => 5,
+      'speech' => [
+        'end_silence_timeout' => 3
+      ]
+    ];
+    $playExpected = [
+      [ 'type' => 'audio', 'params' => ['url' => 'audio.mp3'] ],
+      [ 'type' => 'silence', 'params' => ['duration' => 5] ],
+      [ 'type' => 'tts', 'params' => ['text' => 'hello', 'gender' => 'male'] ]
+    ];
+    $flattenedMedia = [
+      ['type' => 'audio', 'url' => 'audio.mp3'],
+      ['type' => 'silence', 'duration' => 5],
+      ['type' => 'tts', 'text' => 'hello', 'gender' => 'male']
+    ];
+    list($collect, $play) = \SignalWire\preparePromptParams($collectExpected, $flattenedMedia);
+    $this->assertEquals($collect, $collectExpected);
+    $this->assertEquals($play, $playExpected);
+  }
+
+  public function testPreparePromptParamsWithFlattenedParams(): void {
+    $collectExpected = [
+      'initial_timeout' => 5,
+      'digits' => [
+        'max' => 3, 'digit_timeout' => 2, 'terminators' => '#'
+      ],
+      'speech' => [
+        'end_silence_timeout' => 3,
+        'speech_timeout' => 3
+      ]
+    ];
+    $playExpected = [
+      [ 'type' => 'audio', 'params' => ['url' => 'audio.mp3'] ],
+      [ 'type' => 'silence', 'params' => ['duration' => 5] ],
+      [ 'type' => 'tts', 'params' => ['text' => 'hello', 'gender' => 'male'] ]
+    ];
+    $params = [
+      'initial_timeout' => 5,
+      'digits_max' => 3,
+      'digits_timeout' => 2,
+      'digits_terminators' => '#',
+      'end_silence_timeout' => 3,
+      'speech_timeout' => 3,
+      'NOT_EXISTS' => 'this will be ignored',
+      'media' => [
+        [ 'type' => 'audio', 'url' => 'audio.mp3'],
+        [ 'type' => 'silence', 'duration' => 5],
+        [ 'type' => 'tts', 'text' => 'hello', 'gender' => 'male']
+      ]
+    ];
+    list($collect, $play) = \SignalWire\preparePromptParams($params);
+    $this->assertEquals($collect, $collectExpected);
+    $this->assertEquals($play, $playExpected);
+  }
+
+  public function testPreparePromptParamsWithoutMedia(): void {
+    $collectExpected = [
+      'initial_timeout' => 5,
+      'speech' => [
+        'end_silence_timeout' => 3
+      ]
+    ];
+    $playExpected = [];
+
+    $params = [
+      'initial_timeout' => 5,
+      'end_silence_timeout' => 3
+    ];
+    list($collect, $play) = \SignalWire\preparePromptParams($params);
+    $this->assertEquals($collect, $collectExpected);
+    $this->assertEquals($play, $playExpected);
+  }
 }
