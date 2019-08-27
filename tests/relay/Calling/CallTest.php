@@ -13,7 +13,6 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
     $this->stateNotificationCreated = json_decode('{"event_type":"calling.call.state","params":{"call_state":"created","direction":"inbound","device":{"type":"phone","params":{"from_number":"+1234","to_number":"15678"}},"tag":"'.self::UUID.'","call_id":"call-id","node_id":"node-id"}}');
     $this->stateNotificationAnswered = json_decode('{"event_type":"calling.call.state","params":{"call_state":"answered","direction":"inbound","device":{"type":"phone","params":{"from_number":"+1234","to_number":"15678"}},"call_id":"call-id","node_id":"node-id"}}');
     $this->stateNotificationEnded = json_decode('{"event_type":"calling.call.state","params":{"call_state":"ended","end_reason":"busy","direction":"inbound","device":{"type":"phone","params":{"from_number":"+1234","to_number":"15678"}},"call_id":"call-id","node_id":"node-id"}}');
-    $this->recordNotification = json_decode('{"event_type":"calling.call.record","params":{"state":"finished","record":{"audio":{"format":"mp3","direction":"speak","stereo":false}},"url":"record.mp3","control_id":"'.self::UUID.'","size":4096,"duration":4,"call_id":"call-id","node_id":"node-id"}}');
     $this->playNotification = json_decode('{"event_type":"calling.call.play","params":{"control_id":"'.self::UUID.'","call_id":"call-id","node_id":"node-id","state":"finished"}}');
     $this->collectNotification = json_decode('{"event_type":"calling.call.collect","params":{"control_id":"'.self::UUID.'","call_id":"call-id","node_id":"node-id","result":{"type":"digit","params":{"digits":"12345","terminator":"#"}}}}');
     $this->connectNotification = json_decode('{"event_type":"calling.call.connect","params":{"connect_state":"connected","peer":{"call_id":"peer-call-id","node_id":"peer-node-id","device":{"type":"phone","params":{"from_number":"+1234","to_number":"+15678"}}},"call_id":"call-id","node_id":"node-id"}}');
@@ -161,111 +160,6 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
       $this->assertEquals($result->getEvent(), null);
     });
     $this->calling->notificationHandler($this->stateNotificationAnswered);
-  }
-
-  public function testRecordSuccess(): void {
-    $this->_setCallReady();
-
-    $msg = new Execute([
-      'protocol' => 'signalwire_calling_proto',
-      'method' => 'calling.record',
-      'params' => [
-        'call_id' => 'call-id',
-        'node_id' => 'node-id',
-        'control_id' => self::UUID,
-        'record' => ["beep" => true, "stereo" => false]
-      ]
-    ]);
-
-    $this->client->connection->expects($this->once())->method('send')->with($msg)->willReturn($this->_successResponse);
-
-    $record = ["beep" => true, "stereo" => false];
-    $this->call->record($record)->done(function($result) {
-      $this->assertInstanceOf('SignalWire\Relay\Calling\Results\RecordResult', $result);
-      $this->assertTrue($result->isSuccessful());
-      $this->assertEquals($result->getUrl(), 'record.mp3');
-      $this->assertObjectHasAttribute('url', $result->getEvent()->payload);
-    });
-
-    $this->calling->notificationHandler($this->recordNotification);
-  }
-
-  public function testRecordFail(): void {
-    $this->_setCallReady();
-
-    $msg = new Execute([
-      'protocol' => 'signalwire_calling_proto',
-      'method' => 'calling.record',
-      'params' => [
-        'call_id' => 'call-id',
-        'node_id' => 'node-id',
-        'control_id' => self::UUID,
-        'record' => ["beep" => true, "stereo" => false]
-      ]
-    ]);
-
-    $this->client->connection->expects($this->once())->method('send')->with($msg)->willReturn($this->_failResponse);
-
-    $record = ["beep" => true, "stereo" => false];
-    $this->call->record($record)->done(function($result) {
-      $this->assertInstanceOf('SignalWire\Relay\Calling\Results\RecordResult', $result);
-      $this->assertFalse($result->isSuccessful());
-    });
-
-    $this->calling->notificationHandler($this->recordNotification);
-  }
-
-  public function testRecordAsyncSuccess(): void {
-    $this->_setCallReady();
-
-    $msg = new Execute([
-      'protocol' => 'signalwire_calling_proto',
-      'method' => 'calling.record',
-      'params' => [
-        'call_id' => 'call-id',
-        'node_id' => 'node-id',
-        'control_id' => self::UUID,
-        'record' => ["beep" => true, "stereo" => false]
-      ]
-    ]);
-
-    $this->client->connection->expects($this->once())->method('send')->with($msg)->willReturn($this->_successResponse);
-
-    $record = ["beep" => true, "stereo" => false];
-    $this->call->recordAsync($record)->done(function($action) {
-      $this->assertInstanceOf('SignalWire\Relay\Calling\Actions\RecordAction', $action);
-      $this->assertInstanceOf('SignalWire\Relay\Calling\Results\RecordResult', $action->getResult());
-      $this->assertFalse($action->isCompleted());
-
-      $this->calling->notificationHandler($this->recordNotification);
-
-      $this->assertTrue($action->isCompleted());
-    });
-  }
-
-  public function testRecordAsyncFail(): void {
-    $this->_setCallReady();
-
-    $msg = new Execute([
-      'protocol' => 'signalwire_calling_proto',
-      'method' => 'calling.record',
-      'params' => [
-        'call_id' => 'call-id',
-        'node_id' => 'node-id',
-        'control_id' => self::UUID,
-        'record' => ["beep" => true, "stereo" => false]
-      ]
-    ]);
-
-    $this->client->connection->expects($this->once())->method('send')->with($msg)->willReturn($this->_failResponse);
-
-    $record = ["beep" => true, "stereo" => false];
-    $this->call->recordAsync($record)->done(function($action) {
-      $this->assertInstanceOf('SignalWire\Relay\Calling\Actions\RecordAction', $action);
-      $this->assertInstanceOf('SignalWire\Relay\Calling\Results\RecordResult', $action->getResult());
-      $this->assertTrue($action->isCompleted());
-      $this->assertEquals($action->getState(), 'failed');
-    });
   }
 
   public function testPlaySuccess(): void {
