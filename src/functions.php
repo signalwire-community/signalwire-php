@@ -40,3 +40,15 @@ function prepareRecordParams(Array $params): Array {
   $record = [ $type => $subParams ];
   return $record;
 }
+
+function preparePlayParams(Array $mediaList): Array {
+  $mediaToPlay = [];
+  foreach($mediaList as $media) {
+    $type = isset($media['type']) ? $media['type'] : '';
+    $params = isset($media['params']) ? $media['params'] : [];
+    unset($media['type'], $media['params']);
+    $params = $params + $media;
+    array_push($mediaToPlay, ['type' => $type, 'params' => $params]);
+  }
+  return $mediaToPlay;
+}

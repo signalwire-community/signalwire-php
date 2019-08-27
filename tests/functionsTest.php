@@ -215,4 +215,46 @@ class FunctionsTest extends TestCase
 
     $this->assertEquals(\SignalWire\prepareRecordParams($input), $expected);
   }
+
+  public function testPreparePlayParamsWithEmptyArray(): void {
+    // do nothing
+    $this->assertEquals(\SignalWire\preparePlayParams([]), []);
+  }
+
+  public function testPreparePlayParamsWithTypeAndParamsKeys(): void {
+    $expected = [
+      [ 'type' => 'tts', 'params' => ['text' => 'hello', 'gender' => 'male'] ]
+    ];
+    $input = [
+      [ 'type' => 'tts', 'params' => ['text' => 'hello', 'gender' => 'male'] ]
+    ];
+
+    $this->assertEquals(\SignalWire\preparePlayParams($input), $expected);
+  }
+
+  public function testPreparePlayParamsWithFlattenParams(): void {
+    $expected = [
+      [ 'type' => 'tts', 'params' => ['text' => 'hello', 'gender' => 'male'] ]
+    ];
+    $input = [
+      [ 'type' => 'tts', 'text' => 'hello', 'gender' => 'male']
+    ];
+
+    $this->assertEquals(\SignalWire\preparePlayParams($input), $expected);
+  }
+
+  public function testPreparePlayParamsWithMixedParams(): void {
+    $expected = [
+      [ 'type' => 'audio', 'params' => ['url' => 'audio.mp3'] ],
+      [ 'type' => 'silence', 'params' => ['duration' => 5] ],
+      [ 'type' => 'tts', 'params' => ['text' => 'hello', 'gender' => 'male'] ]
+    ];
+    $input = [
+      [ 'type' => 'audio', 'url' => 'audio.mp3'],
+      [ 'type' => 'silence', 'duration' => 5],
+      [ 'type' => 'tts', 'params' => ['text' => 'hello'], 'gender' => 'male' ]
+    ];
+
+    $this->assertEquals(\SignalWire\preparePlayParams($input), $expected);
+  }
 }

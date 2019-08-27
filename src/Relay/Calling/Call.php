@@ -123,7 +123,7 @@ class Call {
   }
 
   public function play(...$play) {
-    $component = new Components\Play($this, $play);
+    $component = new Components\Play($this, \SignalWire\preparePlayParams($play));
     $this->_addComponent($component);
 
     return $component->_waitFor(PlayState::Error, PlayState::Finished)->then(function() use (&$component) {
@@ -132,7 +132,7 @@ class Call {
   }
 
   public function playAsync(...$play) {
-    $component = new Components\Play($this, $play);
+    $component = new Components\Play($this, \SignalWire\preparePlayParams($play));
     $this->_addComponent($component);
 
     return $component->execute()->then(function() use (&$component) {
