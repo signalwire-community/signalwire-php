@@ -355,4 +355,26 @@ class FunctionsTest extends TestCase
     $this->assertEquals($collect, $collectExpected);
     $this->assertEquals($play, $playExpected);
   }
+
+  public function testPreparePromptAudioParams(): void {
+    $expected = [
+      'initial_timeout' => 5,
+      'media' => [
+        [ 'type' => 'audio', 'params' => ['url' => 'audio.mp3'] ]
+      ]
+    ];
+    $this->assertEquals(\SignalWire\preparePromptAudioParams(['initial_timeout' => 5, 'url' => 'audio.mp3']), $expected);
+    $this->assertEquals(\SignalWire\preparePromptAudioParams(['initial_timeout' => 5], 'audio.mp3'), $expected);
+  }
+
+  public function testPreparePromptTTSParams(): void {
+    $expected = [
+      'initial_timeout' => 5,
+      'media' => [
+        [ 'type' => 'tts', 'params' => ['text' => 'welcome', 'gender' => 'male'] ]
+      ]
+    ];
+    $this->assertEquals(\SignalWire\preparePromptTTSParams(['initial_timeout' => 5, 'text' => 'welcome', 'gender' => 'male']), $expected);
+    $this->assertEquals(\SignalWire\preparePromptTTSParams(['initial_timeout' => 5], ['text' => 'welcome', 'gender' => 'male']), $expected);
+  }
 }
