@@ -172,4 +172,41 @@ class FunctionsTest extends TestCase
     $this->assertEquals(\SignalWire\checkWebSocketHost('ws://example.signalwire.com'), 'ws://example.signalwire.com');
     $this->assertEquals(\SignalWire\checkWebSocketHost('example.sw.com'), 'wss://example.sw.com');
   }
+
+  public function testPrepareRecordParamsWithAudioKey(): void {
+    $expected = [ 'audio' => [ 'beep' => true, 'format' => 'mp3', 'direction' => 'listen' ] ];
+    $input = [
+      'audio' => [
+        'beep' => true,
+        'format' => 'mp3',
+        'direction' => 'listen'
+      ]
+    ];
+
+    $this->assertEquals(\SignalWire\prepareRecordParams($input), $expected);
+  }
+
+  public function testPrepareRecordParamsWithFlattenedParams(): void {
+    $expected = [ 'audio' => [ 'beep' => true, 'format' => 'mp3', 'direction' => 'listen' ] ];
+    $input = [
+      'beep' => true,
+      'format' => 'mp3',
+      'direction' => 'listen'
+    ];
+
+    $this->assertEquals(\SignalWire\prepareRecordParams($input), $expected);
+  }
+
+  public function testPrepareRecordParamsWithMixedParams(): void {
+    $expected = [ 'audio' => [ 'beep' => true, 'format' => 'mp3', 'direction' => 'listen' ] ];
+    $input = [
+      'audio' => [
+        'beep' => true
+      ],
+      'format' => 'mp3',
+      'direction' => 'listen'
+    ];
+
+    $this->assertEquals(\SignalWire\prepareRecordParams($input), $expected);
+  }
 }

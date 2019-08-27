@@ -105,7 +105,7 @@ class Call {
   }
 
   public function record(Array $record) {
-    $component = new Components\Record($this, $record);
+    $component = new Components\Record($this, \SignalWire\prepareRecordParams($record));
     $this->_addComponent($component);
 
     return $component->_waitFor(RecordState::NoInput, RecordState::Finished)->then(function() use (&$component) {
@@ -114,7 +114,7 @@ class Call {
   }
 
   public function recordAsync(Array $record) {
-    $component = new Components\Record($this, $record);
+    $component = new Components\Record($this, \SignalWire\prepareRecordParams($record));
     $this->_addComponent($component);
 
     return $component->execute()->then(function() use (&$component) {

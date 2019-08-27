@@ -30,6 +30,23 @@ class RelayCallingCallRecordTest extends RelayCallingBaseActionCase
       $this->assertInstanceOf('SignalWire\Relay\Calling\Results\RecordResult', $result);
       $this->assertTrue($result->isSuccessful());
       $this->assertEquals($result->getUrl(), 'record.mp3');
+      $this->assertEquals($result->getSize(), 4096);
+      $this->assertObjectHasAttribute('url', $result->getEvent()->payload);
+    });
+
+    $this->calling->notificationHandler(self::$notificationFinished);
+  }
+
+  public function testRecordSuccessWithFlattenedParams(): void {
+    $msg = $this->_recordMsg();
+    $this->_mockSuccessResponse($msg, self::$success);
+
+    $record = ['beep' => true, 'stereo' => false];
+    $this->call->record($record)->done(function($result) {
+      $this->assertInstanceOf('SignalWire\Relay\Calling\Results\RecordResult', $result);
+      $this->assertTrue($result->isSuccessful());
+      $this->assertEquals($result->getUrl(), 'record.mp3');
+      $this->assertEquals($result->getSize(), 4096);
       $this->assertObjectHasAttribute('url', $result->getEvent()->payload);
     });
 
@@ -54,6 +71,22 @@ class RelayCallingCallRecordTest extends RelayCallingBaseActionCase
     $this->_mockSuccessResponse($msg, self::$success);
 
     $record = ['audio' => ['beep' => true, 'stereo' => false]];
+    $this->call->recordAsync($record)->done(function($action) {
+      $this->assertInstanceOf('SignalWire\Relay\Calling\Actions\RecordAction', $action);
+      $this->assertInstanceOf('SignalWire\Relay\Calling\Results\RecordResult', $action->getResult());
+      $this->assertFalse($action->isCompleted());
+
+      $this->calling->notificationHandler(self::$notificationFinished);
+
+      $this->assertTrue($action->isCompleted());
+    });
+  }
+
+  public function testRecordAsyncSuccessWithFlattenedParams(): void {
+    $msg = $this->_recordMsg();
+    $this->_mockSuccessResponse($msg, self::$success);
+
+    $record = ['beep' => true, 'stereo' => false];
     $this->call->recordAsync($record)->done(function($action) {
       $this->assertInstanceOf('SignalWire\Relay\Calling\Actions\RecordAction', $action);
       $this->assertInstanceOf('SignalWire\Relay\Calling\Results\RecordResult', $action->getResult());

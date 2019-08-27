@@ -2,6 +2,8 @@
 
 namespace SignalWire;
 
+use SignalWire\Relay\Calling\RecordType;
+
 function reduceConnectParams(Array $devices, String $defaultFrom, Int $defaultTimeout, $nested = false) {
   $final = [];
   foreach ($devices as $d) {
@@ -28,4 +30,13 @@ function reduceConnectParams(Array $devices, String $defaultFrom, Int $defaultTi
 function checkWebSocketHost(String $host): String {
   $protocol = preg_match("/^(ws|wss):\/\//", $host) ? '' : 'wss://';
   return $protocol . $host;
+}
+
+function prepareRecordParams(Array $params): Array {
+  $type = RecordType::Audio; // Default to audio
+  $subParams = isset($params['audio']) ? $params['audio'] : $params;
+  unset($params['type'], $params['audio']);
+  $subParams = $subParams + $params;
+  $record = [ $type => $subParams ];
+  return $record;
 }
