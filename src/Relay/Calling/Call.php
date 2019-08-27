@@ -148,11 +148,11 @@ class Call {
     return $this->playAsync(['type' => PlayType::Audio, 'params' => [ 'url' => $url ]]);
   }
 
-  public function playSilence(String $duration) {
+  public function playSilence(Float $duration) {
     return $this->play(['type' => PlayType::Silence, 'params' => [ 'duration' => $duration ]]);
   }
 
-  public function playSilenceAsync(String $duration) {
+  public function playSilenceAsync(Float $duration) {
     return $this->playAsync(['type' => PlayType::Silence, 'params' => [ 'duration' => $duration ]]);
   }
 
