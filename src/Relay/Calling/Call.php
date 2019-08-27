@@ -104,7 +104,7 @@ class Call {
     });
   }
 
-  public function record(Array $record) {
+  public function record(Array $record = []) {
     $component = new Components\Record($this, \SignalWire\prepareRecordParams($record));
     $this->_addComponent($component);
 
@@ -113,7 +113,7 @@ class Call {
     });
   }
 
-  public function recordAsync(Array $record) {
+  public function recordAsync(Array $record = []) {
     $component = new Components\Record($this, \SignalWire\prepareRecordParams($record));
     $this->_addComponent($component);
 

@@ -173,6 +173,12 @@ class FunctionsTest extends TestCase
     $this->assertEquals(\SignalWire\checkWebSocketHost('example.sw.com'), 'wss://example.sw.com');
   }
 
+  public function testPrepareRecordParamsWithEmptyArray(): void {
+    $expected = [ 'audio' => [] ];
+    $input = [];
+    $this->assertEquals(\SignalWire\prepareRecordParams($input), $expected);
+  }
+
   public function testPrepareRecordParamsWithAudioKey(): void {
     $expected = [ 'audio' => [ 'beep' => true, 'format' => 'mp3', 'direction' => 'listen' ] ];
     $input = [
