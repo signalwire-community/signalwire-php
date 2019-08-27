@@ -195,12 +195,14 @@ class Call {
     return $this->promptAsync($collect);
   }
 
-  public function promptTTS(Array $collect, Array $options) {
-    return $this->prompt($collect, ['type' => PlayType::TTS, 'params' => $options]);
+  public function promptTTS(Array $params, Array $ttsOptions = []) {
+    $collect = \SignalWire\preparePromptTTSParams($params, $ttsOptions);
+    return $this->prompt($collect);
   }
 
-  public function promptTTSAsync(Array $collect, Array $options) {
-    return $this->promptAsync($collect, ['type' => PlayType::TTS, 'params' => $options]);
+  public function promptTTSAsync(Array $params, Array $ttsOptions = []) {
+    $collect = \SignalWire\preparePromptTTSParams($params, $ttsOptions);
+    return $this->promptAsync($collect);
   }
 
   public function connect(...$devices) {

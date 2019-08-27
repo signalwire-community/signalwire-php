@@ -109,3 +109,17 @@ function preparePromptAudioParams(Array $params, String $url): Array {
   ];
   return $params;
 }
+
+function preparePromptTTSParams(Array $params, Array $ttsOptions = []): Array {
+  $keys = ['text', 'language', 'gender'];
+  foreach ($keys as $key) {
+    if (isset($params[$key])) {
+      $ttsOptions[$key] = $params[$key];
+      unset($params[$key]);
+    }
+  }
+  $params['media'] = [
+    ['type' => PlayType::TTS, 'params' => $ttsOptions]
+  ];
+  return $params;
+}
