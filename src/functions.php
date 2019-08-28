@@ -5,6 +5,8 @@ namespace SignalWire;
 use SignalWire\Relay\Calling\RecordType;
 use SignalWire\Relay\Calling\PromptType;
 use SignalWire\Relay\Calling\PlayType;
+use SignalWire\Relay\Calling\DetectType;
+use SignalWire\Relay\Calling\DetectState;
 
 function reduceConnectParams(Array $devices, String $defaultFrom, Int $defaultTimeout, $nested = false) {
   $final = [];
@@ -127,4 +129,31 @@ function preparePromptTTSParams(Array $params, Array $ttsOptions = []): Array {
     ['type' => PlayType::TTS, 'params' => $ttsOptions]
   ];
   return $params;
+}
+
+function prepareDetectParams(Array $params) {
+  $timeout = isset($params['timeout']) ? $params['timeout'] : null;
+  $type = isset($params['type']) ? $params['type'] : null;
+  $waitForBeep = isset($params['wait_for_beep']) ? $params['wait_for_beep'] : false;
+  unset($params['type'], $params['timeout'], $params['wait_for_beep']);
+  $detect = ['type' => $type, 'params' => $params];
+
+  return [$detect, $timeout, $waitForBeep];
+}
+
+function prepareDetectFaxParamsAndEvents(array $params) {
+  $params['type'] = DetectType::Fax;
+  list($detect, $timeout) = prepareDetectParams($params);
+  $faxEvents = [DetectState::CED, DetectState::CNG];
+  $events = [];
+  $tone = isset($detect['params']['tone']) ? $detect['params']['tone'] : null;
+  if ($tone && in_array($tone, $faxEvents)) {
+    $detect['params'] = ['tone' => $tone];
+    array_push($events, $tone);
+  } else {
+    $detect['params'] = [];
+    $events = $faxEvents; // Both CED & CNG
+  }
+
+  return [$detect, $timeout, $events];
 }

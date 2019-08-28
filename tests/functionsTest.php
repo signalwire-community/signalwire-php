@@ -400,4 +400,66 @@ class FunctionsTest extends TestCase
     $this->assertEquals(\SignalWire\preparePromptTTSParams(['initial_timeout' => 5, 'text' => 'welcome', 'gender' => 'male']), $expected);
     $this->assertEquals(\SignalWire\preparePromptTTSParams(['initial_timeout' => 5], ['text' => 'welcome', 'gender' => 'male']), $expected);
   }
+
+  public function testPrepareDetectParamsWithRequiredParamsOnly(): void {
+    $expected = [
+      'type' => 'fax', 'params' => []
+    ];
+    $input = [
+      'type' => 'fax'
+    ];
+    list($detect, $timeout, $waitForBeep) = \SignalWire\prepareDetectParams($input);
+    $this->assertEquals($detect, $expected);
+    $this->assertNull($timeout);
+    $this->assertFalse($waitForBeep);
+  }
+
+  public function testPrepareDetectParamsWithWaitForBeep(): void {
+    $expected = [
+      'type' => 'machine', 'params' => []
+    ];
+    $input = [
+      'type' => 'machine', 'timeout' => 20, 'wait_for_beep' => true
+    ];
+    list($detect, $timeout, $waitForBeep) = \SignalWire\prepareDetectParams($input);
+    $this->assertEquals($detect, $expected);
+    $this->assertEquals($timeout, 20);
+    $this->assertTrue($waitForBeep);
+  }
+
+  public function testPrepareDetectParamsWithDigits(): void {
+    $expected = [
+      'type' => 'digit', 'params' => ['digits' => '1234']
+    ];
+    $input = [
+      'type' => 'digit', 'digits' => '1234'
+    ];
+    list($detect, $timeout) = \SignalWire\prepareDetectParams($input);
+    $this->assertEquals($detect, $expected);
+    $this->assertNull($timeout);
+  }
+
+  public function testPrepareDetectFaxParamsAndEventsWithEmptyArray(): void {
+    $expected = [
+      'type' => 'fax', 'params' => []
+    ];
+    $input = ['type' => 'fax'];
+    list($detect, $timeout, $events) = \SignalWire\prepareDetectFaxParamsAndEvents($input);
+    $this->assertEquals($detect, $expected);
+    $this->assertNull($timeout);
+    $this->assertEquals($events, ['CED', 'CNG']);
+  }
+
+  public function testPrepareDetectFaxParamsAndEventsWithTone(): void {
+    $expected = [
+      'type' => 'fax', 'params' => ['tone' => 'CED']
+    ];
+    $input = [
+      'type' => 'fax', 'tone' => 'CED'
+    ];
+    list($detect, $timeout, $events) = \SignalWire\prepareDetectFaxParamsAndEvents($input);
+    $this->assertEquals($detect, $expected);
+    $this->assertNull($timeout);
+    $this->assertEquals($events, ['CED']);
+  }
 }
