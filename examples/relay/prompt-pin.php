@@ -25,12 +25,20 @@ class CustomConsumer extends Consumer {
       return;
     }
     $call = $dialResult->getCall();
-    $call->on('play.stateChange', function ($call, $params) {
-      Log::info('play.stateChange: ' . $params->state);
-    });
-
-    Log::info('Trying to play audio..');
-    yield $call->playAudio('https://cdn.signalwire.com/default-music/welcome.mp3');
+    $promptParams = [
+      'type' => 'digits',
+      'digits_max' => '4',
+      'digits_terminators' => '#',
+      'text' => 'Welcome at SignalWire. Please, enter your PIN and then # to proceed'
+    ];
+    $promptResult = yield $call->promptTTS($promptParams);
+    $pin = $promptResult->getResult();
+    Log::info('PIN: ' . $pin);
+    if ($pin === '1234') {
+      yield $call->playTTS(['text' => 'You entered the proper PIN. Thank you!']);
+    } else {
+      yield $call->playTTS(['text' => 'Unknown PIN.']);
+    }
     yield $call->hangup();
   }
 
