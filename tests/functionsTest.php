@@ -264,6 +264,29 @@ class FunctionsTest extends TestCase
     $this->assertEquals(\SignalWire\preparePromptParams($input), $expected);
   }
 
+  public function testPreparePromptParamsWithRequiredParamsOnly(): void {
+    $collectExpected = [
+      'initial_timeout' => 5,
+      'digits' => (object)[],
+      'speech' => (object)[]
+    ];
+    $playExpected = [
+      ['type' => 'audio', 'params' => ['url' => 'audio.mp3']],
+      ['type' => 'tts', 'params' => ['text' => 'hello', 'gender' => 'male']]
+    ];
+    $params = [
+      'initial_timeout' => 5,
+      'type' => 'both',
+      'media' => [
+        ['type' => 'audio', 'url' => 'audio.mp3'],
+        ['type' => 'tts', 'text' => 'hello', 'gender' => 'male']
+      ]
+    ];
+    list($collect, $play) = \SignalWire\preparePromptParams($params);
+    $this->assertEquals($collect, $collectExpected);
+    $this->assertEquals($play, $playExpected);
+  }
+
   public function testPreparePromptParamsWithDigitsKey(): void {
     $collectExpected = [
       'initial_timeout' => 5,

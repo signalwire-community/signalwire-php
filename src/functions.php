@@ -92,11 +92,16 @@ function preparePromptParams(Array $params, Array $mediaList = []): Array {
   if (isset($params['partial_results'])) {
     $collect['partial_results'] = $params['partial_results'];
   }
+  $type = isset($params['type']) ? $params['type'] : '';
   if (count($digits)) {
     $collect[PromptType::Digits] = $digits;
+  } elseif ($type == PromptType::Digits || $type == 'both') {
+    $collect[PromptType::Digits] = new \stdClass;
   }
   if (count($speech)) {
     $collect[PromptType::Speech] = $speech;
+  } elseif ($type == PromptType::Speech || $type == 'both') {
+    $collect[PromptType::Speech] = new \stdClass;
   }
   return [$collect, preparePlayParams($mediaToPlay)];
 }
