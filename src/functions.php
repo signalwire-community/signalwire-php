@@ -7,6 +7,7 @@ use SignalWire\Relay\Calling\PromptType;
 use SignalWire\Relay\Calling\PlayType;
 use SignalWire\Relay\Calling\DetectType;
 use SignalWire\Relay\Calling\DetectState;
+use SignalWire\Relay\Calling\TapType;
 
 function reduceConnectParams(Array $devices, String $defaultFrom, Int $defaultTimeout, $nested = false) {
   $final = [];
@@ -156,4 +157,44 @@ function prepareDetectFaxParamsAndEvents(array $params) {
   }
 
   return [$detect, $timeout, $events];
+}
+
+function prepareTapParams(array $params, array $deviceParams = []) {
+  $tapParams = [];
+  if (isset($params['audio_direction'])) {
+    $tapParams['direction'] = $params['audio_direction'];
+  } elseif (isset($params['direction'])) {
+    $tapParams['direction'] = $params['direction'];
+  }
+  $tap = ['type' => TapType::Audio, 'params' => $tapParams];
+
+  $device = ['type' => '', 'params' => []];
+  if (isset($deviceParams['type'])) {
+    $device['type'] = $deviceParams['type'];
+    unset($deviceParams['type']);
+  } elseif (isset($params['target_type'])) {
+    $device['type'] = $params['target_type'];
+  }
+
+  if (isset($params['target_addr'])) {
+    $deviceParams['addr'] = $params['target_addr'];
+  }
+  if (isset($params['target_port'])) {
+    $deviceParams['port'] = $params['target_port'];
+  }
+  if (isset($params['target_ptime'])) {
+    $deviceParams['ptime'] = $params['target_ptime'];
+  }
+  if (isset($params['target_uri'])) {
+    $deviceParams['uri'] = $params['target_uri'];
+  }
+  if (isset($params['rate'])) {
+    $deviceParams['rate'] = $params['rate'];
+  }
+  if (isset($params['codec'])) {
+    $deviceParams['codec'] = $params['codec'];
+  }
+  $device['params'] = $deviceParams;
+
+  return [$tap, $device];
 }

@@ -500,9 +500,9 @@ class Call {
     return $this->detectAsync($params);
   }
 
-  public function tap(Array $tap, Array $device) {
-    list($_tap, $_device) = $this->_prepareTapParams($tap, $device);
-    $component = new Components\Tap($this, $_tap, $_device);
+  public function tap(Array $params, Array $deprecatedDevice = []) {
+    list($tap, $device) = \SignalWire\prepareTapParams($params, $deprecatedDevice);
+    $component = new Components\Tap($this, $tap, $device);
     $this->_addComponent($component);
 
     return $component->_waitFor(TapState::Finished)->then(function() use (&$component) {
@@ -510,9 +510,9 @@ class Call {
     });
   }
 
-  public function tapAsync(Array $tap, Array $device) {
-    list($_tap, $_device) = $this->_prepareTapParams($tap, $device);
-    $component = new Components\Tap($this, $_tap, $_device);
+  public function tapAsync(Array $params, Array $deprecatedDevice = []) {
+    list($tap, $device) = \SignalWire\prepareTapParams($params, $deprecatedDevice);
+    $component = new Components\Tap($this, $tap, $device);
     $this->_addComponent($component);
 
     return $component->execute()->then(function() use (&$component) {
@@ -670,17 +670,5 @@ class Call {
         $component->terminate($params);
       }
     }
-  }
-
-  private function _prepareTapParams(array $tap, array $device) {
-    $tapType = isset($tap['type']) ? $tap['type'] : 'audio';
-    unset($tap['type']);
-    $_tap = ['type' => $tapType, 'params' => $tap];
-
-    $deviceType = isset($device['type']) ? $device['type'] : null;
-    unset($device['type']);
-    $_device = ['type' => $deviceType, 'params' => $device];
-
-    return [$_tap, $_device];
   }
 }

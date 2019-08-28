@@ -462,4 +462,51 @@ class FunctionsTest extends TestCase
     $this->assertNull($timeout);
     $this->assertEquals($events, ['CED']);
   }
+
+  public function testPrepareTapParamsWithBothTapAndDevice(): void {
+    $expectedTap = [ 'type' => 'audio', 'params' => [ 'direction' => 'listen' ] ];
+    $expectedDevice = [ 'type' => 'rtp', 'params' => [ 'addr' => '127.0.0.1', 'port' => 1234 ] ];
+
+    $tapParams = [ 'type' => 'audio', 'direction' => 'listen' ];
+    $deviceParams = [ 'type' => 'rtp', 'addr' => '127.0.0.1', 'port' => 1234 ];
+
+    list($tap, $device) = \SignalWire\prepareTapParams($tapParams, $deviceParams);
+
+    $this->assertEquals($tap, $expectedTap);
+    $this->assertEquals($device, $expectedDevice);
+  }
+
+  public function testPrepareTapParamsWithFlattenedParams(): void {
+    $expectedTap = [ 'type' => 'audio', 'params' => [ 'direction' => 'listen' ] ];
+    $expectedDevice = [ 'type' => 'rtp', 'params' => [ 'addr' => '127.0.0.1', 'port' => 1234 ] ];
+
+    $params = [
+      'audio_direction' => 'listen',
+      'target_type' => 'rtp',
+      'target_addr' => '127.0.0.1',
+      'target_port' => 1234
+    ];
+
+    list($tap, $device) = \SignalWire\prepareTapParams($params);
+
+    $this->assertEquals($tap, $expectedTap);
+    $this->assertEquals($device, $expectedDevice);
+  }
+
+  public function testPrepareTapParamsWithoutDirection(): void {
+    $expectedTap = [ 'type' => 'audio', 'params' => [] ];
+    $expectedDevice = [ 'type' => 'rtp', 'params' => [ 'addr' => '127.0.0.1', 'port' => 1234, 'codec' => 'OPUS' ] ];
+
+    $params = [
+      'target_type' => 'rtp',
+      'target_addr' => '127.0.0.1',
+      'target_port' => 1234,
+      'codec' => 'OPUS'
+    ];
+
+    list($tap, $device) = \SignalWire\prepareTapParams($params);
+
+    $this->assertEquals($tap, $expectedTap);
+    $this->assertEquals($device, $expectedDevice);
+  }
 }
