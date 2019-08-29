@@ -104,8 +104,8 @@ class Call {
     });
   }
 
-  public function record(Array $record) {
-    $component = new Components\Record($this, $record);
+  public function record(Array $record = []) {
+    $component = new Components\Record($this, \SignalWire\prepareRecordParams($record));
     $this->_addComponent($component);
 
     return $component->_waitFor(RecordState::NoInput, RecordState::Finished)->then(function() use (&$component) {
@@ -113,8 +113,8 @@ class Call {
     });
   }
 
-  public function recordAsync(Array $record) {
-    $component = new Components\Record($this, $record);
+  public function recordAsync(Array $record = []) {
+    $component = new Components\Record($this, \SignalWire\prepareRecordParams($record));
     $this->_addComponent($component);
 
     return $component->execute()->then(function() use (&$component) {
@@ -123,7 +123,7 @@ class Call {
   }
 
   public function play(...$play) {
-    $component = new Components\Play($this, $play);
+    $component = new Components\Play($this, \SignalWire\preparePlayParams($play));
     $this->_addComponent($component);
 
     return $component->_waitFor(PlayState::Error, PlayState::Finished)->then(function() use (&$component) {
@@ -132,7 +132,7 @@ class Call {
   }
 
   public function playAsync(...$play) {
-    $component = new Components\Play($this, $play);
+    $component = new Components\Play($this, \SignalWire\preparePlayParams($play));
     $this->_addComponent($component);
 
     return $component->execute()->then(function() use (&$component) {
@@ -148,11 +148,11 @@ class Call {
     return $this->playAsync(['type' => PlayType::Audio, 'params' => [ 'url' => $url ]]);
   }
 
-  public function playSilence(String $duration) {
+  public function playSilence(Float $duration) {
     return $this->play(['type' => PlayType::Silence, 'params' => [ 'duration' => $duration ]]);
   }
 
-  public function playSilenceAsync(String $duration) {
+  public function playSilenceAsync(Float $duration) {
     return $this->playAsync(['type' => PlayType::Silence, 'params' => [ 'duration' => $duration ]]);
   }
 
@@ -164,7 +164,8 @@ class Call {
     return $this->playAsync(['type' => PlayType::TTS, 'params' => $options]);
   }
 
-  public function prompt(Array $collect, ...$play) {
+  public function prompt(Array $params, ...$mediaList) {
+    list($collect, $play) = \SignalWire\preparePromptParams($params, $mediaList);
     $component = new Components\Prompt($this, $collect, $play);
     $this->_addComponent($component);
 
@@ -174,7 +175,8 @@ class Call {
     });
   }
 
-  public function promptAsync(Array $collect, ...$play) {
+  public function promptAsync(Array $params, ...$mediaList) {
+    list($collect, $play) = \SignalWire\preparePromptParams($params, $mediaList);
     $component = new Components\Prompt($this, $collect, $play);
     $this->_addComponent($component);
 
@@ -183,20 +185,24 @@ class Call {
     });
   }
 
-  public function promptAudio(Array $collect, String $url) {
-    return $this->prompt($collect, ['type' => PlayType::Audio, 'params' => ['url' => $url]]);
+  public function promptAudio(Array $params, String $url = '') {
+    $collect = \SignalWire\preparePromptAudioParams($params, $url);
+    return $this->prompt($collect);
   }
 
-  public function promptAudioAsync(Array $collect, String $url) {
-    return $this->promptAsync($collect, ['type' => PlayType::Audio, 'params' => ['url' => $url]]);
+  public function promptAudioAsync(Array $params, String $url = '') {
+    $collect = \SignalWire\preparePromptAudioParams($params, $url);
+    return $this->promptAsync($collect);
   }
 
-  public function promptTTS(Array $collect, Array $options) {
-    return $this->prompt($collect, ['type' => PlayType::TTS, 'params' => $options]);
+  public function promptTTS(Array $params, Array $ttsOptions = []) {
+    $collect = \SignalWire\preparePromptTTSParams($params, $ttsOptions);
+    return $this->prompt($collect);
   }
 
-  public function promptTTSAsync(Array $collect, Array $options) {
-    return $this->promptAsync($collect, ['type' => PlayType::TTS, 'params' => $options]);
+  public function promptTTSAsync(Array $params, Array $ttsOptions = []) {
+    $collect = \SignalWire\preparePromptTTSParams($params, $ttsOptions);
+    return $this->promptAsync($collect);
   }
 
   public function connect(...$devices) {
@@ -296,7 +302,7 @@ class Call {
    * @param Array Detector params
    */
   public function detect(array $params) {
-    list($detect, $timeout) = $this->_prepareDetectParams($params);
+    list($detect, $timeout) = \SignalWire\prepareDetectParams($params);
     $component = new Components\Detect($this, $detect, $timeout);
     $this->_addComponent($component);
 
@@ -312,7 +318,7 @@ class Call {
    * @param Array Detector params
    */
   public function detectAsync(array $params) {
-    list($detect, $timeout) = $this->_prepareDetectParams($params);
+    list($detect, $timeout) = \SignalWire\prepareDetectParams($params);
     $component = new Components\Detect($this, $detect, $timeout);
     $this->_addComponent($component);
 
@@ -335,7 +341,7 @@ class Call {
    */
   public function detectAnsweringMachine(array $params = []) {
     $params['type'] = DetectType::Machine;
-    list($detect, $timeout, $waitForBeep) = $this->_prepareDetectParams($params);
+    list($detect, $timeout, $waitForBeep) = \SignalWire\prepareDetectParams($params);
     $component = new Components\Detect($this, $detect, $timeout, $waitForBeep);
     $this->_addComponent($component);
 
@@ -359,7 +365,7 @@ class Call {
    */
   public function detectAnsweringMachineAsync(array $params = []) {
     $params['type'] = DetectType::Machine;
-    list($detect, $timeout, $waitForBeep) = $this->_prepareDetectParams($params);
+    list($detect, $timeout, $waitForBeep) = \SignalWire\prepareDetectParams($params);
     $component = new Components\Detect($this, $detect, $timeout, $waitForBeep);
     $this->_addComponent($component);
 
@@ -377,7 +383,7 @@ class Call {
   public function detectHuman(array $params = []) {
     trigger_error('Method ' . __METHOD__ . ' is deprecated. Use detectAnsweringMachine instead.', E_USER_DEPRECATED);
     $params['type'] = DetectType::Machine;
-    list($detect, $timeout) = $this->_prepareDetectParams($params);
+    list($detect, $timeout) = \SignalWire\prepareDetectParams($params);
     $component = new Components\Detect($this, $detect, $timeout);
     $this->_addComponent($component);
 
@@ -397,7 +403,7 @@ class Call {
   public function detectHumanAsync(array $params = []) {
     trigger_error('Method ' . __METHOD__ . ' is deprecated. Use detectAnsweringMachineAsync instead.', E_USER_DEPRECATED);
     $params['type'] = DetectType::Machine;
-    list($detect, $timeout) = $this->_prepareDetectParams($params);
+    list($detect, $timeout) = \SignalWire\prepareDetectParams($params);
     $component = new Components\Detect($this, $detect, $timeout);
     $this->_addComponent($component);
 
@@ -415,7 +421,7 @@ class Call {
   public function detectMachine(array $params = []) {
     trigger_error('Method ' . __METHOD__ . ' is deprecated. Use detectAnsweringMachine instead.', E_USER_DEPRECATED);
     $params['type'] = DetectType::Machine;
-    list($detect, $timeout) = $this->_prepareDetectParams($params);
+    list($detect, $timeout) = \SignalWire\prepareDetectParams($params);
     $component = new Components\Detect($this, $detect, $timeout);
     $this->_addComponent($component);
 
@@ -435,7 +441,7 @@ class Call {
   public function detectMachineAsync(array $params = []) {
     trigger_error('Method ' . __METHOD__ . ' is deprecated. Use detectAnsweringMachineAsync instead.', E_USER_DEPRECATED);
     $params['type'] = DetectType::Machine;
-    list($detect, $timeout) = $this->_prepareDetectParams($params);
+    list($detect, $timeout) = \SignalWire\prepareDetectParams($params);
     $component = new Components\Detect($this, $detect, $timeout);
     $this->_addComponent($component);
 
@@ -450,7 +456,7 @@ class Call {
    * @param Array Detector params
    */
   public function detectFax(array $params = []) {
-    list($detect, $timeout, $events) = $this->_prepareDetectFaxParamsAndEvents($params);
+    list($detect, $timeout, $events) = \SignalWire\prepareDetectFaxParamsAndEvents($params);
     $component = new Components\Detect($this, $detect, $timeout);
     $this->_addComponent($component);
 
@@ -465,7 +471,7 @@ class Call {
    * @param Array Detector params
    */
   public function detectFaxAsync(array $params = []) {
-    list($detect, $timeout) = $this->_prepareDetectFaxParamsAndEvents($params);
+    list($detect, $timeout) = \SignalWire\prepareDetectFaxParamsAndEvents($params);
     $component = new Components\Detect($this, $detect, $timeout);
     $this->_addComponent($component);
 
@@ -494,9 +500,9 @@ class Call {
     return $this->detectAsync($params);
   }
 
-  public function tap(Array $tap, Array $device) {
-    list($_tap, $_device) = $this->_prepareTapParams($tap, $device);
-    $component = new Components\Tap($this, $_tap, $_device);
+  public function tap(Array $params, Array $deprecatedDevice = []) {
+    list($tap, $device) = \SignalWire\prepareTapParams($params, $deprecatedDevice);
+    $component = new Components\Tap($this, $tap, $device);
     $this->_addComponent($component);
 
     return $component->_waitFor(TapState::Finished)->then(function() use (&$component) {
@@ -504,9 +510,9 @@ class Call {
     });
   }
 
-  public function tapAsync(Array $tap, Array $device) {
-    list($_tap, $_device) = $this->_prepareTapParams($tap, $device);
-    $component = new Components\Tap($this, $_tap, $_device);
+  public function tapAsync(Array $params, Array $deprecatedDevice = []) {
+    list($tap, $device) = \SignalWire\prepareTapParams($params, $deprecatedDevice);
+    $component = new Components\Tap($this, $tap, $device);
     $this->_addComponent($component);
 
     return $component->execute()->then(function() use (&$component) {
@@ -664,44 +670,5 @@ class Call {
         $component->terminate($params);
       }
     }
-  }
-
-  private function _prepareTapParams(array $tap, array $device) {
-    $tapType = isset($tap['type']) ? $tap['type'] : 'audio';
-    unset($tap['type']);
-    $_tap = ['type' => $tapType, 'params' => $tap];
-
-    $deviceType = isset($device['type']) ? $device['type'] : null;
-    unset($device['type']);
-    $_device = ['type' => $deviceType, 'params' => $device];
-
-    return [$_tap, $_device];
-  }
-
-  private function _prepareDetectParams(array $params) {
-    $timeout = isset($params['timeout']) ? $params['timeout'] : null;
-    $type = isset($params['type']) ? $params['type'] : null;
-    $waitForBeep = isset($params['wait_for_beep']) ? $params['wait_for_beep'] : false;
-    unset($params['type'], $params['timeout'], $params['wait_for_beep']);
-    $detect = ['type' => $type, 'params' => $params];
-
-    return [$detect, $timeout, $waitForBeep];
-  }
-
-  private function _prepareDetectFaxParamsAndEvents(array $params) {
-    $params['type'] = DetectType::Fax;
-    list($detect, $timeout) = $this->_prepareDetectParams($params);
-    $faxEvents = [DetectState::CED, DetectState::CNG];
-    $events = [];
-    $tone = isset($detect['params']['tone']) ? $detect['params']['tone'] : null;
-    if ($tone && in_array($tone, $faxEvents)) {
-      $detect['params'] = ['tone' => $tone];
-      array_push($events, $tone);
-    } else {
-      $detect['params'] = [];
-      array_push($events, ...$faxEvents);
-    }
-
-    return [$detect, $timeout, $events];
   }
 }
