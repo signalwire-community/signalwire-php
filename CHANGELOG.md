@@ -6,8 +6,11 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ## [Unreleased]
 ### Changed
 - Minor change at the lower level APIs: using `calling.` instead of `call.` prefix for calling methods.
+- Flattened parameters for _record_, _play_, _prompt_, _detect_ and _tap_ calling methods.
+
 ### Added
 - New methods to perform answering machine detection: `amd` (alias to `detectAnsweringMachine`) and `amdAsync` (alias to `detectAnsweringMachineAsync`).
+
 ### Deprecated
 - Deprecated the following methods on Call: `detectHuman`, `detectHumanAsync`, `detectMachine`, `detectMachineAsync`.
 
