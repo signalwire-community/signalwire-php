@@ -608,7 +608,8 @@ class Call {
 
   public function _collectChange($params) {
     $this->_notifyComponents(Notification::Collect, $params->control_id, $params);
-    $this->_dispatchCallback('collect', $params);
+    $this->_dispatchCallback('collect', $params); // backwards compat.
+    $this->_dispatchCallback('prompt', $params);
   }
 
   public function _faxChange($params) {
