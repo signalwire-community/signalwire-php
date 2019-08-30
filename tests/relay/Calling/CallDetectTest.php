@@ -391,6 +391,7 @@ class RelayCallingCallDetectTest extends RelayCallingBaseActionCase
       $this->assertEquals($result->getResult(), 'MACHINE');
       $this->assertObjectHasAttribute('type', $result->getEvent()->payload);
       $this->assertObjectHasAttribute('params', $result->getEvent()->payload);
+      $this->assertEquals('READY', $result->getEvent()->payload->params->event);
     });
     $this->calling->notificationHandler(self::$notificationMachineMachine);
     $this->calling->notificationHandler(self::$notificationMachineNotReady);
@@ -408,6 +409,7 @@ class RelayCallingCallDetectTest extends RelayCallingBaseActionCase
       $this->assertEquals($result->getResult(), 'HUMAN');
       $this->assertObjectHasAttribute('type', $result->getEvent()->payload);
       $this->assertObjectHasAttribute('params', $result->getEvent()->payload);
+      $this->assertEquals('HUMAN', $result->getEvent()->payload->params->event);
     });
     $this->calling->notificationHandler(self::$notificationMachineHuman);
   }
