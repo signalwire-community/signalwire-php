@@ -49,6 +49,10 @@ function prepareRecordParams(Array $params): Array {
 function preparePlayParams(Array $mediaList): Array {
   $mediaToPlay = [];
   foreach($mediaList as $media) {
+    if (!is_array($media)) {
+      Log::warning('Invalid media to play.');
+      continue;
+    }
     $type = isset($media['type']) ? $media['type'] : '';
     $params = isset($media['params']) ? $media['params'] : [];
     unset($media['type'], $media['params']);
