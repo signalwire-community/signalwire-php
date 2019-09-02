@@ -40,6 +40,7 @@ class BroadcastHandler {
       case CallNotification::Fax:
       case CallNotification::Detect:
       case CallNotification::Tap:
+      case CallNotification::SendDigits:
         $client->getCalling()->notificationHandler($params);
         break;
       default:

@@ -3,41 +3,40 @@ error_reporting(E_ALL);
 
 require dirname(__FILE__) . '/../../vendor/autoload.php';
 
-$project = isset($_ENV['PROJECT']) ? $_ENV['PROJECT'] : '';
-$token = isset($_ENV['TOKEN']) ? $_ENV['TOKEN'] : '';
-if (empty($project) || empty($token)) {
-  throw new \Exception('Set your SignalWire project and token before run the example!');
-}
+use Generator as Coroutine;
+use SignalWire\Relay\Consumer;
+use SignalWire\Log;
 
-$client = new SignalWire\Relay\Client([ 'project' => $project, 'token' => $token ]);
+class CustomConsumer extends Consumer {
+  public $project;
+  public $token;
+  public $contexts = ['home', 'office'];
 
-$client->on('signalwire.ready', function($client) {
+  public function setup() {
+    $this->project = isset($_ENV['PROJECT']) ? $_ENV['PROJECT'] : '';
+    $this->token = isset($_ENV['TOKEN']) ? $_ENV['TOKEN'] : '';
+  }
 
-  $params = array('type' => 'phone', 'from' => '+1xxx', 'to' => '+1yyy');
+  public function teardown(): Coroutine {
+    yield;
+    echo "\n General cleanup here.. \n";
+  }
 
-  $client->calling->dial($params)->done(function($dialResult) {
-    if (!$dialResult->isSuccessful()) {
-      echo "\n Error dialing \n";
-      return;
-    }
-    $call = $dialResult->getCall();
+  public function onIncomingCall($call): Coroutine {
+    print "\n - onIncomingCall on context: {$call->context}, from: {$call->from} to: {$call->to} !\n";
+
+    yield $call->answer();
 
     $call->on('detect.update', function ($call, $params) {
-      echo "\nDetect Update\n";
       print_r($params);
-      echo "\nDetect Update\n";
     });
 
-    $call->detectDigit(['digits' => '123'])->done(function($result) use ($call) {
-      print PHP_EOL . 'isSuccessful: ' . $result->isSuccessful() . PHP_EOL;
-      print PHP_EOL . 'getType: ' . $result->getType() . PHP_EOL;
-      print PHP_EOL . 'getResult: ' . $result->getResult() . PHP_EOL;
+    $result = yield $call->detectDigit(['digits' => '123']);
+    Log::info('isSuccessful: ' . $result->isSuccessful());
+    Log::info('getResult: ' . $result->getResult());
+    yield $call->hangup();
+  }
+}
 
-      $call->hangup();
-    });
-
-  });
-
-});
-
-$client->connect();
+$x = new CustomConsumer();
+$x->run();
