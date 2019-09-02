@@ -69,6 +69,10 @@ abstract class BaseComponent {
   abstract function notificationHandler($params);
 
   public function execute() {
+    if ($this->call->ended) {
+      $this->terminate();
+      return \React\Promise\resolve();
+    }
     $method = $this->method();
     if ($method === null) {
       return \React\Promise\resolve();
