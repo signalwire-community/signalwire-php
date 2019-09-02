@@ -528,6 +528,7 @@ class Call {
         $this->answered = true;
         break;
       case CallState::Ending:
+        $this->ended = true;
         $this->active = false;
         break;
       case CallState::Ended:
