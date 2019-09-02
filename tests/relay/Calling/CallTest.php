@@ -12,6 +12,7 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
 
     $this->stateNotificationCreated = json_decode('{"event_type":"calling.call.state","params":{"call_state":"created","direction":"inbound","device":{"type":"phone","params":{"from_number":"+1234","to_number":"15678"}},"tag":"'.self::UUID.'","call_id":"call-id","node_id":"node-id"}}');
     $this->stateNotificationAnswered = json_decode('{"event_type":"calling.call.state","params":{"call_state":"answered","direction":"inbound","device":{"type":"phone","params":{"from_number":"+1234","to_number":"15678"}},"call_id":"call-id","node_id":"node-id"}}');
+    $this->stateNotificationEnding = json_decode('{"event_type":"calling.call.state","params":{"call_state":"ending","end_reason":"busy","direction":"inbound","device":{"type":"phone","params":{"from_number":"+1234","to_number":"15678"}},"call_id":"call-id","node_id":"node-id"}}');
     $this->stateNotificationEnded = json_decode('{"event_type":"calling.call.state","params":{"call_state":"ended","end_reason":"busy","direction":"inbound","device":{"type":"phone","params":{"from_number":"+1234","to_number":"15678"}},"call_id":"call-id","node_id":"node-id"}}');
     $this->connectNotification = json_decode('{"event_type":"calling.call.connect","params":{"connect_state":"connected","peer":{"call_id":"peer-call-id","node_id":"peer-node-id","device":{"type":"phone","params":{"from_number":"+1234","to_number":"+15678"}}},"call_id":"call-id","node_id":"node-id"}}');
     $this->connectNotificationPeerCreated = json_decode('{"event_type":"calling.call.state","params":{"call_state":"created","direction":"outbound","device":{"type":"phone","params":{"from_number":"+1234","to_number":"15678"}},"peer":{"call_id":"call-id","node_id":"node-id"},"call_id":"peer-call-id","node_id":"peer-node-id"}}');
@@ -114,6 +115,19 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
       $this->assertEquals($result->getEvent(), null);
     });
     $this->calling->notificationHandler($this->stateNotificationEnded);
+  }
+
+  public function testHangupIfAlreadyEnded(): void {
+    $this->_setCallReady();
+    $this->calling->notificationHandler($this->stateNotificationEnding);
+
+    $this->client->connection->expects($this->never())->method('send');
+
+    $this->call->hangup()->done(function($result) {
+      $this->assertInstanceOf('SignalWire\Relay\Calling\Results\HangupResult', $result);
+      $this->assertFalse($result->isSuccessful());
+      $this->assertNull($result->getEvent());
+    });
   }
 
   public function testAnswerSuccess(): void {
