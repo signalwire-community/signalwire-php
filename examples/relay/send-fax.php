@@ -3,46 +3,45 @@ error_reporting(E_ALL);
 
 require dirname(__FILE__) . '/../../vendor/autoload.php';
 
-$project = isset($_ENV['PROJECT']) ? $_ENV['PROJECT'] : '';
-$token = isset($_ENV['TOKEN']) ? $_ENV['TOKEN'] : '';
-if (empty($project) || empty($token)) {
-  throw new \Exception('Set your SignalWire project and token before running the example!');
-}
+use Generator as Coroutine;
+use SignalWire\Relay\Consumer;
+use SignalWire\Log;
 
-$client = new SignalWire\Relay\Client(array(
-  "project" => $project,
-  "token" => $token
-));
+class CustomConsumer extends Consumer {
+  public $contexts = ['home', 'office'];
 
-$client->on('signalwire.ready', function($session) {
+  public function setup() {
+    $this->project = isset($_ENV['PROJECT']) ? $_ENV['PROJECT'] : '';
+    $this->token = isset($_ENV['TOKEN']) ? $_ENV['TOKEN'] : '';
+  }
 
-  $params = array('type' => 'phone', 'from' => '+1xxx', 'to' => '+1yyy');
-
-  $session->calling->dial($params)->done(function($dialResult) {
+  public function ready(): Coroutine {
+    $params = ['type' => 'phone', 'from' => '+1xxx', 'to' => '+1yyy'];
+    Log::info('Trying to dial: ' . $params['to']);
+    $dialResult = yield $this->client->calling->dial($params);
     if (!$dialResult->isSuccessful()) {
-      echo "\n Error dialing \n";
+      Log::warning('Outbound call failed or not answered.');
+      return;
     }
     $call = $dialResult->getCall();
 
-    $call->on('stateChange', function ($call) {
-      echo PHP_EOL . $call->id . " state changed to " . $call->state . PHP_EOL;
-    })
-    ->on('fax.stateChange', function ($call, $params) {
-      echo PHP_EOL . $call->id . " Fax Notification " . PHP_EOL;
-      print_r($params);
-    });
+    $pdfDocument = 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf';
+    $result = yield $call->faxSend($pdfDocument);
+    Log::info('isSuccessful: ' . $result->isSuccessful());
+    Log::info('getDirection: ' . $result->getDirection());
+    Log::info('getIdentity: ' . $result->getIdentity());
+    Log::info('getRemoteIdentity: ' . $result->getRemoteIdentity());
+    Log::info('getDocument: ' . $result->getDocument());
+    Log::info('getPages: ' . $result->getPages());
 
-    $call->faxSend('https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf')->done(function($result) {
-      print PHP_EOL . 'isSuccessful: ' . $result->isSuccessful() . PHP_EOL;
-      print PHP_EOL . 'getDirection: ' . $result->getDirection() . PHP_EOL;
-      print PHP_EOL . 'getIdentity: ' . $result->getIdentity() . PHP_EOL;
-      print PHP_EOL . 'getRemoteIdentity: ' . $result->getRemoteIdentity() . PHP_EOL;
-      print PHP_EOL . 'getDocument: ' . $result->getDocument() . PHP_EOL;
-      print PHP_EOL . 'getPages: ' . $result->getPages() . PHP_EOL;
-    });
+    yield $call->hangup();
+  }
 
-  });
+  public function teardown(): Coroutine {
+    yield;
+    Log::info('Consumer teardown. Cleanup..');
+  }
+}
 
-});
-
-$client->connect();
+$x = new CustomConsumer();
+$x->run();

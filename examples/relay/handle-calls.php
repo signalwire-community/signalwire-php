@@ -17,16 +17,11 @@ class CustomConsumer extends Consumer {
 
   public function onIncomingCall($call): Coroutine {
     Log::info("Incoming call on context: {$call->context}, from: {$call->from} to: {$call->to}");
+    // Do something with the call..
 
     yield $call->answer();
 
-    $call->on('detect.update', function ($call, $params) {
-      print_r($params);
-    });
-
-    $result = yield $call->detectDigit(['digits' => '123']);
-    Log::info('isSuccessful: ' . $result->isSuccessful());
-    Log::info('getResult: ' . $result->getResult());
+    // then hangup..
     yield $call->hangup();
   }
 

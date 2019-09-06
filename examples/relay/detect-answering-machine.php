@@ -3,39 +3,42 @@ error_reporting(E_ALL);
 
 require dirname(__FILE__) . '/../../vendor/autoload.php';
 
-$project = isset($_ENV['PROJECT']) ? $_ENV['PROJECT'] : '';
-$token = isset($_ENV['TOKEN']) ? $_ENV['TOKEN'] : '';
-if (empty($project) || empty($token)) {
-  throw new \Exception('Set your SignalWire project and token before run the example!');
-}
+use Generator as Coroutine;
+use SignalWire\Relay\Consumer;
+use SignalWire\Log;
 
-$client = new SignalWire\Relay\Client([ 'project' => $project, 'token' => $token ]);
+class CustomConsumer extends Consumer {
+  public $contexts = ['home', 'office'];
 
-$client->on('signalwire.ready', function($client) {
+  public function setup() {
+    $this->project = isset($_ENV['PROJECT']) ? $_ENV['PROJECT'] : '';
+    $this->token = isset($_ENV['TOKEN']) ? $_ENV['TOKEN'] : '';
+  }
 
-  $params = array('type' => 'phone', 'from' => '+1xxx', 'to' => '+1yyy');
-
-  $client->calling->dial($params)->done(function($dialResult) {
+  public function ready(): Coroutine {
+    $params = ['type' => 'phone', 'from' => '+1xxx', 'to' => '+1yyy'];
+    Log::info('Trying to dial: ' . $params['to']);
+    $dialResult = yield $this->client->calling->dial($params);
     if (!$dialResult->isSuccessful()) {
-      echo "\n Error dialing \n";
+      Log::warning('Outbound call failed or not answered.');
       return;
     }
     $call = $dialResult->getCall();
+    Log::info('Start AMD..');
+    $result = yield $call->amd();
 
-    $call->on('detect.update', function ($call, $params) {
-      print_r($params);
-    });
+    Log::info('isSuccessful: ' . $result->isSuccessful());
+    Log::info('getType: ' . $result->getType());
+    Log::info('getResult: ' . $result->getResult());
 
-    $call->amd()->done(function($result) use ($call) {
-      print PHP_EOL . 'isSuccessful: ' . $result->isSuccessful() . PHP_EOL;
-      print PHP_EOL . 'getType: ' . $result->getType() . PHP_EOL;
-      print PHP_EOL . 'getResult: ' . $result->getResult() . PHP_EOL;
+    yield $call->hangup();
+  }
 
-      $call->hangup();
-    });
+  public function teardown(): Coroutine {
+    yield;
+    Log::info('Consumer teardown. Cleanup..');
+  }
+}
 
-  });
-
-});
-
-$client->connect();
+$x = new CustomConsumer();
+$x->run();
