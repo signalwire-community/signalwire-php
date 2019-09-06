@@ -46,5 +46,5 @@ class CustomConsumer extends Consumer {
   }
 }
 
-$x = new CustomConsumer();
-$x->run();
+$consumer = new CustomConsumer();
+$consumer->run();
