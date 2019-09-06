@@ -15,19 +15,10 @@ class CustomConsumer extends Consumer {
     $this->token = isset($_ENV['TOKEN']) ? $_ENV['TOKEN'] : '';
   }
 
-  public function onIncomingCall($call): Coroutine {
-    Log::info("Incoming call on context: {$call->context}, from: {$call->from} to: {$call->to}");
-
-    yield $call->answer();
-
-    $call->on('detect.update', function ($call, $params) {
-      print_r($params);
-    });
-
-    $result = yield $call->detectDigit(['digits' => '123']);
-    Log::info('isSuccessful: ' . $result->isSuccessful());
-    Log::info('getResult: ' . $result->getResult());
-    yield $call->hangup();
+  public function onIncomingMessage($message): Coroutine {
+    yield;
+    Log::info("Message received on context: {$message->context}, from: {$message->from} to: {$message->to}");
+    print_r($message);
   }
 
   public function teardown(): Coroutine {

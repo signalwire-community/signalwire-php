@@ -1,5 +1,8 @@
 <?php
-error_reporting(E_ALL);
+
+/// This file shows how to handle an inbound Task.
+///
+/// See the related create-task.php file.
 
 require dirname(__FILE__) . '/../../vendor/autoload.php';
 
@@ -15,19 +18,10 @@ class CustomConsumer extends Consumer {
     $this->token = isset($_ENV['TOKEN']) ? $_ENV['TOKEN'] : '';
   }
 
-  public function onIncomingCall($call): Coroutine {
-    Log::info("Incoming call on context: {$call->context}, from: {$call->from} to: {$call->to}");
-
-    yield $call->answer();
-
-    $call->on('detect.update', function ($call, $params) {
-      print_r($params);
-    });
-
-    $result = yield $call->detectDigit(['digits' => '123']);
-    Log::info('isSuccessful: ' . $result->isSuccessful());
-    Log::info('getResult: ' . $result->getResult());
-    yield $call->hangup();
+  public function onTask($task): Coroutine {
+    yield;
+    Log::info('Inbound task payload: ');
+    print_r($task);
   }
 
   public function teardown(): Coroutine {

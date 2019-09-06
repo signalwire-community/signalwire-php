@@ -15,22 +15,13 @@ class CustomConsumer extends Consumer {
     $this->token = isset($_ENV['TOKEN']) ? $_ENV['TOKEN'] : '';
   }
 
-  public function ready(): Coroutine {
-    $params = ['type' => 'phone', 'from' => '+1xxx', 'to' => '+1yyy'];
-    Log::info('Trying to dial: ' . $params['to']);
-    $dialResult = yield $this->client->calling->dial($params);
-    if (!$dialResult->isSuccessful()) {
-      Log::warning('Outbound call failed or not answered.');
-      return;
-    }
-    $call = $dialResult->getCall();
-    Log::info('Start AMD..');
-    $result = yield $call->amd();
+  public function onIncomingCall($call): Coroutine {
+    Log::info("Incoming call on context: {$call->context}, from: {$call->from} to: {$call->to}");
+    // Do something with the call..
 
-    Log::info('isSuccessful: ' . $result->isSuccessful());
-    Log::info('getType: ' . $result->getType());
-    Log::info('getResult: ' . $result->getResult());
+    yield $call->answer();
 
+    // then hangup..
     yield $call->hangup();
   }
 

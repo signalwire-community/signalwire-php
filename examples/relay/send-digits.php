@@ -8,8 +8,6 @@ use SignalWire\Relay\Consumer;
 use SignalWire\Log;
 
 class CustomConsumer extends Consumer {
-  public $project;
-  public $token;
   public $contexts = ['home', 'office'];
 
   public function setup() {
@@ -22,7 +20,7 @@ class CustomConsumer extends Consumer {
     Log::info('Trying to dial: ' . $params['to']);
     $dialResult = yield $this->client->calling->dial($params);
     if (!$dialResult->isSuccessful()) {
-      echo "\n Error dialing \n";
+      Log::warning('Outbound call failed or not answered.');
       return;
     }
     $call = $dialResult->getCall();
@@ -38,9 +36,9 @@ class CustomConsumer extends Consumer {
 
   public function teardown(): Coroutine {
     yield;
-    echo "\n General cleanup here.. \n";
+    Log::info('Consumer teardown. Cleanup..');
   }
 }
 
-$x = new CustomConsumer();
-$x->run();
+$consumer = new CustomConsumer();
+$consumer->run();
