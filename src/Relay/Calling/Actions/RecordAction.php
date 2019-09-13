@@ -10,6 +10,10 @@ class RecordAction extends BaseAction {
     return new RecordResult($this->component);
   }
 
+  public function getUrl() {
+    return $this->component->url;
+  }
+
   public function stop() {
     return $this->component->stop();
   }

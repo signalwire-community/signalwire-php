@@ -117,7 +117,10 @@ class Call {
     $component = new Components\Record($this, \SignalWire\prepareRecordParams($record));
     $this->_addComponent($component);
 
-    return $component->execute()->then(function() use (&$component) {
+    return $component->execute()->then(function($result) use (&$component) {
+      if (isset($result->url)) {
+        $component->url = $result->url;
+      }
       return new Actions\RecordAction($component);
     });
   }
