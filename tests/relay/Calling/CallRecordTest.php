@@ -11,7 +11,7 @@ class RelayCallingCallRecordTest extends RelayCallingBaseActionCase
 
   public static function setUpBeforeClass() {
     self::$notificationFinished = json_decode('{"event_type":"calling.call.record","params":{"state":"finished","record":{"audio":{"format":"mp3","direction":"speak","stereo":false}},"url":"record.mp3","control_id":"'.self::UUID.'","size":4096,"duration":4,"call_id":"call-id","node_id":"node-id"}}');
-    self::$success = json_decode('{"result":{"code":"200","message":"message","control_id":"'.self::UUID.'"}}');
+    self::$success = json_decode('{"result":{"code":"200","message":"message","control_id":"'.self::UUID.'","url":"record.mp3"}}');
     self::$fail = json_decode('{"result":{"code":"400","message":"some error","control_id":"'.self::UUID.'"}}');
   }
 
@@ -73,6 +73,7 @@ class RelayCallingCallRecordTest extends RelayCallingBaseActionCase
     $record = ['audio' => ['beep' => true, 'stereo' => false]];
     $this->call->recordAsync($record)->done(function($action) {
       $this->assertInstanceOf('SignalWire\Relay\Calling\Actions\RecordAction', $action);
+      $this->assertEquals($action->getUrl(), 'record.mp3');
       $this->assertInstanceOf('SignalWire\Relay\Calling\Results\RecordResult', $action->getResult());
       $this->assertFalse($action->isCompleted());
 
@@ -105,6 +106,7 @@ class RelayCallingCallRecordTest extends RelayCallingBaseActionCase
     $record = ['audio' => ['beep' => true, 'stereo' => false]];
     $this->call->recordAsync($record)->done(function($action) {
       $this->assertInstanceOf('SignalWire\Relay\Calling\Actions\RecordAction', $action);
+      $this->assertNull($action->getUrl());
       $this->assertInstanceOf('SignalWire\Relay\Calling\Results\RecordResult', $action->getResult());
       $this->assertTrue($action->isCompleted());
       $this->assertEquals($action->getState(), 'failed');
