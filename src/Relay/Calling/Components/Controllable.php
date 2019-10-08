@@ -3,26 +3,27 @@
 namespace SignalWire\Relay\Calling\Components;
 
 use SignalWire\Messages\Execute;
-use SignalWire\Relay\Calling\Results\BaseResult;
-// use SignalWire\Relay\Calling\Event;
 
 abstract class Controllable extends BaseComponent {
 
   public function stop() {
-    return $this->_execute("{$this->method()}.stop");
-  }
-
-  public function pause(BaseResult $resultKlass) {
-    return $this->_execute("{$this->method()}.pause")->then(function() use ($resultKlass) {
-      // $this->event = new Event('', []); // TODO: use the execute response?
-      return new $resultKlass($this);
+    return $this->_execute("{$this->method()}.stop")->then(function ($result) {
+      if ($result->code !== '200') {
+        $this->terminate();
+      }
+      return $result;
     });
   }
 
-  public function resume(BaseResult $resultKlass) {
-    return $this->_execute("{$this->method()}.resume")->then(function() use ($resultKlass) {
-      // $this->event = new Event('', []); // TODO: use the execute response?
-      return new $resultKlass($this);
+  public function pause($resultKlass) {
+    return $this->_execute("{$this->method()}.pause")->then(function($result) use ($resultKlass) {
+      return new $resultKlass($result->code === '200');
+    });
+  }
+
+  public function resume($resultKlass) {
+    return $this->_execute("{$this->method()}.resume")->then(function($result) use ($resultKlass) {
+      return new $resultKlass($result->code === '200');
     });
   }
 
@@ -38,7 +39,6 @@ abstract class Controllable extends BaseComponent {
     ]);
 
     return $this->call->_execute($msg)->otherwise(function($error) {
-      $this->terminate();
       return (object)[
         'code' => $error->getCode(),
         'message' => $error->getMessage()
