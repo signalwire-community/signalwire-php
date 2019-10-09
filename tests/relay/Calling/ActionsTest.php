@@ -21,6 +21,7 @@ class RelayCallingActionsTest extends RelayCallingBaseActionCase {
     $action->stop()->done(function($result) {
       $this->assertInstanceOf('SignalWire\Relay\Calling\Results\StopResult', $result);
       $this->assertTrue($result->successful);
+      $this->assertEquals($result->code, '200');
     });
   }
 
@@ -31,9 +32,9 @@ class RelayCallingActionsTest extends RelayCallingBaseActionCase {
     $action->stop()->done(function($result) use (&$action) {
       $this->assertInstanceOf('SignalWire\Relay\Calling\Results\StopResult', $result);
       $this->assertFalse($result->successful);
-      // $this->assertEquals($result->code, '400');
-      // $this->assertTrue($action->isCompleted());
-      // $this->assertEquals($action->getState(), 'failed');
+      $this->assertEquals($result->code, '400');
+      $this->assertTrue($action->isCompleted());
+      $this->assertEquals($action->getState(), 'failed');
     });
   }
 
@@ -44,6 +45,7 @@ class RelayCallingActionsTest extends RelayCallingBaseActionCase {
     $action->stop()->done(function($result) {
       $this->assertInstanceOf('SignalWire\Relay\Calling\Results\StopResult', $result);
       $this->assertTrue($result->successful);
+      $this->assertEquals($result->code, '200');
     });
   }
 
@@ -54,9 +56,9 @@ class RelayCallingActionsTest extends RelayCallingBaseActionCase {
     $action->stop()->done(function ($result) use (&$action) {
       $this->assertInstanceOf('SignalWire\Relay\Calling\Results\StopResult', $result);
       $this->assertFalse($result->successful);
-      // $this->assertEquals($result->code, '400');
-      // $this->assertTrue($action->isCompleted());
-      // $this->assertEquals($action->getState(), 'failed');
+      $this->assertEquals($result->code, '400');
+      $this->assertTrue($action->isCompleted());
+      $this->assertEquals($action->getState(), 'failed');
     });
   }
 
@@ -107,6 +109,7 @@ class RelayCallingActionsTest extends RelayCallingBaseActionCase {
     $action->stop()->done(function($result) {
       $this->assertInstanceOf('SignalWire\Relay\Calling\Results\StopResult', $result);
       $this->assertTrue($result->successful);
+      $this->assertEquals($result->code, '200');
     });
   }
 
@@ -117,9 +120,9 @@ class RelayCallingActionsTest extends RelayCallingBaseActionCase {
     $action->stop()->done(function ($result) use (&$action) {
       $this->assertInstanceOf('SignalWire\Relay\Calling\Results\StopResult', $result);
       $this->assertFalse($result->successful);
-      // $this->assertEquals($result->code, '400');
-      // $this->assertTrue($action->isCompleted());
-      // $this->assertEquals($action->getState(), 'failed');
+      $this->assertEquals($result->code, '400');
+      $this->assertTrue($action->isCompleted());
+      $this->assertEquals($action->getState(), 'failed');
     });
   }
 

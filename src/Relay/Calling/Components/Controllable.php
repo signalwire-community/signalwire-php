@@ -12,7 +12,7 @@ abstract class Controllable extends BaseComponent {
       if ($result->code !== '200') {
         $this->terminate();
       }
-      return new StopResult($result->code === '200');
+      return new StopResult($result);
     });
   }
 
