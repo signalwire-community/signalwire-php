@@ -3,6 +3,7 @@
 namespace SignalWire\Relay\Calling\Components;
 
 use SignalWire\Messages\Execute;
+use SignalWire\Relay\Calling\Results\StopResult;
 
 abstract class Controllable extends BaseComponent {
 
@@ -11,7 +12,7 @@ abstract class Controllable extends BaseComponent {
       if ($result->code !== '200') {
         $this->terminate();
       }
-      return $result;
+      return new StopResult($result);
     });
   }
 
