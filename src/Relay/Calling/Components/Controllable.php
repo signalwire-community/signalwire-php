@@ -16,15 +16,15 @@ abstract class Controllable extends BaseComponent {
     });
   }
 
-  public function pause($resultKlass) {
-    return $this->_execute("{$this->method()}.pause")->then(function($result) use ($resultKlass) {
-      return new $resultKlass($result->code === '200');
+  public function pause() {
+    return $this->_execute("{$this->method()}.pause")->then(function($result) {
+      return $result->code === '200';
     });
   }
 
-  public function resume($resultKlass) {
-    return $this->_execute("{$this->method()}.resume")->then(function($result) use ($resultKlass) {
-      return new $resultKlass($result->code === '200');
+  public function resume() {
+    return $this->_execute("{$this->method()}.resume")->then(function($result) {
+      return $result->code === '200';
     });
   }
 

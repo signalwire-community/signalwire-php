@@ -17,11 +17,15 @@ class PlayAction extends BaseAction {
   }
 
   public function pause() {
-    return $this->component->pause(PlayPauseResult::class);
+    return $this->component->pause()->then(function($result) {
+      return new PlayPauseResult($result);
+    });
   }
 
   public function resume() {
-    return $this->component->resume(PlayResumeResult::class);
+    return $this->component->resume()->then(function($result) {
+      return new PlayResumeResult($result);
+    });
   }
 
 }
