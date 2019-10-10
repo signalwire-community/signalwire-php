@@ -145,14 +145,14 @@ class Call {
     });
   }
 
-  public function playAudio(String $url, $volume = 0) {
+  public function playAudio(String $url, Float $volume = 0) {
     $media = [
       ['type' => PlayType::Audio, 'params' => [ 'url' => $url ]]
     ];
     return $this->play(['media' => $media, 'volume' => $volume]);
   }
 
-  public function playAudioAsync(String $url, $volume = 0) {
+  public function playAudioAsync(String $url, Float $volume = 0) {
     $media = [
       ['type' => PlayType::Audio, 'params' => [ 'url' => $url ]]
     ];

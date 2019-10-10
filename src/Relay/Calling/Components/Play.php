@@ -17,7 +17,7 @@ class Play extends Controllable {
     parent::__construct($call);
 
     $this->_play = $play;
-    $this->_volume = $volume;
+    $this->_volume = (float)$volume;
   }
 
   public function method() {
@@ -31,8 +31,8 @@ class Play extends Controllable {
       'control_id' => $this->controlId,
       'play' => $this->_play
     ];
-    if ($this->_volume !== 0) {
-      $tmp['volume'] = (float)$this->_volume;
+    if ($this->_volume !== 0.0) {
+      $tmp['volume'] = $this->_volume;
     }
     return $tmp;
   }

@@ -24,7 +24,7 @@ class Prompt extends Controllable {
 
     $this->_collect = $collect;
     $this->_play = $play;
-    $this->_volume = $volume;
+    $this->_volume = (float)$volume;
   }
 
   public function method() {
@@ -39,8 +39,8 @@ class Prompt extends Controllable {
       'play' => $this->_play,
       'collect' => $this->_collect
     ];
-    if ($this->_volume !== 0) {
-      $tmp['volume'] = (float)$this->_volume;
+    if ($this->_volume !== 0.0) {
+      $tmp['volume'] = $this->_volume;
     }
     return $tmp;
   }
