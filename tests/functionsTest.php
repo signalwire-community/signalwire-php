@@ -259,7 +259,7 @@ class FunctionsTest extends TestCase
   }
 
   public function testPreparePromptParamsWithEmptyArray(): void {
-    $expected = [[], []];
+    $expected = [[], [], 0];
     $input = [];
     $this->assertEquals(\SignalWire\preparePromptParams($input), $expected);
   }

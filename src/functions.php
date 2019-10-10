@@ -110,7 +110,8 @@ function preparePromptParams(Array $params, Array $mediaList = []): Array {
   } elseif ($type == PromptType::Speech || $type == 'both') {
     $collect[PromptType::Speech] = new \stdClass;
   }
-  return [$collect, preparePlayParams($mediaToPlay)];
+  $volume = isset($params['volume']) ? $params['volume'] : 0;
+  return [$collect, preparePlayParams($mediaToPlay), $volume];
 }
 
 function preparePromptAudioParams(Array $params, String $url = ''): Array {

@@ -168,8 +168,8 @@ class Call {
   }
 
   public function prompt(Array $params, ...$mediaList) {
-    list($collect, $play) = \SignalWire\preparePromptParams($params, $mediaList);
-    $component = new Components\Prompt($this, $collect, $play);
+    list($collect, $play, $volume) = \SignalWire\preparePromptParams($params, $mediaList);
+    $component = new Components\Prompt($this, $collect, $play, $volume);
     $this->_addComponent($component);
 
     $events = [PromptState::Error, PromptState::NoInput, PromptState::NoMatch, PromptState::Digit, PromptState::Speech];
@@ -179,8 +179,8 @@ class Call {
   }
 
   public function promptAsync(Array $params, ...$mediaList) {
-    list($collect, $play) = \SignalWire\preparePromptParams($params, $mediaList);
-    $component = new Components\Prompt($this, $collect, $play);
+    list($collect, $play, $volume) = \SignalWire\preparePromptParams($params, $mediaList);
+    $component = new Components\Prompt($this, $collect, $play, $volume);
     $this->_addComponent($component);
 
     return $component->execute()->then(function() use (&$component) {
