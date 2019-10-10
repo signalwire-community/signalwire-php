@@ -17,12 +17,14 @@ class Prompt extends Controllable {
 
   private $_collect;
   private $_play;
+  private $_volume;
 
-  public function __construct(Call $call, $collect, $play) {
+  public function __construct(Call $call, $collect, $play, $volume = 0) {
     parent::__construct($call);
 
     $this->_collect = $collect;
     $this->_play = $play;
+    $this->_volume = $volume;
   }
 
   public function method() {
@@ -30,13 +32,17 @@ class Prompt extends Controllable {
   }
 
   public function payload() {
-    return [
+    $tmp = [
       'node_id' => $this->call->nodeId,
       'call_id' => $this->call->id,
       'control_id' => $this->controlId,
       'play' => $this->_play,
       'collect' => $this->_collect
     ];
+    if ($this->_volume !== 0) {
+      $tmp['volume'] = (float)$this->_volume;
+    }
+    return $tmp;
   }
 
   public function notificationHandler($params) {
