@@ -125,8 +125,9 @@ class Call {
     });
   }
 
-  public function play(...$play) {
-    $component = new Components\Play($this, \SignalWire\preparePlayParams($play));
+  public function play(...$params) {
+    list($play, $volume) = \SignalWire\preparePlayParams($params);
+    $component = new Components\Play($this, $play, $volume);
     $this->_addComponent($component);
 
     return $component->_waitFor(PlayState::Error, PlayState::Finished)->then(function() use (&$component) {
@@ -134,8 +135,9 @@ class Call {
     });
   }
 
-  public function playAsync(...$play) {
-    $component = new Components\Play($this, \SignalWire\preparePlayParams($play));
+  public function playAsync(...$params) {
+    list($play, $volume) = \SignalWire\preparePlayParams($params);
+    $component = new Components\Play($this, $play, $volume);
     $this->_addComponent($component);
 
     return $component->execute()->then(function() use (&$component) {
@@ -143,12 +145,18 @@ class Call {
     });
   }
 
-  public function playAudio(String $url) {
-    return $this->play(['type' => PlayType::Audio, 'params' => [ 'url' => $url ]]);
+  public function playAudio(String $url, $volume = 0) {
+    $media = [
+      ['type' => PlayType::Audio, 'params' => [ 'url' => $url ]]
+    ];
+    return $this->play(['media' => $media, 'volume' => $volume]);
   }
 
-  public function playAudioAsync(String $url) {
-    return $this->playAsync(['type' => PlayType::Audio, 'params' => [ 'url' => $url ]]);
+  public function playAudioAsync(String $url, $volume = 0) {
+    $media = [
+      ['type' => PlayType::Audio, 'params' => [ 'url' => $url ]]
+    ];
+    return $this->playAsync(['media' => $media, 'volume' => $volume]);
   }
 
   public function playSilence(Float $duration) {
@@ -160,11 +168,21 @@ class Call {
   }
 
   public function playTTS(Array $options) {
-    return $this->play(['type' => PlayType::TTS, 'params' => $options]);
+    $volume = isset($options['volume']) ? $options['volume'] : 0;
+    unset($options['volume']);
+    $media = [
+      ['type' => PlayType::TTS, 'params' => $options]
+    ];
+    return $this->play(['media' => $media, 'volume' => $volume]);
   }
 
   public function playTTSAsync(Array $options) {
-    return $this->playAsync(['type' => PlayType::TTS, 'params' => $options]);
+    $volume = isset($options['volume']) ? $options['volume'] : 0;
+    unset($options['volume']);
+    $media = [
+      ['type' => PlayType::TTS, 'params' => $options]
+    ];
+    return $this->playAsync(['media' => $media, 'volume' => $volume]);
   }
 
   public function prompt(Array $params, ...$mediaList) {
