@@ -6,6 +6,8 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ## [Unreleased]
 ### Added
 - Add `getUrl()` method to `RecordAction` object.
+- Add methods to `pause` and `resume` a PlayAction.
+- Ability to set volume playback on `play` and `prompt` methods, or through the asynchronous `PlayAction` and `PromptAction` objects.
 
 ## [2.2.0] - 2019-09-09
 ### Changed
