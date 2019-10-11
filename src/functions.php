@@ -69,6 +69,17 @@ function preparePlayParams(Array $params): Array {
   return [$mediaToPlay, $volume];
 }
 
+function preparePlayAudioParams($params): Array {
+  if (gettype($params) === 'string') {
+    return [$params, 0];
+  } elseif (gettype($params) === 'array') {
+    $url = isset($params['url']) ? $params['url'] : '';
+    $volume = isset($params['volume']) ? $params['volume'] : '';
+    return [$url, $volume];
+  }
+  return ['', 0];
+}
+
 function preparePromptParams(Array $params, Array $mediaList = []): Array {
   $digits = isset($params[PromptType::Digits]) ? $params[PromptType::Digits] : [];
   $speech = isset($params[PromptType::Speech]) ? $params[PromptType::Speech] : [];

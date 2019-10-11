@@ -143,7 +143,8 @@ class RelayCallingCallPlayTest extends RelayCallingBaseActionCase
     ], 5);
     $this->_mockSuccessResponse($msg, self::$success);
 
-    $this->call->playAudio('url-to-audio.mp3', 5)->done([$this, '__syncPlayCheck']);
+    $params = ['url' => 'url-to-audio.mp3', 'volume' => 5];
+    $this->call->playAudio($params)->done([$this, '__syncPlayCheck']);
     $this->calling->notificationHandler(self::$notificationFinished);
   }
 
@@ -154,6 +155,16 @@ class RelayCallingCallPlayTest extends RelayCallingBaseActionCase
     $this->_mockSuccessResponse($msg, self::$success);
 
     $this->call->playAudioAsync('url-to-audio.mp3')->done([$this, '__asyncPlayCheck']);
+  }
+
+  public function testPlayAudioAsyncWithVolume(): void {
+    $msg = $this->_playMsg([
+      ['type' => 'audio', 'params' => ['url' => 'url-to-audio.mp3']]
+    ], 6.7);
+    $this->_mockSuccessResponse($msg, self::$success);
+
+    $params = ['url' => 'url-to-audio.mp3', 'volume' => 6.7];
+    $this->call->playAudioAsync($params)->done([$this, '__asyncPlayCheck']);
   }
 
   public function testPlaySilence(): void {
@@ -235,7 +246,7 @@ class RelayCallingCallPlayTest extends RelayCallingBaseActionCase
     if ($volume !== 0.0) {
       $params['volume'] = $volume;
     }
-    return $msg = new Execute([
+    return new Execute([
       'protocol' => 'signalwire_calling_proto',
       'method' => 'calling.play',
       'params' => $params

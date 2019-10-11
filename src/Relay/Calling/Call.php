@@ -145,14 +145,16 @@ class Call {
     });
   }
 
-  public function playAudio(String $url, Float $volume = 0) {
+  public function playAudio($params) {
+    list($url, $volume) = \SignalWire\preparePlayAudioParams($params);
     $media = [
       ['type' => PlayType::Audio, 'params' => [ 'url' => $url ]]
     ];
     return $this->play(['media' => $media, 'volume' => $volume]);
   }
 
-  public function playAudioAsync(String $url, Float $volume = 0) {
+  public function playAudioAsync($params) {
+    list($url, $volume) = \SignalWire\preparePlayAudioParams($params);
     $media = [
       ['type' => PlayType::Audio, 'params' => [ 'url' => $url ]]
     ];
