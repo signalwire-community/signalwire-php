@@ -16,15 +16,34 @@ abstract class Controllable extends BaseComponent {
     });
   }
 
-  public function pause($resultKlass) {
-    return $this->_execute("{$this->method()}.pause")->then(function($result) use ($resultKlass) {
-      return new $resultKlass($result->code === '200');
+  public function pause() {
+    return $this->_execute("{$this->method()}.pause")->then(function($result) {
+      return $result->code === '200';
     });
   }
 
-  public function resume($resultKlass) {
-    return $this->_execute("{$this->method()}.resume")->then(function($result) use ($resultKlass) {
-      return new $resultKlass($result->code === '200');
+  public function resume() {
+    return $this->_execute("{$this->method()}.resume")->then(function($result) {
+      return $result->code === '200';
+    });
+  }
+
+  public function volume($value) {
+    $msg = new Execute([
+      'protocol' => $this->call->relayInstance->client->relayProtocol,
+      'method' => "{$this->method()}.volume",
+      'params' => [
+        'node_id' => $this->call->nodeId,
+        'call_id' => $this->call->id,
+        'control_id' => $this->controlId,
+        'volume' => (float)$value
+      ]
+    ]);
+
+    return $this->call->_execute($msg)->then(function() {
+      return true;
+    }, function() {
+      return false;
     });
   }
 

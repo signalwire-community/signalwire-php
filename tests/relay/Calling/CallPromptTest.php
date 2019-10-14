@@ -36,8 +36,23 @@ class RelayCallingCallPromptTest extends RelayCallingBaseActionCase
     $this->calling->notificationHandler(self::$notificationFinished);
   }
 
+  public function testPromptSuccessWithVolume(): void {
+    $collect = ['initial_timeout' => 10, 'digits' => [ 'max' => 3 ], 'volume' => 5.6];
+    $play = [
+      ['type' => 'audio', 'params' => ['url' => 'audio.mp3']],
+      ['type' => 'tts', 'params' => ['text' => 'Welcome', 'gender' => 'male']],
+      ['type' => 'silence', 'params' => ['duration' => 5]]
+    ];
+    $msg = $this->_promptMsg($collect, $play);
+    $this->_mockSuccessResponse($msg, self::$success);
+
+    $this->call->prompt($collect, ...$play)->done([$this, '__syncPromptCheck']);
+
+    $this->calling->notificationHandler(self::$notificationFinished);
+  }
+
   public function testPromptSuccessWithFlattenedParameters(): void {
-    $collect = ['initial_timeout' => 10, 'digits' => [ 'max' => 3 ]];
+    $collect = ['initial_timeout' => 10, 'digits' => [ 'max' => 3 ], 'volume' => -4];
     $play = [
       ['type' => 'audio', 'params' => ['url' => 'audio.mp3']],
       ['type' => 'tts', 'params' => ['text' => 'Welcome', 'gender' => 'male']],
@@ -49,6 +64,7 @@ class RelayCallingCallPromptTest extends RelayCallingBaseActionCase
     $params = [
       'initial_timeout' => 10,
       'digits_max' => 3,
+      'volume' => -4,
       'media' => [
         ['type' => 'audio', 'url' => 'audio.mp3'],
         ['type' => 'tts', 'text' => 'Welcome', 'gender' => 'male'],
@@ -117,6 +133,18 @@ class RelayCallingCallPromptTest extends RelayCallingBaseActionCase
     $this->_mockSuccessResponse($msg, self::$success);
 
     $this->call->promptTTS($collect, ['text' => 'Welcome', 'gender' => 'male'])->done([$this, '__syncPromptCheck']);
+    $this->calling->notificationHandler(self::$notificationFinished);
+  }
+
+  public function testPromptTTSWithVolume(): void {
+    $collect = ['initial_timeout' => 10, 'digits' => [ 'max' => 3 ], 'volume' => 5.4];
+    $play = [
+      ['type' => 'tts', 'params' => ['text' => 'Welcome', 'gender' => 'male']]
+    ];
+    $msg = $this->_promptMsg($collect, $play);
+    $this->_mockSuccessResponse($msg, self::$success);
+
+    $this->call->promptTTS(['initial_timeout' => 10, 'digits_max' => 3, 'volume' => 5.4], ['text' => 'Welcome', 'gender' => 'male'])->done([$this, '__syncPromptCheck']);
     $this->calling->notificationHandler(self::$notificationFinished);
   }
 
@@ -205,16 +233,22 @@ class RelayCallingCallPromptTest extends RelayCallingBaseActionCase
   }
 
   private function _promptMsg(Array $collect, Array $play) {
+    $volume = isset($collect['volume']) ? $collect['volume'] : 0;
+    unset($collect['volume']);
+    $params = [
+      'call_id' => 'call-id',
+      'node_id' => 'node-id',
+      'control_id' => self::UUID,
+      'collect' => $collect,
+      'play' => $play
+    ];
+    if ($volume !== 0) {
+      $params['volume'] = $volume;
+    }
     return new Execute([
       'protocol' => 'signalwire_calling_proto',
       'method' => 'calling.play_and_collect',
-      'params' => [
-        'call_id' => 'call-id',
-        'node_id' => 'node-id',
-        'control_id' => self::UUID,
-        'collect' => $collect,
-        'play' => $play
-      ]
+      'params' => $params
     ]);
   }
 }

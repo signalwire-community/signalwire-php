@@ -102,6 +102,26 @@ class RelayCallingActionsTest extends RelayCallingBaseActionCase {
     });
   }
 
+  public function testPlayVolumeWithSuccess(): void {
+    $this->client->connection->expects($this->once())->method('send')->with($this->_playVolumeMsg(4.1))->willReturn($this->_successResponse);
+    $component = new Components\Play($this->call, ['type' => 'audio', 'params' => ['url' => 'url-to-audio.mp3']]);
+    $action = new Actions\PlayAction($component);
+    $action->volume(4.1)->done(function($result) {
+      $this->assertInstanceOf('SignalWire\Relay\Calling\Results\PlayVolumeResult', $result);
+      $this->assertTrue($result->successful);
+    });
+  }
+
+  public function testPlayVolumeWithFail(): void {
+    $this->client->connection->expects($this->once())->method('send')->with($this->_playVolumeMsg(4.1))->willReturn($this->_failResponse);
+    $component = new Components\Play($this->call, ['type' => 'audio', 'params' => ['url' => 'url-to-audio.mp3']]);
+    $action = new Actions\PlayAction($component);
+    $action->volume(4.1)->done(function ($result) {
+      $this->assertInstanceOf('SignalWire\Relay\Calling\Results\PlayVolumeResult', $result);
+      $this->assertFalse($result->successful);
+    });
+  }
+
   public function testPromptActionStopWithSuccess(): void {
     $this->client->connection->expects($this->once())->method('send')->with($this->_promptStopMsg())->willReturn($this->_successResponse);
     $component = new Components\Prompt($this->call, ['digits' => 'blah'], ['type' => 'audio', 'params' => ['url' => 'url-to-audio.mp3']]);
@@ -123,6 +143,26 @@ class RelayCallingActionsTest extends RelayCallingBaseActionCase {
       $this->assertEquals($result->code, '400');
       $this->assertTrue($action->isCompleted());
       $this->assertEquals($action->getState(), 'failed');
+    });
+  }
+
+  public function testPromptVolumeStopWithSuccess(): void {
+    $this->client->connection->expects($this->once())->method('send')->with($this->_promptVolumeMsg(-4.5))->willReturn($this->_successResponse);
+    $component = new Components\Prompt($this->call, ['digits' => 'blah'], ['type' => 'audio', 'params' => ['url' => 'url-to-audio.mp3']]);
+    $action = new Actions\PromptAction($component);
+    $action->volume(-4.5)->done(function($result) {
+      $this->assertInstanceOf('SignalWire\Relay\Calling\Results\PromptVolumeResult', $result);
+      $this->assertTrue($result->successful);
+    });
+  }
+
+  public function testPromptVolumeStopWithFail(): void {
+    $this->client->connection->expects($this->once())->method('send')->with($this->_promptVolumeMsg(-4.5))->willReturn($this->_failResponse);
+    $component = new Components\Prompt($this->call, ['digits' => 'blah'], ['type' => 'audio', 'params' => ['url' => 'url-to-audio.mp3']]);
+    $action = new Actions\PromptAction($component);
+    $action->volume(-4.5)->done(function ($result) use (&$action) {
+      $this->assertInstanceOf('SignalWire\Relay\Calling\Results\PromptVolumeResult', $result);
+      $this->assertFalse($result->successful);
     });
   }
 
@@ -163,6 +203,22 @@ class RelayCallingActionsTest extends RelayCallingBaseActionCase {
       'protocol' => 'signalwire_calling_proto',
       'method' => 'calling.play_and_collect.stop',
       'params' => [ 'node_id' => 'node-id', 'call_id' => 'call-id', 'control_id' => self::UUID ]
+    ]);
+  }
+
+  private function _playVolumeMsg($value) {
+    return new Execute([
+      'protocol' => 'signalwire_calling_proto',
+      'method' => 'calling.play.volume',
+      'params' => [ 'node_id' => 'node-id', 'call_id' => 'call-id', 'control_id' => self::UUID, 'volume' => (float)$value ]
+    ]);
+  }
+
+  private function _promptVolumeMsg($value) {
+    return new Execute([
+      'protocol' => 'signalwire_calling_proto',
+      'method' => 'calling.play_and_collect.volume',
+      'params' => [ 'node_id' => 'node-id', 'call_id' => 'call-id', 'control_id' => self::UUID, 'volume' => (float)$value ]
     ]);
   }
 }

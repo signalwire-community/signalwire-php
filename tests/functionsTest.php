@@ -218,7 +218,7 @@ class FunctionsTest extends TestCase
 
   public function testPreparePlayParamsWithEmptyArray(): void {
     // do nothing
-    $this->assertEquals(\SignalWire\preparePlayParams([]), []);
+    $this->assertEquals(\SignalWire\preparePlayParams([]), [[], 0]);
   }
 
   public function testPreparePlayParamsWithTypeAndParamsKeys(): void {
@@ -229,7 +229,7 @@ class FunctionsTest extends TestCase
       [ 'type' => 'tts', 'params' => ['text' => 'hello', 'gender' => 'male'] ]
     ];
 
-    $this->assertEquals(\SignalWire\preparePlayParams($input), $expected);
+    $this->assertEquals(\SignalWire\preparePlayParams($input), [$expected, 0]);
   }
 
   public function testPreparePlayParamsWithFlattenParams(): void {
@@ -240,7 +240,7 @@ class FunctionsTest extends TestCase
       [ 'type' => 'tts', 'text' => 'hello', 'gender' => 'male']
     ];
 
-    $this->assertEquals(\SignalWire\preparePlayParams($input), $expected);
+    $this->assertEquals(\SignalWire\preparePlayParams($input), [$expected, 0]);
   }
 
   public function testPreparePlayParamsWithMixedParams(): void {
@@ -255,11 +255,11 @@ class FunctionsTest extends TestCase
       [ 'type' => 'tts', 'params' => ['text' => 'hello'], 'gender' => 'male' ]
     ];
 
-    $this->assertEquals(\SignalWire\preparePlayParams($input), $expected);
+    $this->assertEquals(\SignalWire\preparePlayParams($input), [$expected, 0]);
   }
 
   public function testPreparePromptParamsWithEmptyArray(): void {
-    $expected = [[], []];
+    $expected = [[], [], 0];
     $input = [];
     $this->assertEquals(\SignalWire\preparePromptParams($input), $expected);
   }

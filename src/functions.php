@@ -46,7 +46,14 @@ function prepareRecordParams(Array $params): Array {
   return $record;
 }
 
-function preparePlayParams(Array $mediaList): Array {
+function preparePlayParams(Array $params): Array {
+  $volume = 0;
+  if (count($params) === 1 && isset($params[0]['media'])) {
+    $mediaList = $params[0]['media'];
+    $volume = isset($params[0]['volume']) ? $params[0]['volume'] : 0;
+  } else {
+    $mediaList = $params;
+  }
   $mediaToPlay = [];
   foreach($mediaList as $media) {
     if (!is_array($media)) {
@@ -59,7 +66,18 @@ function preparePlayParams(Array $mediaList): Array {
     $params = $params + $media;
     array_push($mediaToPlay, ['type' => $type, 'params' => $params]);
   }
-  return $mediaToPlay;
+  return [$mediaToPlay, $volume];
+}
+
+function preparePlayAudioParams($params): Array {
+  if (gettype($params) === 'string') {
+    return [$params, 0];
+  } elseif (gettype($params) === 'array') {
+    $url = isset($params['url']) ? $params['url'] : '';
+    $volume = isset($params['volume']) ? $params['volume'] : '';
+    return [$url, $volume];
+  }
+  return ['', 0];
 }
 
 function preparePromptParams(Array $params, Array $mediaList = []): Array {
@@ -110,7 +128,9 @@ function preparePromptParams(Array $params, Array $mediaList = []): Array {
   } elseif ($type == PromptType::Speech || $type == 'both') {
     $collect[PromptType::Speech] = new \stdClass;
   }
-  return [$collect, preparePlayParams($mediaToPlay)];
+  $volume = isset($params['volume']) ? $params['volume'] : 0;
+  list($play) = preparePlayParams($mediaToPlay);
+  return [$collect, $play, $volume];
 }
 
 function preparePromptAudioParams(Array $params, String $url = ''): Array {

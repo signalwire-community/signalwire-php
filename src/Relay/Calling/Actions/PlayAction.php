@@ -5,6 +5,7 @@ namespace SignalWire\Relay\Calling\Actions;
 use SignalWire\Relay\Calling\Results\PlayResult;
 use SignalWire\Relay\Calling\Results\PlayPauseResult;
 use SignalWire\Relay\Calling\Results\PlayResumeResult;
+use SignalWire\Relay\Calling\Results\PlayVolumeResult;
 
 class PlayAction extends BaseAction {
 
@@ -17,11 +18,21 @@ class PlayAction extends BaseAction {
   }
 
   public function pause() {
-    return $this->component->pause(PlayPauseResult::class);
+    return $this->component->pause()->then(function($result) {
+      return new PlayPauseResult($result);
+    });
+  }
+
+  public function volume($value) {
+    return $this->component->volume($value)->then(function($result) {
+      return new PlayVolumeResult($result);
+    });
   }
 
   public function resume() {
-    return $this->component->resume(PlayResumeResult::class);
+    return $this->component->resume()->then(function($result) {
+      return new PlayResumeResult($result);
+    });
   }
 
 }
