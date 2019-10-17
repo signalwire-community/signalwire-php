@@ -234,6 +234,16 @@ class Call {
     return $this->promptAsync($collect);
   }
 
+  public function promptRingtone(Array $params) {
+    $collect = \SignalWire\preparePromptRingtoneParams($params);
+    return $this->prompt($collect);
+  }
+
+  public function promptRingtoneAsync(Array $params) {
+    $collect = \SignalWire\preparePromptRingtoneParams($params);
+    return $this->promptAsync($collect);
+  }
+
   public function promptTTS(Array $params, Array $ttsOptions = []) {
     $collect = \SignalWire\preparePromptTTSParams($params, $ttsOptions);
     return $this->prompt($collect);

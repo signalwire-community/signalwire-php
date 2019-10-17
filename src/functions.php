@@ -165,6 +165,22 @@ function preparePromptTTSParams(Array $params, Array $ttsOptions = []): Array {
   return $params;
 }
 
+function preparePromptRingtoneParams(Array $params): Array {
+  $mediaParams = [];
+  if (isset($params['name'])) {
+    $mediaParams['name'] = $params['name'];
+    unset($params['name']);
+  }
+  if (isset($params['duration'])) {
+    $mediaParams['duration'] = (float)$params['duration'];
+    unset($params['duration']);
+  }
+  $params['media'] = [
+    ['type' => PlayType::Ringtone, 'params' => $mediaParams]
+  ];
+  return $params;
+}
+
 function prepareDetectParams(Array $params) {
   $timeout = isset($params['timeout']) ? $params['timeout'] : null;
   $type = isset($params['type']) ? $params['type'] : null;

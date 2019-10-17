@@ -207,6 +207,44 @@ class RelayCallingCallPromptTest extends RelayCallingBaseActionCase
     $this->call->promptAudioAsync($params)->done([$this, '__asyncPromptCheck']);
   }
 
+  public function testPromptRingtone(): void {
+    $collect = ['digits' => [ 'max' => 3 ]];
+    $play = [
+      ['type' => 'ringtone', 'params' => ['name' => 'at', 'duration' => 3.5]]
+    ];
+    $msg = $this->_promptMsg($collect, $play);
+    $this->_mockSuccessResponse($msg, self::$success);
+
+    $params = ['digits_max' => 3, 'name' => 'at', 'duration' => '3.5'];
+    $this->call->promptRingtone($params)->done([$this, '__syncPromptCheck']);
+    $this->calling->notificationHandler(self::$notificationFinished);
+  }
+
+  public function testPromptRingtoneWithVolume(): void {
+    $collect = ['initial_timeout' => 10, 'digits' => [ 'max' => 3 ], 'volume' => 5.4];
+    $play = [
+      ['type' => 'ringtone', 'params' => ['name' => 'at', 'duration' => 3.5]]
+    ];
+    $msg = $this->_promptMsg($collect, $play);
+    $this->_mockSuccessResponse($msg, self::$success);
+
+    $params = ['initial_timeout' => 10, 'digits_max' => 3, 'name' => 'at', 'duration' => '3.5', 'volume' => '5.4'];
+    $this->call->promptRingtone($params)->done([$this, '__syncPromptCheck']);
+    $this->calling->notificationHandler(self::$notificationFinished);
+  }
+
+  public function testPromptRingtoneAsync(): void {
+    $collect = ['digits' => [ 'max' => 3 ]];
+    $play = [
+      ['type' => 'ringtone', 'params' => ['name' => 'at', 'duration' => 3.5]]
+    ];
+    $msg = $this->_promptMsg($collect, $play);
+    $this->_mockSuccessResponse($msg, self::$success);
+
+    $params = ['digits_max' => 3, 'name' => 'at', 'duration' => '3.5'];
+    $this->call->promptRingtoneAsync($params)->done([$this, '__asyncPromptCheck']);
+  }
+
   /**
    * Callable to not repeat the same function for every SYNC prompt test
    */
