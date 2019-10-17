@@ -273,6 +273,42 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
     $this->calling->notificationHandler($this->connectNotification);
   }
 
+  public function testConnectDevicesInSeriesWithRingback(): void {
+    $this->_setCallReady();
+
+    $msg = new Execute([
+      'protocol' => 'signalwire_calling_proto',
+      'method' => 'calling.connect',
+      'params' => [
+        'call_id' => 'call-id',
+        'node_id' => 'node-id',
+        'devices' => [
+          [
+            [ "type" => "phone", "params" => [ "to_number" => "999", "from_number" => "231", "timeout" => 10 ] ]
+          ],
+          [
+            [ "type" => "phone", "params" => [ "to_number" => "888", "from_number" => "234", "timeout" => 20 ] ]
+          ]
+        ],
+        'ringback' => [ "type" => "ringtone", "params" => [ "name" => "us", "duration" => 10 ] ]
+      ]
+    ]);
+
+    $this->client->connection->expects($this->once())->method('send')->with($msg)->willReturn($this->_successResponse);
+
+    $params = [
+      'devices' => [
+        ["type" => "phone", "to" => "999", "from" => "231", "timeout" => 10],
+        ["type" => "phone", "to" => "888"]
+      ],
+      'ringback' => [ "type" => "ringtone", "name" => "us", "duration" => 10 ]
+    ];
+    $this->call->connect($params)->done([$this, '__syncConnectCheck']);
+
+    $this->calling->notificationHandler($this->connectNotificationPeerCreated);
+    $this->calling->notificationHandler($this->connectNotification);
+  }
+
   public function testConnectDevicesInParallel(): void {
     $this->_setCallReady();
 

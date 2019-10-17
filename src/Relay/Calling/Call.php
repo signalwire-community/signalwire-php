@@ -254,9 +254,9 @@ class Call {
     return $this->promptAsync($collect);
   }
 
-  public function connect(...$devices) {
-    $devices = \SignalWire\reduceConnectParams($devices, $this->from, $this->timeout);
-    $component = new Components\Connect($this, $devices);
+  public function connect(...$params) {
+    list($devices, $ringback) = \SignalWire\prepareConnectParams($params, $this->from, $this->timeout);
+    $component = new Components\Connect($this, $devices, $ringback);
     $this->_addComponent($component);
 
     return $component->_waitFor(ConnectState::Failed, ConnectState::Connected)->then(function() use (&$component) {
@@ -264,9 +264,9 @@ class Call {
     });
   }
 
-  public function connectAsync(...$devices) {
-    $devices = \SignalWire\reduceConnectParams($devices, $this->from, $this->timeout);
-    $component = new Components\Connect($this, $devices);
+  public function connectAsync(...$params) {
+    list($devices, $ringback) = \SignalWire\prepareConnectParams($params, $this->from, $this->timeout);
+    $component = new Components\Connect($this, $devices, $ringback);
     $this->_addComponent($component);
 
     return $component->execute()->then(function() use (&$component) {
