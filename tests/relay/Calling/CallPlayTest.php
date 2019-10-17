@@ -37,6 +37,16 @@ class RelayCallingCallPlayTest extends RelayCallingBaseActionCase
     $this->calling->notificationHandler(self::$notificationFinished);
   }
 
+  public function testPlaySuccessWithRingtone(): void {
+    $msg = $this->_playMsg([
+      ['type' => 'ringtone', 'params' => ['name' => 'at']]
+    ]);
+    $this->_mockSuccessResponse($msg, self::$success);
+
+    $this->call->play(['type' => 'ringtone', 'name' => 'at'])->done([$this, '__syncPlayCheck']);
+    $this->calling->notificationHandler(self::$notificationFinished);
+  }
+
   public function testPlaySuccessWithVolume(): void {
     $msg = $this->_playMsg([
       ['type' => 'audio', 'params' => ['url' => 'audio.mp3']],
@@ -212,6 +222,34 @@ class RelayCallingCallPlayTest extends RelayCallingBaseActionCase
     $this->_mockSuccessResponse($msg, self::$success);
 
     $this->call->playTTSAsync(['text' => 'Welcome', 'gender' => 'male', 'volume' => -7])->done([$this, '__asyncPlayCheck']);
+  }
+
+  public function testPlayRingtone(): void {
+    $msg = $this->_playMsg([
+      ['type' => 'ringtone', 'params' => ['name' => 'us', 'duration' => 4.5]]
+    ]);
+    $this->_mockSuccessResponse($msg, self::$success);
+
+    $this->call->playRingtone(['name' => 'us', 'duration' => '4.5'])->done([$this, '__syncPlayCheck']);
+    $this->calling->notificationHandler(self::$notificationFinished);
+  }
+
+  public function testPlayRingtoneAsync(): void {
+    $msg = $this->_playMsg([
+      ['type' => 'ringtone', 'params' => ['name' => 'us', 'duration' => 4.5]]
+    ]);
+    $this->_mockSuccessResponse($msg, self::$success);
+
+    $this->call->playRingtoneAsync(['name' => 'us', 'duration' => '4.5'])->done([$this, '__asyncPlayCheck']);
+  }
+
+  public function testPlayRingtoneAsyncWithVolume(): void {
+    $msg = $this->_playMsg([
+      ['type' => 'ringtone', 'params' => ['name' => 'us', 'duration' => 4.5]]
+    ], -7);
+    $this->_mockSuccessResponse($msg, self::$success);
+
+    $this->call->playRingtoneAsync(['name' => 'us', 'duration' => 4.5, 'volume' => -7])->done([$this, '__asyncPlayCheck']);
   }
 
   /**

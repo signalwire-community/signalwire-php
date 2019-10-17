@@ -161,6 +161,22 @@ class Call {
     return $this->playAsync(['media' => $media, 'volume' => $volume]);
   }
 
+  public function playRingtone(Array $options) {
+    list($params, $volume) = \SignalWire\preparePlayRingtoneParams($options);
+    $media = [
+      ['type' => PlayType::Ringtone, 'params' => $params]
+    ];
+    return $this->play(['media' => $media, 'volume' => $volume]);
+  }
+
+  public function playRingtoneAsync(Array $options) {
+    list($params, $volume) = \SignalWire\preparePlayRingtoneParams($options);
+    $media = [
+      ['type' => PlayType::Ringtone, 'params' => $params]
+    ];
+    return $this->playAsync(['media' => $media, 'volume' => $volume]);
+  }
+
   public function playSilence(Float $duration) {
     return $this->play(['type' => PlayType::Silence, 'params' => [ 'duration' => $duration ]]);
   }

@@ -80,6 +80,15 @@ function preparePlayAudioParams($params): Array {
   return ['', 0];
 }
 
+function preparePlayRingtoneParams($params): Array {
+  $volume = isset($params['volume']) ? $params['volume'] : 0;
+  unset($params['volume']);
+  if (isset($params['duration'])) {
+    $params['duration'] = (float)$params['duration'];
+  }
+  return [$params, $volume];
+}
+
 function preparePromptParams(Array $params, Array $mediaList = []): Array {
   $digits = isset($params[PromptType::Digits]) ? $params[PromptType::Digits] : [];
   $speech = isset($params[PromptType::Speech]) ? $params[PromptType::Speech] : [];
