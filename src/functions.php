@@ -9,6 +9,23 @@ use SignalWire\Relay\Calling\DetectType;
 use SignalWire\Relay\Calling\DetectState;
 use SignalWire\Relay\Calling\TapType;
 
+function prepareConnectParams(Array $params, String $defaultFrom, Int $defaultTimeout): Array {
+  $devices = [];
+  $ringback = [];
+  if (count($params) === 1 && isset($params[0]['devices'])) {
+    $devices = $params[0]['devices'];
+    if (isset($params[0]['ringback'])) {
+      $ringback = destructMedia($params[0]['ringback']);
+    }
+  } else {
+    $devices = $params;
+  }
+  return [
+    reduceConnectParams($devices, $defaultFrom, $defaultTimeout),
+    $ringback
+  ];
+}
+
 function reduceConnectParams(Array $devices, String $defaultFrom, Int $defaultTimeout, $nested = false) {
   $final = [];
   foreach ($devices as $d) {
@@ -46,6 +63,14 @@ function prepareRecordParams(Array $params): Array {
   return $record;
 }
 
+function destructMedia(Array $media): Array {
+  $type = isset($media['type']) ? $media['type'] : '';
+  $params = isset($media['params']) ? $media['params'] : [];
+  unset($media['type'], $media['params']);
+  $params = $params + $media;
+  return ['type' => $type, 'params' => $params];
+}
+
 function preparePlayParams(Array $params): Array {
   $volume = 0;
   if (count($params) === 1 && isset($params[0]['media'])) {
@@ -56,15 +81,9 @@ function preparePlayParams(Array $params): Array {
   }
   $mediaToPlay = [];
   foreach($mediaList as $media) {
-    if (!is_array($media)) {
-      Log::warning('Invalid media to play.');
-      continue;
+    if (is_array($media)) {
+      array_push($mediaToPlay, destructMedia($media));
     }
-    $type = isset($media['type']) ? $media['type'] : '';
-    $params = isset($media['params']) ? $media['params'] : [];
-    unset($media['type'], $media['params']);
-    $params = $params + $media;
-    array_push($mediaToPlay, ['type' => $type, 'params' => $params]);
   }
   return [$mediaToPlay, $volume];
 }
@@ -78,6 +97,15 @@ function preparePlayAudioParams($params): Array {
     return [$url, $volume];
   }
   return ['', 0];
+}
+
+function preparePlayRingtoneParams($params): Array {
+  $volume = isset($params['volume']) ? $params['volume'] : 0;
+  unset($params['volume']);
+  if (isset($params['duration'])) {
+    $params['duration'] = (float)$params['duration'];
+  }
+  return [$params, $volume];
 }
 
 function preparePromptParams(Array $params, Array $mediaList = []): Array {
@@ -152,6 +180,22 @@ function preparePromptTTSParams(Array $params, Array $ttsOptions = []): Array {
   }
   $params['media'] = [
     ['type' => PlayType::TTS, 'params' => $ttsOptions]
+  ];
+  return $params;
+}
+
+function preparePromptRingtoneParams(Array $params): Array {
+  $mediaParams = [];
+  if (isset($params['name'])) {
+    $mediaParams['name'] = $params['name'];
+    unset($params['name']);
+  }
+  if (isset($params['duration'])) {
+    $mediaParams['duration'] = (float)$params['duration'];
+    unset($params['duration']);
+  }
+  $params['media'] = [
+    ['type' => PlayType::Ringtone, 'params' => $mediaParams]
   ];
   return $params;
 }

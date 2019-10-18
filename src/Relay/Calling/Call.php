@@ -161,6 +161,22 @@ class Call {
     return $this->playAsync(['media' => $media, 'volume' => $volume]);
   }
 
+  public function playRingtone(Array $options) {
+    list($params, $volume) = \SignalWire\preparePlayRingtoneParams($options);
+    $media = [
+      ['type' => PlayType::Ringtone, 'params' => $params]
+    ];
+    return $this->play(['media' => $media, 'volume' => $volume]);
+  }
+
+  public function playRingtoneAsync(Array $options) {
+    list($params, $volume) = \SignalWire\preparePlayRingtoneParams($options);
+    $media = [
+      ['type' => PlayType::Ringtone, 'params' => $params]
+    ];
+    return $this->playAsync(['media' => $media, 'volume' => $volume]);
+  }
+
   public function playSilence(Float $duration) {
     return $this->play(['type' => PlayType::Silence, 'params' => [ 'duration' => $duration ]]);
   }
@@ -218,6 +234,16 @@ class Call {
     return $this->promptAsync($collect);
   }
 
+  public function promptRingtone(Array $params) {
+    $collect = \SignalWire\preparePromptRingtoneParams($params);
+    return $this->prompt($collect);
+  }
+
+  public function promptRingtoneAsync(Array $params) {
+    $collect = \SignalWire\preparePromptRingtoneParams($params);
+    return $this->promptAsync($collect);
+  }
+
   public function promptTTS(Array $params, Array $ttsOptions = []) {
     $collect = \SignalWire\preparePromptTTSParams($params, $ttsOptions);
     return $this->prompt($collect);
@@ -228,9 +254,9 @@ class Call {
     return $this->promptAsync($collect);
   }
 
-  public function connect(...$devices) {
-    $devices = \SignalWire\reduceConnectParams($devices, $this->from, $this->timeout);
-    $component = new Components\Connect($this, $devices);
+  public function connect(...$params) {
+    list($devices, $ringback) = \SignalWire\prepareConnectParams($params, $this->from, $this->timeout);
+    $component = new Components\Connect($this, $devices, $ringback);
     $this->_addComponent($component);
 
     return $component->_waitFor(ConnectState::Failed, ConnectState::Connected)->then(function() use (&$component) {
@@ -238,9 +264,9 @@ class Call {
     });
   }
 
-  public function connectAsync(...$devices) {
-    $devices = \SignalWire\reduceConnectParams($devices, $this->from, $this->timeout);
-    $component = new Components\Connect($this, $devices);
+  public function connectAsync(...$params) {
+    list($devices, $ringback) = \SignalWire\prepareConnectParams($params, $this->from, $this->timeout);
+    $component = new Components\Connect($this, $devices, $ringback);
     $this->_addComponent($component);
 
     return $component->execute()->then(function() use (&$component) {

@@ -11,12 +11,14 @@ class Connect extends BaseComponent {
   public $eventType = Notification::Connect;
 
   private $_devices;
+  private $_ringback;
 
-  public function __construct(Call $call, Array $devices) {
+  public function __construct(Call $call, Array $devices, Array $ringback = []) {
     parent::__construct($call);
 
     $this->controlId = $call->tag;
     $this->_devices = $devices;
+    $this->_ringback = $ringback;
   }
 
   public function method() {
@@ -24,11 +26,15 @@ class Connect extends BaseComponent {
   }
 
   public function payload() {
-    return [
+    $tmp = [
       'node_id' => $this->call->nodeId,
       'call_id' => $this->call->id,
       'devices' => $this->_devices
     ];
+    if (is_array($this->_ringback) && count($this->_ringback) > 0) {
+      $tmp['ringback'] = $this->_ringback;
+    }
+    return $tmp;
   }
 
   public function notificationHandler($params) {
