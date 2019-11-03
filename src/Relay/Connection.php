@@ -40,7 +40,9 @@ class Connection {
 
         $this->_ws->on('close', function($code = null, $reason = null) {
           $this->_connected = false;
-          $this->client->eventLoop->cancelTimer($this->_keepAliveTimer);
+          if ($this->_keepAliveTimer) {
+            $this->client->eventLoop->cancelTimer($this->_keepAliveTimer);
+          }
           $param = array('code' => $code, 'reason' => $reason);
           Handler::trigger(Events::SocketClose, $param, $this->client->uuid);
         });
