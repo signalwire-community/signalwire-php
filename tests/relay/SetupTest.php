@@ -3,6 +3,7 @@
 require_once dirname(__FILE__) . '/BaseRelayCase.php';
 
 use SignalWire\Relay\Setup;
+use SignalWire\Messages\Execute;
 
 class RelaySetupTest extends BaseRelayCase
 {
@@ -11,6 +12,36 @@ class RelaySetupTest extends BaseRelayCase
     $responseSubscr = json_decode('{"protocol":"signalwire_calling_proto","command":"add","subscribe_channels":["notifications"]}');
     $this->_mockResponse([$responseProto, $responseSubscr]);
 
+    Setup::protocol($this->client)->then(function (String $protocol) {
+      $this->assertEquals('signalwire_calling_proto', $protocol);
+      $this->assertArrayHasKey('signalwire_calling_protonotifications', $this->client->subscriptions);
+    });
+  }
+
+  public function testProtocolSetupAfterReconnectWithSameSignature(): void {
+    $responseProto = json_decode('{"requester_nodeid":"ad490dc4-550a-4742-929d-b86fdf8958ef","responder_nodeid":"b0007713-071d-45f9-88aa-302d14e1251c","result":{"protocol":"signalwire_calling_proto"}}');
+    $responseSubscr = json_decode('{"protocol":"signalwire_calling_proto","command":"add","subscribe_channels":["notifications"]}');
+    $requestProto = new Execute([
+      'protocol' => 'signalwire', 'method' => 'setup', 'params' => (object)[ 'protocol' => 'signalwire_signature_uuid_uuid' ]
+    ]);
+    $this->_mockResponse([$responseProto, $responseSubscr], [$requestProto]);
+    $this->client->signature = 'signature';
+    $this->client->relayProtocol = 'signalwire_signature_uuid_uuid';
+    Setup::protocol($this->client)->then(function (String $protocol) {
+      $this->assertEquals('signalwire_calling_proto', $protocol);
+      $this->assertArrayHasKey('signalwire_calling_protonotifications', $this->client->subscriptions);
+    });
+  }
+
+  public function testProtocolSetupAfterReconnectWithDifferentSignature(): void {
+    $responseProto = json_decode('{"requester_nodeid":"ad490dc4-550a-4742-929d-b86fdf8958ef","responder_nodeid":"b0007713-071d-45f9-88aa-302d14e1251c","result":{"protocol":"signalwire_calling_proto"}}');
+    $responseSubscr = json_decode('{"protocol":"signalwire_calling_proto","command":"add","subscribe_channels":["notifications"]}');
+    $requestProto = new Execute([
+      'protocol' => 'signalwire', 'method' => 'setup', 'params' => (object)[]
+    ]);
+    $this->_mockResponse([$responseProto, $responseSubscr], [$requestProto]);
+    $this->client->signature = 'another-signature';
+    $this->client->relayProtocol = 'signalwire_signature_uuid_uuid';
     Setup::protocol($this->client)->then(function (String $protocol) {
       $this->assertEquals('signalwire_calling_proto', $protocol);
       $this->assertArrayHasKey('signalwire_calling_protonotifications', $this->client->subscriptions);
