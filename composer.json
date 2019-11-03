@@ -13,7 +13,8 @@
       "SignalWire\\": "src/"
     },
     "files": [
-      "src/functions.php"
+      "src/functions.php",
+      "src/Version.php"
     ]
   },
   "authors": [
