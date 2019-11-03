@@ -192,15 +192,17 @@ class Client {
 
   public function _onSocketClose(Array $param = array()) {
     if ($this->_autoReconnect) {
-      unset($this->_calling);
-      $this->_calling = null;
       $this->eventLoop->addTimer(5.0, [$this, 'connect']);
     }
   }
 
   public function _onSocketError($error) {
     Log::error("WebSocket error: {$error->getMessage()}. [code: {$error->getCode()}]");
-    $this->eventLoop->stop();
+    if ($this->_autoReconnect) {
+      $this->eventLoop->addTimer(5.0, [$this, 'connect']);
+    } else {
+      $this->eventLoop->stop();
+    }
   }
 
   public function _onSocketMessage($message) {
