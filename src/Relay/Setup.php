@@ -13,10 +13,17 @@ class Setup {
   const Receive = 'signalwire.receive';
 
   static function protocol(Client $client) {
+    $params = new \stdClass;
+    if ($client->relayProtocol) {
+      $split = explode('_', $client->relayProtocol);
+      if (isset($split[1]) && $split[1] === $client->signature) {
+        $params->protocol = $client->relayProtocol;
+      }
+    }
     $msg = new Execute(array(
       'protocol' => self::Protocol,
       'method' => self::Method,
-      'params' => array('service' => '')
+      'params' => $params
     ));
     return $client->execute($msg)->then(function ($response) use ($client) {
       return $client->subscribe($response->result->protocol, self::Channels)->then(function ($response) {

@@ -65,6 +65,12 @@ class Client {
   public $relayProtocol = null;
 
   /**
+   * Relay client signature
+   * @var String
+   */
+  public $signature = null;
+
+  /**
    * Array containing the contexts this client is receiving.
    * @var Array
    */
@@ -143,6 +149,8 @@ class Client {
     if (!$this->connection) {
       return;
     }
+    $this->contexts = [];
+    $this->_subscriptions = [];
     $this->connection->connect();
     if ($this->_loopIsRunning === false) {
       $this->_loopIsRunning = true;
@@ -178,6 +186,7 @@ class Client {
       $this->_autoReconnect = true;
       $this->sessionid = $result->sessionid;
       $this->nodeid = $result->nodeid;
+      $this->signature = $result->authorization->signature;
       Setup::protocol($this)->done(function(String $protocol) {
         $this->relayProtocol = $protocol;
         $this->_emptyExecuteQueue();
