@@ -19,6 +19,6 @@ abstract class BaseMessage {
   }
 
   public function toJson(Bool $pretty = false){
-    return $pretty ? json_encode($this->request, JSON_PRETTY_PRINT) : json_encode($this->request);
+    return $pretty ? json_encode($this->request, JSON_PRETTY_PRINT, JSON_UNESCAPED_SLASHES) : json_encode($this->request, JSON_UNESCAPED_SLASHES);
   }
 }

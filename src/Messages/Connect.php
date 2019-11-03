@@ -18,7 +18,8 @@ class Connect extends BaseMessage {
       'authentication' => array(
         'project' => $project,
         'token' => $token
-      )
+      ),
+      'agent' => 'PHP SDK/' . \SignalWire\VERSION
     );
     if ($sessionid) {
       $params['sessionid'] = $sessionid;
