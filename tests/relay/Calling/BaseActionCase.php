@@ -1,38 +1,28 @@
 <?php
 
-use PHPUnit\Framework\TestCase;
-use SignalWire\Relay\Client;
+require_once dirname(__FILE__) . '/../BaseRelayCase.php';
+
 use SignalWire\Relay\Calling\Calling;
 use SignalWire\Relay\Calling\Call;
 
-abstract class RelayCallingBaseActionCase extends TestCase
+abstract class RelayCallingBaseActionCase extends BaseRelayCase
 {
-  const UUID = 'e36f227c-2946-11e8-b467-0ed5f89f718b';
   protected $client;
   protected $calling;
   protected $call;
 
   protected function setUp() {
-    $this->mockUuid();
+    parent::setUp();
     $this->setUpClient();
     $this->setUpCall();
   }
 
-  protected function tearDown() {
+  public function tearDown() {
     unset($this->client, $this->call);
-    SignalWire\Handler::deRegisterAll('signalwire_calling_proto');
-    \Ramsey\Uuid\Uuid::setFactory(new \Ramsey\Uuid\UuidFactory());
-  }
-
-  protected function mockUuid() {
-    $factory = $this->createMock(\Ramsey\Uuid\UuidFactoryInterface::class);
-    $factory->method('uuid4')
-      ->will($this->returnValue(\Ramsey\Uuid\Uuid::fromString(self::UUID)));
-    \Ramsey\Uuid\Uuid::setFactory($factory);
+    parent::tearDown();
   }
 
   protected function setUpClient() {
-    $this->client = new Client(array('host' => 'host', 'project' => 'project', 'token' => 'token'));
     $this->client->connection = $this->createMock(SignalWire\Relay\Connection::class, ['send']);
     $this->client->relayProtocol = 'signalwire_calling_proto';
   }
