@@ -11,13 +11,13 @@ class MessagesTest extends TestCase
 
   public function testBladeConnectWithoutSessionId(): void {
     $msg = new Connect('project', 'token');
-    $json = '{"jsonrpc":"2.0","id":"'.$msg->id.'","method":"blade.connect","params":{"version":{"major":2,"minor":1,"revision":0},"authentication":{"project":"project","token":"token"}}}';
+    $json = '{"jsonrpc":"2.0","id":"'.$msg->id.'","method":"blade.connect","params":{"version":{"major":2,"minor":1,"revision":0},"authentication":{"project":"project","token":"token"},"agent":"PHP SDK/'.\SignalWire\VERSION.'"}}';
     $this->assertEquals($msg->toJson(), $json);
   }
 
   public function testBladeConnectWithSessionId(): void {
     $msg = new Connect('project', 'token', 'sessId');
-    $json = '{"jsonrpc":"2.0","id":"'.$msg->id.'","method":"blade.connect","params":{"version":{"major":2,"minor":1,"revision":0},"authentication":{"project":"project","token":"token"},"sessionid":"sessId"}}';
+    $json = '{"jsonrpc":"2.0","id":"'.$msg->id.'","method":"blade.connect","params":{"version":{"major":2,"minor":1,"revision":0},"authentication":{"project":"project","token":"token"},"agent":"PHP SDK/'.\SignalWire\VERSION.'","sessionid":"sessId"}}';
     $this->assertEquals($msg->toJson(), $json);
   }
 
