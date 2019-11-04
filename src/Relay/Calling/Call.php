@@ -85,6 +85,15 @@ class Call {
     });
   }
 
+  public function disconnect() {
+    $component = new Components\Disconnect($this);
+    $this->_addComponent($component);
+
+    return $component->_waitFor(ConnectState::Failed, ConnectState::Disconnected)->then(function() use (&$component) {
+      return new Results\DisconnectResult($component);
+    });
+  }
+
   public function hangup(String $reason = 'hangup') {
     $component = new Components\Hangup($this, $reason);
     $this->_addComponent($component);
