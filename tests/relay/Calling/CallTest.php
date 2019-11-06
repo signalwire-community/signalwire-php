@@ -2,6 +2,7 @@
 require_once dirname(__FILE__) . '/BaseActionCase.php';
 
 use SignalWire\Messages\Execute;
+use SignalWire\Relay\Calling\Call;
 
 class RelayCallingCallTest extends RelayCallingBaseActionCase
 {
@@ -17,6 +18,7 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
     $this->connectNotification = json_decode('{"event_type":"calling.call.connect","params":{"connect_state":"connected","peer":{"call_id":"peer-call-id","node_id":"peer-node-id","device":{"type":"phone","params":{"from_number":"+1234","to_number":"+15678"}}},"call_id":"call-id","node_id":"node-id"}}');
     $this->connectNotificationPeerCreated = json_decode('{"event_type":"calling.call.state","params":{"call_state":"created","direction":"outbound","device":{"type":"phone","params":{"from_number":"+1234","to_number":"15678"}},"peer":{"call_id":"call-id","node_id":"node-id"},"call_id":"peer-call-id","node_id":"peer-node-id"}}');
     $this->connectNotificationFailed = json_decode('{"event_type":"calling.call.connect","params":{"connect_state":"failed","peer":{"call_id":"peer-call-id","node_id":"peer-node-id"},"call_id":"call-id","node_id":"node-id"}}');
+    $this->connectNotificationDisconnected = json_decode('{"event_type":"calling.call.connect","params":{"connect_state":"disconnected","peer":{"call_id":"peer-call-id","node_id":"peer-node-id"},"call_id":"call-id","node_id":"node-id"}}');
     $this->faxNotificationPage = json_decode('{"event_type":"calling.call.fax","params":{"control_id":"'.self::UUID.'","call_id":"call-id","node_id":"node-id","fax":{"type":"page","params":{"direction":"send","pages":"1"}}}}');
     $this->faxNotificationFinished = json_decode('{"event_type":"calling.call.fax","params":{"control_id":"'.self::UUID.'","call_id":"call-id","node_id":"node-id","fax":{"type":"finished","params":{"direction":"send","identity":"+1xxx","remote_identity":"+1yyy","document":"file.pdf","success":true,"result":"1231","result_text":"","pages":"1"}}}}');
   }
@@ -697,6 +699,73 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
       $this->assertTrue($action->isCompleted());
       $this->assertEquals($action->getState(), 'failed');
     });
+  }
+
+  public function testDisconnectSuccess(): void {
+    $this->_setCallReady();
+    $msg = new Execute([
+      'protocol' => 'signalwire_calling_proto',
+      'method' => 'calling.disconnect',
+      'params' => [
+        'call_id' => 'call-id',
+        'node_id' => 'node-id'
+      ]
+    ]);
+
+    $this->client->connection->expects($this->once())->method('send')->with($msg)->willReturn($this->_successResponse);
+
+    $this->call->peer = new Call($this->calling, new \stdClass);
+    $this->call->disconnect()->done(function($result) {
+      $this->assertInstanceOf('SignalWire\Relay\Calling\Results\DisconnectResult', $result);
+      $this->assertNull($this->call->peer);
+      $this->assertTrue($result->isSuccessful());
+    });
+    $this->calling->notificationHandler($this->connectNotificationDisconnected);
+  }
+
+  public function testDisconnectFail(): void {
+    $this->_setCallReady();
+    $msg = new Execute([
+      'protocol' => 'signalwire_calling_proto',
+      'method' => 'calling.disconnect',
+      'params' => [
+        'call_id' => 'call-id',
+        'node_id' => 'node-id'
+      ]
+    ]);
+
+    $this->client->connection->expects($this->once())->method('send')->with($msg)->willReturn($this->_failResponse);
+
+    $peer = new Call($this->calling, new \stdClass);
+    $this->call->peer = $peer;
+    $this->call->disconnect()->done(function($result) use (&$peer) {
+      $this->assertInstanceOf('SignalWire\Relay\Calling\Results\DisconnectResult', $result);
+      $this->assertEquals($peer, $this->call->peer);
+      $this->assertFalse($result->isSuccessful());
+    });
+  }
+
+  public function testDisconnectWithEventFailed(): void {
+    $this->_setCallReady();
+    $msg = new Execute([
+      'protocol' => 'signalwire_calling_proto',
+      'method' => 'calling.disconnect',
+      'params' => [
+        'call_id' => 'call-id',
+        'node_id' => 'node-id'
+      ]
+    ]);
+
+    $this->client->connection->expects($this->once())->method('send')->with($msg)->willReturn($this->_successResponse);
+
+    $peer = new Call($this->calling, new \stdClass);
+    $this->call->peer = $peer;
+    $this->call->disconnect()->done(function($result) use (&$peer) {
+      $this->assertInstanceOf('SignalWire\Relay\Calling\Results\DisconnectResult', $result);
+      $this->assertEquals($peer, $this->call->peer);
+      $this->assertFalse($result->isSuccessful());
+    });
+    $this->calling->notificationHandler($this->connectNotificationFailed);
   }
 
   /**
