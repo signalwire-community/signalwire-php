@@ -2,11 +2,10 @@
 
 namespace SignalWire\Relay\Calling\Components;
 
-class FaxReceive extends BaseFax {
+use SignalWire\Relay\Calling\Method;
 
-  public function method() {
-    return 'calling.receive_fax';
-  }
+class FaxReceive extends BaseFax {
+  public $method = Method::ReceiveFax;
 
   public function payload() {
     return [

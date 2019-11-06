@@ -16,6 +16,9 @@ abstract class BaseComponent {
   /** Type of Relay events to handle. state|play|collect|record|connect */
   public $eventType;
 
+  /** Relay method to execute */
+  public $method = null;
+
   /** ControlId to identify the component among the notifications */
   public $controlId;
 
@@ -50,12 +53,6 @@ abstract class BaseComponent {
   }
 
   /**
-   * Relay method to execute
-   *
-   */
-  abstract function method();
-
-  /**
    * Payload sent to Relay in requests
    *
    */
@@ -73,13 +70,12 @@ abstract class BaseComponent {
       $this->terminate();
       return \React\Promise\resolve();
     }
-    $method = $this->method();
-    if ($method === null) {
+    if ($this->method === null) {
       return \React\Promise\resolve();
     }
     $msg = new Execute([
       'protocol' => $this->call->relayInstance->client->relayProtocol,
-      'method' => $method,
+      'method' => $this->method,
       'params' => $this->payload()
     ]);
 

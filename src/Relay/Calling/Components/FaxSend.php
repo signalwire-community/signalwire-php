@@ -3,8 +3,10 @@
 namespace SignalWire\Relay\Calling\Components;
 
 use SignalWire\Relay\Calling\Call;
+use SignalWire\Relay\Calling\Method;
 
 class FaxSend extends BaseFax {
+  public $method = Method::SendFax;
   private $_document;
   private $_identity;
   private $_header;
@@ -15,10 +17,6 @@ class FaxSend extends BaseFax {
     $this->_document = $document;
     $this->_identity = $identity;
     $this->_header = $header;
-  }
-
-  public function method() {
-    return 'calling.send_fax';
   }
 
   public function payload() {

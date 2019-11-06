@@ -5,10 +5,12 @@ namespace SignalWire\Relay\Calling\Components;
 use SignalWire\Relay\Calling\Call;
 use SignalWire\Relay\Calling\CallState;
 use SignalWire\Relay\Calling\Notification;
+use SignalWire\Relay\Calling\Method;
 use SignalWire\Relay\Calling\Event;
 
 class Hangup extends BaseComponent {
   public $eventType = Notification::State;
+  public $method = Method::End;
   public $reason;
 
   public function __construct(Call $call, String $reason) {
@@ -16,10 +18,6 @@ class Hangup extends BaseComponent {
 
     $this->controlId = $call->tag;
     $this->reason = $reason;
-  }
-
-  public function method() {
-    return 'calling.end';
   }
 
   public function payload() {

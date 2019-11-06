@@ -16,10 +16,6 @@ class Await extends BaseComponent {
     $this->controlId = $call->tag;
   }
 
-  public function method() {
-    return null;
-  }
-
   public function payload() {
     return null;
   }

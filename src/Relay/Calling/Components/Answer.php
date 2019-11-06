@@ -5,19 +5,17 @@ namespace SignalWire\Relay\Calling\Components;
 use SignalWire\Relay\Calling\Call;
 use SignalWire\Relay\Calling\CallState;
 use SignalWire\Relay\Calling\Notification;
+use SignalWire\Relay\Calling\Method;
 use SignalWire\Relay\Calling\Event;
 
 class Answer extends BaseComponent {
   public $eventType = Notification::State;
+  public $method = Method::Answer;
 
   public function __construct(Call $call) {
     parent::__construct($call);
 
     $this->controlId = $call->tag;
-  }
-
-  public function method() {
-    return 'calling.answer';
   }
 
   public function payload() {

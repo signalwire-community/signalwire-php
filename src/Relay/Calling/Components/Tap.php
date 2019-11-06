@@ -5,10 +5,12 @@ namespace SignalWire\Relay\Calling\Components;
 use SignalWire\Relay\Calling\Call;
 use SignalWire\Relay\Calling\TapState;
 use SignalWire\Relay\Calling\Notification;
+use SignalWire\Relay\Calling\Method;
 use SignalWire\Relay\Calling\Event;
 
 class Tap extends Controllable {
   public $eventType = Notification::Tap;
+  public $method = Method::Tap;
   public $tap;
   public $device;
 
@@ -20,10 +22,6 @@ class Tap extends Controllable {
 
     $this->_tap = $tap;
     $this->_device = $device;
-  }
-
-  public function method() {
-    return 'calling.tap';
   }
 
   public function payload() {
