@@ -5,19 +5,17 @@ namespace SignalWire\Relay\Calling\Components;
 use SignalWire\Relay\Calling\Call;
 use SignalWire\Relay\Calling\ConnectState;
 use SignalWire\Relay\Calling\Notification;
+use SignalWire\Relay\Calling\Method;
 use SignalWire\Relay\Calling\Event;
 
 class Disconnect extends BaseComponent {
   public $eventType = Notification::Connect;
+  public $method = Method::Disconnect;
 
   public function __construct(Call $call) {
     parent::__construct($call);
 
     $this->controlId = $call->tag;
-  }
-
-  public function method() {
-    return 'calling.disconnect';
   }
 
   public function payload() {
