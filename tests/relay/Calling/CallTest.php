@@ -2,6 +2,7 @@
 require_once dirname(__FILE__) . '/BaseActionCase.php';
 
 use SignalWire\Messages\Execute;
+use SignalWire\Relay\Calling\Call;
 
 class RelayCallingCallTest extends RelayCallingBaseActionCase
 {
@@ -713,8 +714,10 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
 
     $this->client->connection->expects($this->once())->method('send')->with($msg)->willReturn($this->_successResponse);
 
+    $this->call->peer = new Call($this->calling, new \stdClass);
     $this->call->disconnect()->done(function($result) {
       $this->assertInstanceOf('SignalWire\Relay\Calling\Results\DisconnectResult', $result);
+      $this->assertNull($this->call->peer);
       $this->assertTrue($result->isSuccessful());
     });
     $this->calling->notificationHandler($this->connectNotificationDisconnected);
@@ -733,11 +736,13 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
 
     $this->client->connection->expects($this->once())->method('send')->with($msg)->willReturn($this->_failResponse);
 
-    $this->call->disconnect()->done(function($result) {
+    $peer = new Call($this->calling, new \stdClass);
+    $this->call->peer = $peer;
+    $this->call->disconnect()->done(function($result) use (&$peer) {
       $this->assertInstanceOf('SignalWire\Relay\Calling\Results\DisconnectResult', $result);
+      $this->assertEquals($peer, $this->call->peer);
       $this->assertFalse($result->isSuccessful());
     });
-    // $this->calling->notificationHandler($this->connectNotificationDisconnected);
   }
 
   public function testDisconnectWithEventFailed(): void {
@@ -753,8 +758,11 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
 
     $this->client->connection->expects($this->once())->method('send')->with($msg)->willReturn($this->_successResponse);
 
-    $this->call->disconnect()->done(function($result) {
+    $peer = new Call($this->calling, new \stdClass);
+    $this->call->peer = $peer;
+    $this->call->disconnect()->done(function($result) use (&$peer) {
       $this->assertInstanceOf('SignalWire\Relay\Calling\Results\DisconnectResult', $result);
+      $this->assertEquals($peer, $this->call->peer);
       $this->assertFalse($result->isSuccessful());
     });
     $this->calling->notificationHandler($this->connectNotificationFailed);

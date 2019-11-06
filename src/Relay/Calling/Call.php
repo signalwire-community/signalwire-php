@@ -603,9 +603,20 @@ class Call {
   }
 
   public function _connectChange($params) {
+    $state = $params->connect_state;
+    switch ($state) {
+      case ConnectState::Connected:
+        if (isset($params->peer) && isset($params->peer->call_id)) {
+          $this->peer = $this->relayInstance->getCallById($params->peer->call_id);
+        }
+        break;
+      case ConnectState::Disconnected:
+        $this->peer = null;
+        break;
+    }
     $this->_notifyComponents(Notification::Connect, $this->tag, $params);
     $this->_dispatchCallback("connect.stateChange");
-    $this->_dispatchCallback("connect.$params->connect_state");
+    $this->_dispatchCallback("connect.$state");
   }
 
   public function _recordChange($params) {
