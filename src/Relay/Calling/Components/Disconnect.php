@@ -28,8 +28,6 @@ class Disconnect extends BaseComponent {
   }
 
   public function notificationHandler($params) {
-    // FIXME: Check the calling.call.connect events!!
-
     $this->state = $params->connect_state;
 
     $this->completed = $this->state !== ConnectState::Connecting;
