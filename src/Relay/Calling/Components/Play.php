@@ -5,10 +5,12 @@ namespace SignalWire\Relay\Calling\Components;
 use SignalWire\Relay\Calling\Call;
 use SignalWire\Relay\Calling\PlayState;
 use SignalWire\Relay\Calling\Notification;
+use SignalWire\Relay\Calling\Method;
 use SignalWire\Relay\Calling\Event;
 
 class Play extends Controllable {
   public $eventType = Notification::Play;
+  public $method = Method::Play;
 
   private $_play;
   private $_volume;
@@ -18,10 +20,6 @@ class Play extends Controllable {
 
     $this->_play = $play;
     $this->_volume = (float)$volume;
-  }
-
-  public function method() {
-    return 'calling.play';
   }
 
   public function payload() {

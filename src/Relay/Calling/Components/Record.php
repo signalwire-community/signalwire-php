@@ -5,10 +5,12 @@ namespace SignalWire\Relay\Calling\Components;
 use SignalWire\Relay\Calling\Call;
 use SignalWire\Relay\Calling\RecordState;
 use SignalWire\Relay\Calling\Notification;
+use SignalWire\Relay\Calling\Method;
 use SignalWire\Relay\Calling\Event;
 
 class Record extends Controllable {
   public $eventType = Notification::Record;
+  public $method = Method::Record;
 
   public $url;
   public $duration;
@@ -20,10 +22,6 @@ class Record extends Controllable {
     parent::__construct($call);
 
     $this->_record = $record;
-  }
-
-  public function method() {
-    return 'calling.record';
   }
 
   public function payload() {

@@ -6,10 +6,12 @@ use SignalWire\Relay\Calling\Call;
 use SignalWire\Relay\Calling\DetectState;
 use SignalWire\Relay\Calling\DetectType;
 use SignalWire\Relay\Calling\Notification;
+use SignalWire\Relay\Calling\Method;
 use SignalWire\Relay\Calling\Event;
 
 class Detect extends Controllable {
   public $eventType = Notification::Detect;
+  public $method = Method::Detect;
 
   public $type;
   public $result;
@@ -28,10 +30,6 @@ class Detect extends Controllable {
     $this->_detect = $detect;
     $this->_timeout = $timeout;
     $this->_waitForBeep = $waitForBeep;
-  }
-
-  public function method() {
-    return 'calling.detect';
   }
 
   public function payload() {

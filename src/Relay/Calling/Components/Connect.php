@@ -5,10 +5,12 @@ namespace SignalWire\Relay\Calling\Components;
 use SignalWire\Relay\Calling\Call;
 use SignalWire\Relay\Calling\ConnectState;
 use SignalWire\Relay\Calling\Notification;
+use SignalWire\Relay\Calling\Method;
 use SignalWire\Relay\Calling\Event;
 
 class Connect extends BaseComponent {
   public $eventType = Notification::Connect;
+  public $method = Method::Connect;
 
   private $_devices;
   private $_ringback;
@@ -19,10 +21,6 @@ class Connect extends BaseComponent {
     $this->controlId = $call->tag;
     $this->_devices = $devices;
     $this->_ringback = $ringback;
-  }
-
-  public function method() {
-    return 'calling.connect';
   }
 
   public function payload() {
