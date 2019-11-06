@@ -69,7 +69,7 @@ class Calling extends \SignalWire\Relay\BaseRelay {
     }
   }
 
-  private function getCallById(String $callId) {
+  public function getCallById(String $callId) {
     foreach ($this->_calls as $call) {
       if ($call->id === $callId) {
         return $call;
@@ -78,7 +78,7 @@ class Calling extends \SignalWire\Relay\BaseRelay {
     return false;
   }
 
-  private function getCallByTag(String $tag) {
+  public function getCallByTag(String $tag) {
     foreach ($this->_calls as $call) {
       if ($call->tag === $tag) {
         return $call;
@@ -150,9 +150,6 @@ class Calling extends \SignalWire\Relay\BaseRelay {
   private function _onConnect($params) {
     $call = $this->getCallById($params->call_id);
     if ($call) {
-      if (isset($params->peer) && isset($params->peer->call_id)) {
-        $call->peer = $this->getCallById($params->peer->call_id);
-      }
       $call->_connectChange($params);
     }
   }
