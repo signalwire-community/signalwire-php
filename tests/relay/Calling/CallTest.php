@@ -203,6 +203,7 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
       [ "type" => "phone", "to" => "888" ]
     )->done(function ($result) {
       $this->assertInstanceOf('SignalWire\Relay\Calling\Results\ConnectResult', $result);
+      $this->assertNull($result->getCall());
       $this->assertFalse($result->isSuccessful());
     });
 
@@ -774,8 +775,10 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
   public function __syncConnectCheck($result) {
     $this->assertInstanceOf('SignalWire\Relay\Calling\Results\ConnectResult', $result);
     $this->assertTrue($result->isSuccessful());
-    $this->assertEquals($result->getCall(), $this->call->peer);
-    $this->assertEquals($result->getCall()->id, 'peer-call-id');
+    $peerCall = $result->getCall();
+    $this->assertEquals($peerCall, $this->call->peer);
+    $this->assertEquals($peerCall->id, 'peer-call-id');
+    $this->assertEquals($peerCall->peer, $this->call);
     $this->assertObjectHasAttribute('peer', $result->getEvent()->payload);
     $this->assertObjectHasAttribute('connect_state', $result->getEvent()->payload);
   }
