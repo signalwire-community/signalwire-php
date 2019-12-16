@@ -3,9 +3,12 @@ All notable changes to this project will be documented in this file.
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [2.3.2] - 2019-12-16
 ### Added
 - Call `disconnect()` method.
+
+### Fixed
+- Set `peer` property on the connected Call [#101](https://github.com/signalwire/signalwire-php/issues/101)
 
 ## [2.3.1] - 2019-11-04
 ### Fixed
