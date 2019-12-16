@@ -60,7 +60,7 @@ class Call {
         $this->timeout = $options->device->params->timeout;
       }
     }
-
+    $this->_setPeer($options);
     $this->relayInstance->addCall($this);
   }
 
@@ -596,6 +596,7 @@ class Call {
         }
         $this->active = false;
         $this->ended = true;
+        $this->peer = null;
         $this->_terminateComponents($params);
         $this->relayInstance->removeCall($this);
         break;
@@ -606,9 +607,7 @@ class Call {
     $state = $params->connect_state;
     switch ($state) {
       case ConnectState::Connected:
-        if (isset($params->peer) && isset($params->peer->call_id)) {
-          $this->peer = $this->relayInstance->getCallById($params->peer->call_id);
-        }
+        $this->_setPeer($params);
         break;
       case ConnectState::Disconnected:
         $this->peer = null;
@@ -695,6 +694,12 @@ class Call {
       if (!$component->completed) {
         $component->terminate($params);
       }
+    }
+  }
+
+  private function _setPeer($params) {
+    if (isset($params->peer) && isset($params->peer->call_id)) {
+      $this->peer = $this->relayInstance->getCallById($params->peer->call_id);
     }
   }
 }
