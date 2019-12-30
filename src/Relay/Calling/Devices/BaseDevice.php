@@ -12,7 +12,7 @@ abstract class BaseDevice {
 
   public function __construct($options) {
     if (isset($options->params)) {
-      $this->params = $options->params;
+      $this->params = (object) $options->params;
     } else {
       $this->_buildParams((object) $options);
     }
