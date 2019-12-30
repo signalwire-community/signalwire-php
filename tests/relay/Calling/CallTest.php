@@ -31,7 +31,7 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
       ]
     ]);
 
-    $this->client->connection->expects($this->once())->method('send')->with($msg)->willReturn($this->_successResponse);
+    $this->_mockSuccessResponse($msg);
 
     $this->call->dial()->done(function($result) {
       $this->assertInstanceOf('SignalWire\Relay\Calling\Results\DialResult', $result);
@@ -53,7 +53,7 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
       ]
     ]);
 
-    $this->client->connection->expects($this->once())->method('send')->with($msg)->willReturn($this->_failResponse);
+    $this->_mockFailResponse($msg);
 
     $this->call->dial()->done(function($result) {
       $this->assertInstanceOf('SignalWire\Relay\Calling\Results\DialResult', $result);
@@ -78,7 +78,7 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
       ]
     ]);
 
-    $this->client->connection->expects($this->once())->method('send')->with($msg)->willReturn($this->_successResponse);
+    $this->_mockSuccessResponse($msg);
 
     $this->call->hangup()->done(function($result) {
       $this->assertInstanceOf('SignalWire\Relay\Calling\Results\HangupResult', $result);
@@ -101,7 +101,7 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
       ]
     ]);
 
-    $this->client->connection->expects($this->once())->method('send')->with($msg)->willReturn($this->_failResponse);
+    $this->_mockFailResponse($msg);
 
     $this->call->hangup()->done(function($result) {
       $this->assertInstanceOf('SignalWire\Relay\Calling\Results\HangupResult', $result);
@@ -136,7 +136,7 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
       ]
     ]);
 
-    $this->client->connection->expects($this->once())->method('send')->with($msg)->willReturn($this->_successResponse);
+    $this->_mockSuccessResponse($msg);
 
     $this->call->answer()->done(function($result) {
       $this->assertInstanceOf('SignalWire\Relay\Calling\Results\AnswerResult', $result);
@@ -158,7 +158,7 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
       ]
     ]);
 
-    $this->client->connection->expects($this->once())->method('send')->with($msg)->willReturn($this->_failResponse);
+    $this->_mockFailResponse($msg);
 
     $this->call->answer()->done(function($result) {
       $this->assertInstanceOf('SignalWire\Relay\Calling\Results\AnswerResult', $result);
@@ -216,7 +216,7 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
       ]
     ]);
 
-    $this->client->connection->expects($this->once())->method('send')->with($msg)->willReturn($this->_successResponse);
+    $this->_mockSuccessResponse($msg);
 
     $this->call->faxReceive()->done([$this, '__syncFaxCheck']);
     $this->calling->notificationHandler($this->faxNotificationFinished);
@@ -235,7 +235,7 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
       ]
     ]);
 
-    $this->client->connection->expects($this->once())->method('send')->with($msg)->willReturn($this->_failResponse);
+    $this->_mockFailResponse($msg);
 
     $this->call->faxReceive()->done(function ($result) {
       $this->assertInstanceOf('SignalWire\Relay\Calling\Results\FaxResult', $result);
@@ -258,7 +258,7 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
       ]
     ]);
 
-    $this->client->connection->expects($this->once())->method('send')->with($msg)->willReturn($this->_successResponse);
+    $this->_mockSuccessResponse($msg);
 
     $this->call->faxReceiveAsync()->done([$this, '__asyncFaxCheck']);
   }
@@ -277,7 +277,7 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
       ]
     ]);
 
-    $this->client->connection->expects($this->once())->method('send')->with($msg)->willReturn($this->_failResponse);
+    $this->_mockFailResponse($msg);
 
     $this->call->faxReceiveAsync()->done(function ($action) {
       $this->assertInstanceOf('SignalWire\Relay\Calling\Actions\FaxAction', $action);
@@ -300,7 +300,7 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
       ]
     ]);
 
-    $this->client->connection->expects($this->once())->method('send')->with($msg)->willReturn($this->_successResponse);
+    $this->_mockSuccessResponse($msg);
 
     $this->call->faxSend('document.pdf')->done([$this, '__syncFaxCheck']);
     $this->calling->notificationHandler($this->faxNotificationFinished);
@@ -320,7 +320,7 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
       ]
     ]);
 
-    $this->client->connection->expects($this->once())->method('send')->with($msg)->willReturn($this->_failResponse);
+    $this->_mockFailResponse($msg);
 
     $this->call->faxSend('document.pdf')->done(function ($result) {
       $this->assertInstanceOf('SignalWire\Relay\Calling\Results\FaxResult', $result);
@@ -344,7 +344,7 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
       ]
     ]);
 
-    $this->client->connection->expects($this->once())->method('send')->with($msg)->willReturn($this->_successResponse);
+    $this->_mockSuccessResponse($msg);
 
     $this->call->faxSendAsync('document.pdf', null, 'custom header')->done([$this, '__asyncFaxCheck']);
   }
@@ -364,7 +364,7 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
       ]
     ]);
 
-    $this->client->connection->expects($this->once())->method('send')->with($msg)->willReturn($this->_failResponse);
+    $this->_mockFailResponse($msg);
 
     $this->call->faxSendAsync('document.pdf', null, 'custom header')->done(function ($action) {
       $this->assertInstanceOf('SignalWire\Relay\Calling\Actions\FaxAction', $action);
@@ -384,7 +384,7 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
       ]
     ]);
 
-    $this->client->connection->expects($this->once())->method('send')->with($msg)->willReturn($this->_successResponse);
+    $this->_mockSuccessResponse($msg);
 
     $this->call->peer = new Call($this->calling, new \stdClass);
     $this->call->disconnect()->done(function($result) {
@@ -406,7 +406,7 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
       ]
     ]);
 
-    $this->client->connection->expects($this->once())->method('send')->with($msg)->willReturn($this->_failResponse);
+    $this->_mockFailResponse($msg);
 
     $peer = new Call($this->calling, new \stdClass);
     $this->call->peer = $peer;
@@ -428,7 +428,7 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
       ]
     ]);
 
-    $this->client->connection->expects($this->once())->method('send')->with($msg)->willReturn($this->_successResponse);
+    $this->_mockSuccessResponse($msg);
 
     $peer = new Call($this->calling, new \stdClass);
     $this->call->peer = $peer;
