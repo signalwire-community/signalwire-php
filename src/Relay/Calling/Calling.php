@@ -47,12 +47,24 @@ class Calling extends \SignalWire\Relay\BaseRelay {
     }
   }
 
-  public function newCall(Array $params) {
-    return new Call($this, $this->_buildDevice($params));
+  public function newCall(Array $devices) {
+    if (isset($devices['type'])) {
+      $devices = [$devices];
+    }
+    $callOptions = (object) [
+      'targets' => \SignalWire\prepareDevices($devices)
+    ];
+    return new Call($this, $callOptions);
   }
 
-  public function dial(Array $params) {
-    $call = new Call($this, $this->_buildDevice($params));
+  public function dial(Array $devices) {
+    if (isset($devices['type'])) {
+      $devices = [$devices];
+    }
+    $callOptions = (object) [
+      'targets' => \SignalWire\prepareDevices($devices)
+    ];
+    $call = new Call($this, $callOptions);
     return $call->dial();
   }
 
@@ -159,18 +171,5 @@ class Calling extends \SignalWire\Relay\BaseRelay {
     if ($call) {
       $call->_sendDigitsChange($params);
     }
-  }
-
-  private function _buildDevice(Array $params) {
-    return (object)[
-      'device' => (object)[
-        'type' => $params['type'],
-        'params' => (object)[
-          'from_number' => isset($params['from']) ? $params['from'] : null,
-          'to_number' => isset($params['to']) ? $params['to'] : null,
-          'timeout' => isset($params['timeout']) ? $params['timeout'] : 30
-        ]
-      ]
-    ];
   }
 }
