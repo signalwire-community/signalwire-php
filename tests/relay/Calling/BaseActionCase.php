@@ -4,6 +4,7 @@ require_once dirname(__FILE__) . '/../BaseRelayCase.php';
 
 use SignalWire\Relay\Calling\Calling;
 use SignalWire\Relay\Calling\Call;
+use SignalWire\Relay\Calling\Devices\DeviceFactory;
 
 abstract class RelayCallingBaseActionCase extends BaseRelayCase
 {
@@ -47,6 +48,11 @@ abstract class RelayCallingBaseActionCase extends BaseRelayCase
   protected function _setCallReady() {
     $this->call->id = 'call-id';
     $this->call->nodeId = 'node-id';
+    $this->call->device = DeviceFactory::create(['type' => 'phone', 'params' => ['to_number' => '+99900000000', 'from_number' => '+88800000000', 'timeout' => 20]]);
+    $this->call->type = 'phone';
+    $this->call->from = '+88800000000';
+    $this->call->to = '+99900000000';
+    $this->call->timeout = 20;
   }
 
   protected function _mockSuccessResponse($msg, $success = null) {
