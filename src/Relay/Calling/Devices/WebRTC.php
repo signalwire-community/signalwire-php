@@ -6,15 +6,24 @@ use SignalWire\Relay\Calling\CallType;
 
 class WebRTC extends BaseDevice {
   public $type = CallType::WebRTC;
-  public $params = [];
+  public $params;
 
-  public function __construct(Array $options) {
-    $this->params = [
-      'from' => $options['from'],
-      'to' => $options['to']
+  protected function _buildParams($options) {
+    $this->params = (object) [
+      'from' => $options->from,
+      'to' => $options->to
     ];
-    if (isset($options['codecs'])) {
-      $this->params['codecs'] = $options['codecs'];
+    if (isset($options->codecs)) {
+      $this->params->codecs = $options->codecs;
     }
+    $this->_addTimeout($options);
+  }
+
+  public function from() {
+    return $this->params->from;
+  }
+
+  public function to() {
+    return $this->params->to;
   }
 }
