@@ -4,7 +4,7 @@ namespace SignalWire\Relay\Calling\Devices;
 
 use SignalWire\Relay\Calling\CallType;
 
-class Agora extends BaseDevice {
+class AgoraDevice extends BaseDevice {
   public $type = CallType::Agora;
   public $params;
 

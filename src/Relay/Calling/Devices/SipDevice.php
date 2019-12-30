@@ -4,7 +4,7 @@ namespace SignalWire\Relay\Calling\Devices;
 
 use SignalWire\Relay\Calling\CallType;
 
-class Sip extends BaseDevice {
+class SipDevice extends BaseDevice {
   public $type = CallType::Sip;
   public $params;
 
