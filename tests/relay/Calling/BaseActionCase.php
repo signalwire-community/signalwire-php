@@ -31,10 +31,15 @@ abstract class RelayCallingBaseActionCase extends BaseRelayCase
     $this->calling = new Calling($this->client);
 
     $options = (object)[
-      'device' => (object)[
-        'type' => 'phone',
-        'params' => (object)['from_number' => '234', 'to_number' => '456', 'timeout' => 20]
-      ]
+      'targets' => \SignalWire\prepareDevices([
+        [ 'type' => 'phone', 'from' => '234', 'to' => '456', 'timeout' => 20 ],
+        [
+          [ 'type' => 'phone', 'from' => '234', 'to' => '789', 'timeout' => 30 ],
+          [ 'type' => 'agora', 'from' => '234', 'to' => '456', 'app_id' => 'appid', 'channel' => '1111' ],
+          [ 'type' => 'sip', 'from' => 'user@domain.com', 'to' => 'user@example.com', 'timeout' => 20 ]
+        ],
+        [ 'type' => 'webrtc', 'from' => 'user@domain.com', 'to' => '3500@conf.signalwire.com', 'codecs' => ['OPUS'] ]
+      ])
     ];
     $this->call = new Call($this->calling, $options);
   }

@@ -51,13 +51,10 @@ class RelayCallingCallTest extends RelayCallingBaseActionCase
   public function testDialFail(): void {
     $msg = new Execute([
       'protocol' => 'signalwire_calling_proto',
-      'method' => 'calling.begin',
+      'method' => 'calling.dial',
       'params' => [
         'tag' => self::UUID,
-        'device' => [
-          'type' => 'phone',
-          'params' => ['from_number' => '234', 'to_number' => '456', 'timeout' => 20]
-        ]
+        'devices' => $this->call->targets
       ]
     ]);
 

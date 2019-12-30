@@ -10,7 +10,7 @@ use SignalWire\Relay\Calling\Event;
 
 class Dial extends BaseComponent {
   public $eventType = Notification::State;
-  public $method = Method::Begin;
+  public $method = Method::Dial;
 
   public function __construct(Call $call) {
     parent::__construct($call);
@@ -21,7 +21,7 @@ class Dial extends BaseComponent {
   public function payload() {
     return [
       'tag' => $this->call->tag,
-      'device' => $this->call->getDevice()
+      'devices' => $this->call->targets
     ];
   }
 
