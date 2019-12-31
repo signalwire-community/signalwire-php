@@ -57,17 +57,6 @@ class Call {
     $this->relayInstance->addCall($this);
   }
 
-  public function getDevice() {
-    return [
-      'type' => $this->type,
-      'params' => [
-        'from_number' => $this->from,
-        'to_number' => $this->to,
-        'timeout' => $this->timeout
-      ]
-    ];
-  }
-
   public function dial() {
     $component = new Components\Dial($this);
     $this->_addComponent($component);
