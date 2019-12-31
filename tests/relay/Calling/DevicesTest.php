@@ -69,7 +69,7 @@ class RelayCallingDevicesTest extends TestCase {
       'X-account-id' => '1234',
       'X-account-foo' => 'baz'
     ];
-    $sip = new Devices\SipDevice(['from' => 'user@somewhere.com', 'to' => 'user@example.com', 'headers' => $headers]);
+    $sip = new Devices\SipDevice(['from' => 'user@somewhere.com', 'to' => 'user@example.com', 'headers' => (object)$headers]);
     $this->assertEquals($sip->type, 'sip');
     $this->assertEquals($sip->params, json_decode('{"from":"user@somewhere.com","to":"user@example.com","headers":{"X-account-id":"1234","X-account-foo":"baz"}}'));
   }

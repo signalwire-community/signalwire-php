@@ -1,6 +1,7 @@
 <?php
 
 use PHPUnit\Framework\TestCase;
+use SignalWire\Relay\Calling\Devices\DeviceFactory;
 
 class FunctionsTest extends TestCase
 {
@@ -346,5 +347,71 @@ class FunctionsTest extends TestCase
 
     $this->assertEquals($tap, $expectedTap);
     $this->assertEquals($device, $expectedDevice);
+  }
+
+  public function testPrepareDevicesWithOnePhone(): void {
+    $expectedDevices = [
+      [ DeviceFactory::create(['type' => 'phone', 'params' => ['from_number' => '234', 'to_number' => '456', 'timeout' => 20]]) ]
+    ];
+
+    $devices = \SignalWire\prepareDevices([
+      ['type' => 'phone', 'from' => '234', 'to' => '456', 'timeout' => 20]
+    ]);
+
+    $this->assertEquals($devices, $expectedDevices);
+  }
+
+  public function testPrepareDevicesInSeries(): void {
+    $expectedDevices = [
+      [ DeviceFactory::create(['type' => 'phone', 'params' => ['from_number' => '234', 'to_number' => '456', 'timeout' => 20]]) ],
+      [ DeviceFactory::create(['type' => 'sip', 'params' => ['from' => 'user@example.com', 'to' => 'user@domain.com', 'webrtc_media' => false]]) ]
+    ];
+
+    $devices = \SignalWire\prepareDevices([
+      ['type' => 'phone', 'from' => '234', 'to' => '456', 'timeout' => 20],
+      ['type' => 'sip', 'from' => 'user@example.com', 'to' => 'user@domain.com', 'webrtc_media' => false]
+    ]);
+
+    $this->assertEquals($devices, $expectedDevices);
+  }
+
+  public function testPrepareDevicesInParallel(): void {
+    $expectedDevices = [
+      [
+        DeviceFactory::create(['type' => 'phone', 'params' => ['from_number' => '234', 'to_number' => '456', 'timeout' => 20]]),
+        DeviceFactory::create(['type' => 'agora', 'params' => ['from' => 'from', 'to' => 'to', 'appid' => 'uuid', 'channel' => '1111']])
+      ]
+    ];
+
+    $devices = \SignalWire\prepareDevices([
+      [
+        ['type' => 'phone', 'from' => '234', 'to' => '456', 'timeout' => 20],
+        ['type' => 'agora', 'from' => 'from', 'to' => 'to', 'app_id' => 'uuid', 'channel' => '1111']
+      ]
+    ]);
+
+    $this->assertEquals($devices, $expectedDevices);
+  }
+
+  public function testPrepareDevicesInSeriesAndParallel(): void {
+    $expectedDevices = [
+      [ DeviceFactory::create(['type' => 'webrtc', 'params' => ['from' => 'default_from', 'to' => '3500@conf.com', 'timeout' => 60, 'codecs' => ['OPUS']]]) ],
+      [
+        DeviceFactory::create(['type' => 'phone', 'params' => ['from_number' => '234', 'to_number' => '456', 'timeout' => 20]]),
+        DeviceFactory::create(['type' => 'agora', 'params' => ['from' => 'from', 'to' => 'to', 'appid' => 'uuid', 'channel' => '1111', 'timeout' => 60]])
+      ],
+      [ DeviceFactory::create(['type' => 'sip', 'params' => ['from' => 'default_from', 'to' => 'user@domain.com', 'timeout' => 60, 'webrtc_media' => true, 'headers' => (object) ['x-header-foo' => 'baz']]]) ],
+    ];
+
+    $devices = \SignalWire\prepareDevices([
+      ['type' => 'webrtc', 'to' => '3500@conf.com', 'codecs' => ['OPUS']],
+      [
+        ['type' => 'phone', 'from' => '234', 'to' => '456', 'timeout' => 20],
+        ['type' => 'agora', 'from' => 'from', 'to' => 'to', 'app_id' => 'uuid', 'channel' => '1111']
+      ],
+      ['type' => 'sip', 'to' => 'user@domain.com', 'webrtc_media' => true, 'headers' => ['x-header-foo' => 'baz']]
+    ], 'default_from', 60);
+
+    $this->assertEquals($devices, $expectedDevices);
   }
 }

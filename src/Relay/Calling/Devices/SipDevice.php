@@ -14,7 +14,7 @@ class SipDevice extends BaseDevice {
       'to' => $options->to
     ];
     if (isset($options->headers)) {
-      $this->params->headers = (object)$options->headers;
+      $this->params->headers = (object) $options->headers;
     }
     if (isset($options->codecs)) {
       $this->params->codecs = $options->codecs;
