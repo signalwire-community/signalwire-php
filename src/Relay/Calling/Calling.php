@@ -48,23 +48,11 @@ class Calling extends \SignalWire\Relay\BaseRelay {
   }
 
   public function newCall(Array $devices) {
-    if (isset($devices['type'])) {
-      $devices = [$devices];
-    }
-    $callOptions = (object) [
-      'targets' => \SignalWire\prepareDevices($devices)
-    ];
-    return new Call($this, $callOptions);
+    return new Call($this, $this->_buildCallOptions($devices));
   }
 
   public function dial(Array $devices) {
-    if (isset($devices['type'])) {
-      $devices = [$devices];
-    }
-    $callOptions = (object) [
-      'targets' => \SignalWire\prepareDevices($devices)
-    ];
-    $call = new Call($this, $callOptions);
+    $call = new Call($this, $this->_buildCallOptions($devices));
     return $call->dial();
   }
 
@@ -171,5 +159,14 @@ class Calling extends \SignalWire\Relay\BaseRelay {
     if ($call) {
       $call->_sendDigitsChange($params);
     }
+  }
+
+  private function _buildCallOptions(array $devices) {
+    if (isset($devices['type'])) {
+      $devices = [$devices];
+    }
+    return (object) [
+      'targets' => \SignalWire\prepareDevices($devices)
+    ];
   }
 }
