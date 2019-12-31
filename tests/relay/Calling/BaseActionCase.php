@@ -4,6 +4,7 @@ require_once dirname(__FILE__) . '/../BaseRelayCase.php';
 
 use SignalWire\Relay\Calling\Calling;
 use SignalWire\Relay\Calling\Call;
+use SignalWire\Relay\Calling\Devices\DeviceFactory;
 
 abstract class RelayCallingBaseActionCase extends BaseRelayCase
 {
@@ -31,10 +32,15 @@ abstract class RelayCallingBaseActionCase extends BaseRelayCase
     $this->calling = new Calling($this->client);
 
     $options = (object)[
-      'device' => (object)[
-        'type' => 'phone',
-        'params' => (object)['from_number' => '234', 'to_number' => '456', 'timeout' => 20]
-      ]
+      'targets' => \SignalWire\prepareDevices([
+        [ 'type' => 'phone', 'from' => '234', 'to' => '456', 'timeout' => 20 ],
+        [
+          [ 'type' => 'phone', 'from' => '234', 'to' => '789', 'timeout' => 30 ],
+          [ 'type' => 'agora', 'from' => '234', 'to' => '456', 'app_id' => 'appid', 'channel' => '1111' ],
+          [ 'type' => 'sip', 'from' => 'user@domain.com', 'to' => 'user@example.com', 'timeout' => 20 ]
+        ],
+        [ 'type' => 'webrtc', 'from' => 'user@domain.com', 'to' => '3500@conf.signalwire.com', 'codecs' => ['OPUS'] ]
+      ])
     ];
     $this->call = new Call($this->calling, $options);
   }
@@ -42,6 +48,11 @@ abstract class RelayCallingBaseActionCase extends BaseRelayCase
   protected function _setCallReady() {
     $this->call->id = 'call-id';
     $this->call->nodeId = 'node-id';
+    $this->call->device = DeviceFactory::create(['type' => 'phone', 'params' => ['to_number' => '+99900000000', 'from_number' => '+88800000000', 'timeout' => 20]]);
+    $this->call->type = 'phone';
+    $this->call->from = '+88800000000';
+    $this->call->to = '+99900000000';
+    $this->call->timeout = 20;
   }
 
   protected function _mockSuccessResponse($msg, $success = null) {

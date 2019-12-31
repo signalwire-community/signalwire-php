@@ -4,7 +4,7 @@ namespace SignalWire\Relay\Calling;
 
 final class Method {
   const Answer = 'calling.answer';
-  const Begin = 'calling.begin';
+  const Dial = 'calling.dial';
   const Connect = 'calling.connect';
   const Disconnect = 'calling.disconnect';
   const End = 'calling.end';

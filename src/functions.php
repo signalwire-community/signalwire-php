@@ -7,7 +7,31 @@ use SignalWire\Relay\Calling\PromptType;
 use SignalWire\Relay\Calling\PlayType;
 use SignalWire\Relay\Calling\DetectType;
 use SignalWire\Relay\Calling\DetectState;
+use SignalWire\Relay\Calling\Devices\DeviceFactory;
 use SignalWire\Relay\Calling\TapType;
+
+function prepareDevices(array $devices, string $defaultFrom = null, int $defaultTimeout = null, $nested = false) {
+  $final = [];
+  foreach ($devices as $d) {
+    if (is_array($d) && isset($d[0])) {
+      $tmp = prepareDevices($d, $defaultFrom, $defaultTimeout, true);
+      array_push($final, $tmp);
+    } else {
+      $d = (object) $d;
+      if ($defaultFrom && !isset($d->from)) {
+        $d->from = $defaultFrom;
+      }
+      if ($defaultTimeout && !isset($d->timeout)) {
+        $d->timeout = $defaultTimeout;
+      }
+      $tmp = DeviceFactory::create($d);
+      if ($tmp) {
+        $nested ? array_push($final, $tmp) : array_push($final, [$tmp]);
+      }
+    }
+  }
+  return $final;
+}
 
 function prepareConnectParams(Array $params, String $defaultFrom, Int $defaultTimeout): Array {
   $devices = [];
@@ -21,32 +45,9 @@ function prepareConnectParams(Array $params, String $defaultFrom, Int $defaultTi
     $devices = $params;
   }
   return [
-    reduceConnectParams($devices, $defaultFrom, $defaultTimeout),
+    prepareDevices($devices, $defaultFrom, $defaultTimeout),
     $ringback
   ];
-}
-
-function reduceConnectParams(Array $devices, String $defaultFrom, Int $defaultTimeout, $nested = false) {
-  $final = [];
-  foreach ($devices as $d) {
-    $tmp = [];
-    if (is_array($d) && isset($d[0])) {
-      $tmp = reduceConnectParams($d, $defaultFrom, $defaultTimeout, true);
-    } else {
-      $tmp = [
-        "type" => $d["type"],
-        "params" => [
-          "from_number" => isset($d["from"]) ? $d["from"] : $defaultFrom,
-          "to_number" => isset($d["to"]) ? $d["to"] : "",
-          "timeout" => isset($d["timeout"]) ? $d["timeout"] : $defaultTimeout
-        ]
-      ];
-    }
-
-    $nested || isset($tmp[0]) ? array_push($final, $tmp) : array_push($final, [$tmp]);
-  }
-
-  return $final;
 }
 
 function checkWebSocketHost(String $host): String {

@@ -7,6 +7,7 @@ use SignalWire\Relay\Calling\Components;
 use SignalWire\Relay\Calling\Actions;
 use SignalWire\Relay\Calling\Results;
 use SignalWire\Log;
+use SignalWire\Relay\Calling\Devices\DeviceFactory;
 
 class Call {
   const DefaultTimeout = 30;
@@ -22,6 +23,9 @@ class Call {
   public $from = '';
   public $to = '';
   public $timeout = self::DefaultTimeout;
+  public $targets = [];
+  public $device;
+  public $attemptedDevices = [];
 
   public $answered = false;
   public $active = false;
@@ -45,34 +49,12 @@ class Call {
     if (isset($options->context)) {
       $this->context = $options->context;
     }
-
-    if (isset($options->device)) {
-      if (isset($options->device->type)) {
-        $this->type = $options->device->type;
-      }
-      if (isset($options->device->params->from_number)) {
-        $this->from = $options->device->params->from_number;
-      }
-      if (isset($options->device->params->to_number)) {
-        $this->to = $options->device->params->to_number;
-      }
-      if (isset($options->device->params->timeout)) {
-        $this->timeout = $options->device->params->timeout;
-      }
+    if (isset($options->targets)) {
+      $this->targets = $options->targets;
     }
+
     $this->_setPeer($options);
     $this->relayInstance->addCall($this);
-  }
-
-  public function getDevice() {
-    return [
-      'type' => $this->type,
-      'params' => [
-        'from_number' => $this->from,
-        'to_number' => $this->to,
-        'timeout' => $this->timeout
-      ]
-    ];
   }
 
   public function dial() {
@@ -581,9 +563,15 @@ class Call {
     switch ($this->state) {
       case CallState::Created:
         $this->active = true;
+        if (isset($params->device)) {
+          array_push($this->attemptedDevices, DeviceFactory::create($params->device));
+        }
         break;
       case CallState::Answered:
         $this->answered = true;
+        if (isset($params->device)) {
+          $this->_setDevice($params->device);
+        }
         break;
       case CallState::Ending:
         $this->ended = true;
@@ -700,6 +688,24 @@ class Call {
   private function _setPeer($params) {
     if (isset($params->peer) && isset($params->peer->call_id)) {
       $this->peer = $this->relayInstance->getCallById($params->peer->call_id);
+    }
+  }
+
+  private function _setDevice($device) {
+    $this->device = $device;
+    $this->type = $device->type;
+    switch ($this->type) {
+      case CallType::Phone:
+        $this->from = $device->params->from_number;
+        $this->to = $device->params->to_number;
+        break;
+      default:
+        $this->from = $device->params->from;
+        $this->to = $device->params->to;
+        break;
+    }
+    if (isset($device->params->timeout)) {
+      $this->timeout = $device->params->timeout;
     }
   }
 }
