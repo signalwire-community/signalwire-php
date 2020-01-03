@@ -42,6 +42,9 @@ class Calling extends \SignalWire\Relay\BaseRelay {
         break;
       case Notification::Receive:
         $call = new Call($this, $notification->params);
+        if (isset($notification->params->device)) {
+          $call->_setDevice($notification->params->device);
+        }
         Handler::trigger($this->client->relayProtocol, $call, $this->_ctxReceiveUniqueId($call->context));
         break;
     }

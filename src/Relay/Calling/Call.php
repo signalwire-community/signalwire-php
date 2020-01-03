@@ -656,6 +656,24 @@ class Call {
     $this->_dispatchCallback("sendDigits.$params->state", $params);
   }
 
+  public function _setDevice($device) {
+    $this->device = DeviceFactory::create($device);
+    $this->type = $device->type;
+    switch ($this->type) {
+      case CallType::Phone:
+        $this->from = $device->params->from_number;
+        $this->to = $device->params->to_number;
+        break;
+      default:
+        $this->from = $device->params->from;
+        $this->to = $device->params->to;
+        break;
+    }
+    if (isset($device->params->timeout)) {
+      $this->timeout = $device->params->timeout;
+    }
+  }
+
   private function _dispatchCallback(string $key, ...$params) {
     if (isset($this->_cbQueue[$key]) && is_callable($this->_cbQueue[$key])) {
       call_user_func($this->_cbQueue[$key], $this, ...$params);
@@ -688,24 +706,6 @@ class Call {
   private function _setPeer($params) {
     if (isset($params->peer) && isset($params->peer->call_id)) {
       $this->peer = $this->relayInstance->getCallById($params->peer->call_id);
-    }
-  }
-
-  private function _setDevice($device) {
-    $this->device = $device;
-    $this->type = $device->type;
-    switch ($this->type) {
-      case CallType::Phone:
-        $this->from = $device->params->from_number;
-        $this->to = $device->params->to_number;
-        break;
-      default:
-        $this->from = $device->params->from;
-        $this->to = $device->params->to;
-        break;
-    }
-    if (isset($device->params->timeout)) {
-      $this->timeout = $device->params->timeout;
     }
   }
 }
