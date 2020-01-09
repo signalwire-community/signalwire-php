@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "de3cc2fd0518f63bb578729244cbe359",
+    "content-hash": "66b12e43a23f32590e53165ead4b0499",
     "packages": [
         {
             "name": "evenement/evenement",
@@ -1268,7 +1268,7 @@
                 },
                 {
                     "name": "Gert de Pagter",
-                    "email": "backendtea@gmail.com"
+                    "email": "BackEndTea@gmail.com"
                 }
             ],
             "description": "Symfony polyfill for ctype functions",
@@ -1283,16 +1283,16 @@
         },
         {
             "name": "twilio/sdk",
-            "version": "5.32.1",
+            "version": "5.41.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/twilio/twilio-php.git",
-                "reference": "08118b21b82e209582f5825851521d8022c9988b"
+                "reference": "b10341d50d647b1015dd264c530f3b8bca345b6c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/twilio/twilio-php/zipball/08118b21b82e209582f5825851521d8022c9988b",
-                "reference": "08118b21b82e209582f5825851521d8022c9988b",
+                "url": "https://api.github.com/repos/twilio/twilio-php/zipball/b10341d50d647b1015dd264c530f3b8bca345b6c",
+                "reference": "b10341d50d647b1015dd264c530f3b8bca345b6c",
                 "shasum": ""
             },
             "require": {
@@ -1300,12 +1300,16 @@
             },
             "require-dev": {
                 "apigen/apigen": "^4.1",
-                "phpunit/phpunit": "4.5.*"
+                "guzzlehttp/guzzle": "^6.3",
+                "phpunit/phpunit": ">=4.5"
+            },
+            "suggest": {
+                "guzzlehttp/guzzle": "An HTTP client to execute the API requests"
             },
             "type": "library",
             "autoload": {
                 "psr-4": {
-                    "Twilio\\": "Twilio/"
+                    "Twilio\\": "src/Twilio/"
                 }
             },
             "notification-url": "https://packagist.org/downloads/",
@@ -1325,7 +1329,7 @@
                 "sms",
                 "twilio"
             ],
-            "time": "2019-05-29T22:54:53+00:00"
+            "time": "2019-12-18T19:43:22+00:00"
         }
     ],
     "packages-dev": [
