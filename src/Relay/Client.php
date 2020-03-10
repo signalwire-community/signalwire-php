@@ -98,7 +98,7 @@ class Client {
    * Check to auto reconnect when the socket goes down
    * @var Boolean
    */
-  private $_autoReconnect = false;
+  private $_autoReconnect = true;
 
   /**
    * Whether the loop is running
@@ -124,6 +124,11 @@ class Client {
    */
   private $_subscriptions = [];
 
+  /**
+   * Timer to reconnect the client
+   */
+  private $_reconnectTimer = null;
+
   public function __construct(Array $options) {
     if (isset($options['host'])) {
       $this->host = $options['host'];
@@ -147,7 +152,7 @@ class Client {
 
   public function connect() {
     if (!$this->connection) {
-      return;
+      $this->connection = new Connection($this);
     }
     $this->contexts = [];
     $this->_subscriptions = [];
@@ -160,12 +165,11 @@ class Client {
 
   public function disconnect() {
     Log::info("Disconnecting..");
-    $this->_idle = true;
     $this->_autoReconnect = false;
-    if ($this->connection) {
-      $this->connection->close();
+    $this->_closeConnection();
+    if ($this->_reconnectTimer) {
+      $this->eventLoop->cancelTimer($this->_reconnectTimer);
     }
-    $this->connection = null;
     $this->_executeQueue = array();
     $this->_detachListeners();
   }
@@ -176,7 +180,12 @@ class Client {
         array_push($this->_executeQueue, array('resolve' => $resolve, 'msg' => $msg));
       });
     }
-    return $this->connection->send($msg);
+    return $this->connection->send($msg)->otherwise(function($error) {
+      if (isset($error->code) && $error->code === -32000) {
+        $this->_closeConnection();
+      }
+      return \React\Promise\reject($error);
+    });
   }
 
   public function _onSocketOpen() {
@@ -195,20 +204,19 @@ class Client {
       });
     }, function($error) {
       Log::error("Auth error: {$error->message}. [code: {$error->code}]");
-      $this->eventLoop->stop();
     });
   }
 
   public function _onSocketClose(Array $param = array()) {
     if ($this->_autoReconnect) {
-      $this->eventLoop->addTimer(5.0, [$this, 'connect']);
+      $this->_reconnectTimer = $this->eventLoop->addTimer(5.0, [$this, 'connect']);
     }
   }
 
   public function _onSocketError($error) {
     Log::error("WebSocket error: {$error->getMessage()}. [code: {$error->getCode()}]");
     if ($this->_autoReconnect) {
-      $this->eventLoop->addTimer(5.0, [$this, 'connect']);
+      $this->_reconnectTimer = $this->eventLoop->addTimer(5.0, [$this, 'connect']);
     } else {
       $this->eventLoop->stop();
     }
@@ -337,6 +345,14 @@ class Client {
       $promise = $this->execute($queue['msg']);
       call_user_func($queue['resolve'], $promise);
     }
+  }
+
+  private function _closeConnection() {
+    $this->_idle = true;
+    if ($this->connection) {
+      $this->connection->close();
+    }
+    $this->connection = null;
   }
 
   /**
