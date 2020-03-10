@@ -181,7 +181,6 @@ class Client {
       });
     }
     return $this->connection->send($msg)->otherwise(function($error) {
-      print_r($error);
       if (isset($error->code) && $error->code === -32000) {
         $this->_closeConnection();
       }
@@ -204,7 +203,6 @@ class Client {
         Log::info("Session Ready!");
       });
     }, function($error) {
-      print_r($error);
       Log::error("Auth error: {$error->message}. [code: {$error->code}]");
     });
   }
