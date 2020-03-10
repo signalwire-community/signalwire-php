@@ -181,6 +181,7 @@ class Client {
       });
     }
     return $this->connection->send($msg)->otherwise(function($error) {
+      print_r($error);
       if (isset($error->code) && $error->code === -32000) {
         $this->_closeConnection();
       }
@@ -203,20 +204,21 @@ class Client {
         Log::info("Session Ready!");
       });
     }, function($error) {
+      print_r($error);
       Log::error("Auth error: {$error->message}. [code: {$error->code}]");
     });
   }
 
   public function _onSocketClose(Array $param = array()) {
     if ($this->_autoReconnect) {
-      $this->_reconnectTimer = $this->eventLoop->addTimer(5.0, [$this, 'connect']);
+      $this->_scheduleReconnect();
     }
   }
 
   public function _onSocketError($error) {
     Log::error("WebSocket error: {$error->getMessage()}. [code: {$error->getCode()}]");
     if ($this->_autoReconnect) {
-      $this->_reconnectTimer = $this->eventLoop->addTimer(5.0, [$this, 'connect']);
+      $this->_scheduleReconnect();
     } else {
       $this->eventLoop->stop();
     }
@@ -353,6 +355,10 @@ class Client {
       $this->connection->close();
     }
     $this->connection = null;
+  }
+
+  private function _scheduleReconnect() {
+    $this->_reconnectTimer = $this->eventLoop->addTimer(rand(2, 6), [$this, 'connect']);
   }
 
   /**

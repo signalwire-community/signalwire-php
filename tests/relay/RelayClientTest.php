@@ -2,12 +2,10 @@
 
 require_once dirname(__FILE__) . '/BaseRelayCase.php';
 
-// use PHPUnit\Framework\TestCase;
 use SignalWire\Handler;
 use SignalWire\Messages\Connect;
 use SignalWire\Messages\Execute;
 use SignalWire\Messages\Subscription;
-use SignalWire\Relay\Client;
 use SignalWire\Util\Events;
 
 class RelayClientTest extends BaseRelayCase
