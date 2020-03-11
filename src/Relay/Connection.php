@@ -14,6 +14,7 @@ class Connection {
   private $_ws = null;
   private $_connected = false;
   private $_keepAliveTimer = null;
+  private $_connectorTimer = null;
 
   public function __construct(Client $client) {
     $this->client = $client;
@@ -61,8 +62,10 @@ class Connection {
     if (isset($this->_ws)) {
       $this->_ws->close();
       unset($this->_ws);
+    } elseif ($this->_connectorTimer) {
+      $this->client->eventLoop->cancelTimer($this->_connectorTimer);
     } else {
-      $this->client->eventLoop->addTimer(0.5, [$this, 'close']);
+      $this->_connectorTimer = $this->client->eventLoop->addTimer(1, [$this, 'close']);
     }
   }
 
