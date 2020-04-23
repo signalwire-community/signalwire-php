@@ -3,6 +3,14 @@ All notable changes to this project will be documented in this file.
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3.6] - 2020-04-23
+### Changed
+- Loosened the version requirements for `ramsey/uuid`. Allowed versions are `^3.8 || ^4.0`
+
+## [2.3.5] - 2020-03-11
+### Fixed
+- Handle Blade timeout response and randomize reconnection attempts.
+
 ## [2.3.4] - 2020-01-31
 ### Changed
 - Loosened the version requirements for `monolog/monolog`. Allowed versions are `^1.24 || ^2.0`
