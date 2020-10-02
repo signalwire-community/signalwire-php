@@ -20,7 +20,7 @@ class Client extends \Twilio\Rest\Client {
     return $this->_api->baseUrl;
   }
 
-  protected function getFax() {
+  protected function getFax(): \Twilio\Rest\Fax {
     if (!$this->_fax) {
         $this->_fax = new \SignalWire\Rest\Fax($this);
     }
@@ -55,7 +55,7 @@ class Fax extends \Twilio\Rest\Fax {
     $this->baseUrl = $client->getSignalwireDomain();
   }
 
-  protected function getV1() {
+  protected function getV1(): \Twilio\Rest\Fax\V1 {
     if (!$this->_v1) {
         $this->_v1 = new \SignalWire\Rest\V1($this);
     }
