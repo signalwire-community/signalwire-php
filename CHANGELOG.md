@@ -6,7 +6,6 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ## [2.3.7] = 2020-09-05
 ### Updated
 - Updated Twilio version to `6.10.4`
-- Added missing Twiml file from old repo
 - Added new test file and examples
 - Added VoiceResponse, FaxResponse and MessageResponse
 
