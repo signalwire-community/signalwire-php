@@ -9,10 +9,10 @@
     "voice",
     "voicemail",
     "video",
-    "fax",    
+    "fax",
     "api",
     "ivr",
-    "iot",    
+    "iot",
     "freeswitch",
     "signalwire",
     "relay",
@@ -24,10 +24,7 @@
     "psr-4": {
       "SignalWire\\": "src/"
     },
-    "files": [
-      "src/functions.php",
-      "src/Version.php"
-    ]
+    "files": [ "src/functions.php", "src/Version.php" ]
   },
   "authors": [
     {
@@ -42,7 +39,7 @@
     }
   ],
   "require": {
-    "twilio/sdk": "6.10.4",
+    "twilio/sdk": "<=6.10.4",
     "ratchet/pawl": "^0.3.4",
     "monolog/monolog": "^1.24 || ^2.0",
     "ramsey/uuid": "^3.8 || ^4.0",

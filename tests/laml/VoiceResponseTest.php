@@ -5,7 +5,7 @@ use PHPUnit\Framework\TestCase;
 class VoiceResponseTest extends TestCase
 {
   public function testGeneratedVoiceResponseMatch(): void {
-    $response = new SignalWire\VoiceResponse();
+    $response = new SignalWire\LaML\VoiceResponse();
     $response->say('Hello');
     $response->play('https://cdn.signalwire.com/default-music/welcome.mp3', ['loop' => 5]);
 

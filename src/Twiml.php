@@ -24,21 +24,22 @@ class Twiml {
      *   - if null, initialize an empty element named 'Response'
      */
     public function __construct($arg = null) {
-        switch (true) {
-            case $arg instanceof \SimpleXMLElement:
-                $this->element = $arg;
-                break;
-            case $arg === null:
-                $this->element = new \SimpleXMLElement('<Response/>');
-                break;
-            case \is_array($arg):
-                $this->element = new \SimpleXMLElement('<Response/>');
-                foreach ($arg as $name => $value) {
-                    $this->element->addAttribute($name, $value);
-                }
-                break;
-            default:
-                throw new TwimlException('Invalid argument');
+      trigger_error("\SignalWire\LaML() is Deprecated and will be removed in version 3. Please use \SignalWire\LaML\VoiceResponse, \SignalWire\LaML\MessageResponse or \SignalWire\LaML\FaxResponse", E_USER_NOTICE);
+      switch (true) {
+        case $arg instanceof \SimpleXMLElement:
+          $this->element = $arg;
+          break;
+        case $arg === null:
+          $this->element = new \SimpleXMLElement('<Response/>');
+          break;
+        case \is_array($arg):
+          $this->element = new \SimpleXMLElement('<Response/>');
+          foreach ($arg as $name => $value) {
+              $this->element->addAttribute($name, $value);
+          }
+          break;
+        default:
+          throw new TwimlException('Invalid argument');
         }
     }
 
