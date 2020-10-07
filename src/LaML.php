@@ -1,4 +1,4 @@
 <?php
 namespace SignalWire;
 
-class LaML extends \Twilio\Twiml {}
+class LaML extends \SignalWire\Twiml {}

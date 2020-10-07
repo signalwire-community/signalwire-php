@@ -2,4 +2,4 @@
 
 namespace SignalWire;
 
-const VERSION = '2.3.4';
+const VERSION = '2.3.7';

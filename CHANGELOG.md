@@ -3,6 +3,12 @@ All notable changes to this project will be documented in this file.
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3.7] = 2020-09-05
+### Updated
+- Updated Twilio version to `6.10.4`
+- Added new test file and examples
+- Added VoiceResponse, FaxResponse and MessageResponse
+
 ## [2.3.6] - 2020-04-23
 ### Changed
 - Loosened the version requirements for `ramsey/uuid`. Allowed versions are `^3.8 || ^4.0`
