@@ -1,4 +1,4 @@
 <?php
-namespace SignalWire;
+namespace SignalWire\LaML;
 
 class VoiceResponse extends \Twilio\TwiML\VoiceResponse {}

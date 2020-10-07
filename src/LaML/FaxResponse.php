@@ -1,4 +1,4 @@
 <?php
-namespace SignalWire;
+namespace SignalWire\LaML;
 
 class FaxResponse extends \Twilio\TwiML\FaxResponse {}
