@@ -41,7 +41,7 @@ class RelayTaskTest extends TestCase
 
   public function testDeliverWithException(): void {
     $this->_mockResponse([
-      new ClientException('POST 400 Bad Request', new Request('POST', '/api/relay/rest/tasks'))
+      new ClientException('POST 400 Bad Request', new Request('POST', '/api/relay/rest/tasks'), new Response())
     ]);
 
     $success = $this->task->deliver('context', ['key' => 'value']);
