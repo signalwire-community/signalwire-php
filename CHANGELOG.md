@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3.8] = 2020-10-14
+### Updated
+- Relax Guzzle version requirements and allow Guzzle 7.
+
 ## [2.3.7] = 2020-09-05
 ### Updated
 - Updated Twilio version to `6.10.4`
