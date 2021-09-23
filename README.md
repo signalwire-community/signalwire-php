@@ -32,5 +32,5 @@ Relay SDK for PHP follows Semantic Versioning 2.0 as defined at <http://semver.o
 
 ## License
 
-Relay SDK for PHP is copyright © 2018-2019
+Relay SDK for PHP is copyright © 2018-2021
 [SignalWire](http://signalwire.com). It is free software, and may be redistributed under the terms specified in the [MIT-LICENSE](https://github.com/signalwire/signalwire-php/blob/master/LICENSE) file.
