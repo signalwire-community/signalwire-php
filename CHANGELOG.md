@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3.10] - 2022-01-10
+### Fixed
+- Fixed `SignalWire\LaML\MessageResponse` namespace and introduced `SignalWire\LaML\MessagingResponse` for better compatibility.
+
 ## [2.3.9] - 2021-09-23
 ### Updated
 - Update compatibility SDK versions.
