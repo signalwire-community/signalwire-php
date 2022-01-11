@@ -1,4 +1,7 @@
 <?php
 namespace SignalWire\LaML;
-
-class MessageResponse extends \Twilio\TwiML\MessageResponse {}
+/**
+ * Kept for backwards compatibility.
+ * See SignalWire\LaML\MessagingResponse
+ */
+class MessageResponse extends \Twilio\TwiML\MessagingResponse {}
