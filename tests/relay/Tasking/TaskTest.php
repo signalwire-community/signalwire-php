@@ -14,11 +14,11 @@ class RelayTaskTest extends TestCase
 {
   protected $task;
 
-  protected function setUp() {
+  protected function setUp(): void {
     $this->task = new Task('project', 'token');
   }
 
-  public function tearDown() {
+  public function tearDown(): void {
     unset($this->task);
   }
 

@@ -8,13 +8,13 @@ abstract class BaseRelayCase extends TestCase
   const UUID = 'e36f227c-2946-11e8-b467-0ed5f89f718b';
   protected $client;
 
-  protected function setUp() {
+  protected function setUp(): void {
     $this->mockUuid();
     $this->client = new Client(array('project' => 'project', 'token' => 'token'));
     $this->client->relayProtocol = 'relay-proto';
   }
 
-  public function tearDown() {
+  public function tearDown(): void {
     unset($this->client);
     \Ramsey\Uuid\Uuid::setFactory(new \Ramsey\Uuid\UuidFactory());
     SignalWire\Handler::clear();

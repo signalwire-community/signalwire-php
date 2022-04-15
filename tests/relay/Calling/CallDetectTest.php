@@ -19,7 +19,7 @@ class RelayCallingCallDetectTest extends RelayCallingBaseActionCase
   protected static $notificationDigitError;
   protected static $notificationDigitFinished;
 
-  public static function setUpBeforeClass() {
+  public static function setUpBeforeClass(): void {
     self::$notificationFaxCED = json_decode('{"event_type":"calling.call.detect","params":{"control_id":"'.self::UUID.'","call_id":"call-id","node_id":"node-id","detect":{"type":"fax","params":{"event":"CED"}}}}');
     self::$notificationFaxError = json_decode('{"event_type":"calling.call.detect","params":{"control_id":"'.self::UUID.'","call_id":"call-id","node_id":"node-id","detect":{"type":"fax","params":{"event":"error"}}}}');
     self::$notificationFaxFinished = json_decode('{"event_type":"calling.call.detect","params":{"control_id":"'.self::UUID.'","call_id":"call-id","node_id":"node-id","detect":{"type":"fax","params":{"event":"finished"}}}}');
@@ -37,7 +37,7 @@ class RelayCallingCallDetectTest extends RelayCallingBaseActionCase
     self::$notificationDigitFinished = json_decode('{"event_type":"calling.call.detect","params":{"control_id":"'.self::UUID.'","call_id":"call-id","node_id":"node-id","detect":{"type":"digit","params":{"event":"finished"}}}}');
   }
 
-  protected function setUp() {
+  protected function setUp(): void {
     parent::setUp();
 
     $this->_setCallReady();

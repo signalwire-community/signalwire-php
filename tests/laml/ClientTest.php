@@ -8,7 +8,7 @@ class ClientTest extends TestCase
   protected $sid = "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX";
   protected $token = "PTXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX";
 
-  protected function setUp() {
+  protected function setUp(): void {
     unset($_ENV[Client::ENV_SW_SPACE]);
     putenv(Client::ENV_SW_SPACE);
 

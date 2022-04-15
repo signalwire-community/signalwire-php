@@ -6,7 +6,7 @@ use SignalWire\Relay\Calling\Call;
 
 class RelayCallingCallTest extends RelayCallingBaseActionCase
 {
-  protected function setUp() {
+  protected function setUp(): void {
     parent::setUp();
     $this->_successResponse = \React\Promise\resolve(json_decode('{"result":{"code":"200","message":"message","control_id":"' . self::UUID . '"}}'));
     $this->_failResponse = \React\Promise\reject(json_decode('{"result":{"code":"400","message":"some error","control_id":"' . self::UUID . '"}}'));
