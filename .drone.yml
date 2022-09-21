@@ -7,14 +7,6 @@ steps:
   commands:
   - composer install --prefer-source --no-interaction
 
-# - name: test-php-7.4
-#   image: php:7.4
-#   commands:
-#   - apt-get update
-#   - apt-get install -y libxml2-dev
-#   - docker-php-ext-install soap
-#   - php vendor/bin/phpunit tests
-
 - name: test-php-8.0
   image: php:8.0
   commands:

@@ -34,8 +34,8 @@
   ],
   "repositories": [
     {
-        "type": "vcs",
-        "url": "https://github.com/danieleds/php-vcr"
+      "type": "vcs",
+      "url": "https://github.com/danieleds/php-vcr"
     }
   ],
   "require": {
