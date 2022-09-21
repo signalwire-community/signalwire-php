@@ -11,13 +11,13 @@ abstract class RelayCallingBaseActionCase extends BaseRelayCase
   protected $calling;
   protected $call;
 
-  protected function setUp() {
+  protected function setUp(): void {
     parent::setUp();
     $this->setUpClient();
     $this->setUpCall();
   }
 
-  public function tearDown() {
+  public function tearDown(): void {
     unset($this->client, $this->call);
     parent::tearDown();
   }

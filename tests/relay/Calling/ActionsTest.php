@@ -7,7 +7,7 @@ use SignalWire\Messages\Execute;
 
 class RelayCallingActionsTest extends RelayCallingBaseActionCase {
 
-  protected function setUp() {
+  protected function setUp(): void {
     parent::setUp();
     $this->_setCallReady();
     $this->_successResponse = \React\Promise\resolve(json_decode('{"result":{"code":"200","message":"message","control_id":"' . self::UUID . '"}}'));

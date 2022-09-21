@@ -9,7 +9,7 @@ class IntegrationTest extends TestCase
   protected $domain;
   protected $client;
 
-  protected function setUp() {
+  protected function setUp(): void {
     $this->sid = "my-signalwire-sid";
     $this->token = "my-signalwire-token";
     $this->domain = 'example.signalwire.com';
@@ -20,7 +20,7 @@ class IntegrationTest extends TestCase
     \VCR\VCR::turnOn();
   }
 
-  protected function tearDown() {
+  protected function tearDown(): void {
     \VCR\VCR::eject();
     \VCR\VCR::turnOff();
   }

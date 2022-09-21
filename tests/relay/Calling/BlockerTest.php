@@ -7,7 +7,7 @@ class BlockerTest extends TestCase
 {
   const UUID = 'e36f227c-2946-11e8-b467-0ed5f89f718b';
 
-  protected function tearDown() {
+  protected function tearDown(): void {
     \Ramsey\Uuid\Uuid::setFactory(new \Ramsey\Uuid\UuidFactory());
   }
 

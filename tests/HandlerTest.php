@@ -10,13 +10,13 @@ class HandlerTest extends TestCase
 
   public function noop(): void {}
 
-  protected function setUp() {
+  protected function setUp(): void {
     $this->mock = $this->getMockBuilder(self::class)
       ->enableProxyingToOriginalMethods()
       ->getMock();
   }
 
-  protected function tearDown() {
+  protected function tearDown(): void {
     SignalWire\Handler::clear();
   }
 
