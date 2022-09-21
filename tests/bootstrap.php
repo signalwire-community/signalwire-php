@@ -6,4 +6,4 @@ require dirname(__FILE__) . '/../vendor/autoload.php';
   ->enableRequestMatchers(array('method', 'url', 'host'));
 \VCR\VCR::turnOn();
 
-// \SignalWire\Log::getLogger()->pushHandler(new \Monolog\Handler\NullHandler());
+\SignalWire\Log::getLogger()->pushHandler(new \Monolog\Handler\NullHandler());
