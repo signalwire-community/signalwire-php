@@ -1,5 +1,5 @@
 {
-  "name": "signalwire/signalwire",
+  "name": "signalwire-community/signalwire",
   "description": "Client library for connecting to SignalWire.",
   "type": "library",
   "keywords": [
@@ -18,7 +18,7 @@
     "relay",
     "laml"
   ],
-  "homepage": "https://github.com/signalwire/signalwire-php",
+  "homepage": "https://github.com/signalwire-community/signalwire-php",
   "license": "MIT",
   "autoload": {
     "psr-4": {
