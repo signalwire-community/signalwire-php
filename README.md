@@ -11,7 +11,7 @@ The Relay SDK for PHP enables PHP developers to connect and use SignalWire's Rel
 
 ## Getting Started
 
-Read the implementation documentation, guides and API Reference at the official [Relay SDK for PHP Documentation](https://docs.signalwire.com/reference/relay-sdk-php) site.
+Read the implementation documentation, guides and API Reference at the [Relay SDK for PHP Documentation](https://signalwire-community.github.io/docs/php/) site.
 
 ---
 
