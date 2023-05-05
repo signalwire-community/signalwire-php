@@ -129,6 +129,11 @@ class LaMLTest extends TestCase
       'field' => 'what',
     ]);
     $this->assertEquals($response->__toString(), "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<Response><Refer field=\"what\"/></Response>\n");
+
+    $response = new SignalWire\LaML\VoiceResponse();
+    $dial = $response->dial();
+    $dial->ai('1234');
+    $this->assertEquals($response->__toString(), "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<Response><Dial field=\"what\">+12345</Dial></Response>\n");
   }
 
   public function testMessageResponseLaMLMatch(): void {
