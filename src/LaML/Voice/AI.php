@@ -27,7 +27,7 @@ class AI extends TwiML {
     /**
      * Add Voice attribute.
      *
-     * @param string $voice Play beep when joining
+     * @param string $voice
      */
     public function setVoice($voice): self {
         return $this->setAttribute('voice', $voice);
@@ -36,7 +36,7 @@ class AI extends TwiML {
     /**
      * Add PostPromptURL attribute.
      *
-     * @param bool $postPromptURL Start the conference on enter
+     * @param bool $postPromptURL
      */
     public function setPostPromptURL($postPromptURL): self {
         return $this->setAttribute('postPromptURL', $postPromptURL);
@@ -46,7 +46,7 @@ class AI extends TwiML {
     /**
      * Add postPromptAuthUser attribute.
      *
-     * @param string $postPromptAuthUser Start the conference on enter
+     * @param string $postPromptAuthUser
      */
     public function setPostPromptAuthUser($postPromptAuthUser): self {
         return $this->setAttribute('postPromptAuthUser', $postPromptAuthUser);
@@ -55,7 +55,7 @@ class AI extends TwiML {
     /**
      * Add postPromptAuthPassword attribute.
      *
-     * @param string $postPromptAuthPassword Start the conference on enter
+     * @param string $postPromptAuthPassword
      */
     public function setPostPromptAuthPassword($postPromptAuthPassword): self {
         return $this->setAttribute('postPromptAuthPassword', $postPromptAuthPassword);
@@ -64,7 +64,7 @@ class AI extends TwiML {
     /**
      * Add hints attribute.
      *
-     * @param string $hints Start the conference on enter
+     * @param string $hints
      */
     public function setHints($hints): self {
         return $this->setAttribute('hints', $hints);
@@ -81,13 +81,14 @@ class AI extends TwiML {
 
 class GenericPrompt extends TwiML {
     /**
-     * Conference constructor.
+     * Generic prompt constructor.
      *
-     * @param string $name Conference name
+     * @param string $tagName Tag name (Prompt or PostPrompt)
+     * @param string $value Content of the prompt
      * @param array $attributes Optional attributes
      */
-    public function __construct($tagName, $name, $attributes = []) {
-        parent::__construct($tagName, $name, $attributes);
+    public function __construct($tagName, $value, $attributes = []) {
+        parent::__construct($tagName, $value, $attributes);
     }
 
     /**
@@ -147,9 +148,9 @@ class GenericPrompt extends TwiML {
 
 class Prompt extends GenericPrompt {
     /**
-     * Conference constructor.
+     * Prompt constructor.
      *
-     * @param string $name Conference name
+     * @param string $value Content of the prompt
      * @param array $attributes Optional attributes
      */
     public function __construct($value, $attributes = []) {
@@ -159,9 +160,9 @@ class Prompt extends GenericPrompt {
 
 class PostPrompt extends GenericPrompt {
     /**
-     * Conference constructor.
+     * PostPrompt constructor.
      *
-     * @param string $name Conference name
+     * @param string $value Content of the prompt
      * @param array $attributes Optional attributes
      */
     public function __construct($value, $attributes = []) {
