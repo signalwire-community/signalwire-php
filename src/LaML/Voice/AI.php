@@ -7,7 +7,7 @@ use Twilio\TwiML\TwiML;
 class AI extends TwiML {
 
     /**
-     * Conference constructor.
+     * AI constructor.
      *
      * @param array $attributes Optional attributes
      */
