@@ -2,7 +2,7 @@
 
 namespace SignalWire\LaML\Voice;
 
-class Dial extends \Twilio\TwiML\Voice\Dial {
+class Connect extends \Twilio\TwiML\Voice\Connect {
     public function ai($attributes = []): AI {
         return $this->nest(new AI($attributes));
     }

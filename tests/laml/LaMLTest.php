@@ -131,9 +131,13 @@ class LaMLTest extends TestCase
     $this->assertEquals($response->__toString(), "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<Response><Refer field=\"what\"/></Response>\n");
 
     $response = new SignalWire\LaML\VoiceResponse();
-    $dial = $response->dial();
-    $dial->ai('1234');
-    $this->assertEquals($response->__toString(), "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<Response><Dial field=\"what\">+12345</Dial></Response>\n");
+    $conn = $response->connect();
+    $ai = $conn->ai();
+    $ai->setEngine('gcloud');
+    $p1 = $ai->prompt('prompt1');
+    $p1->setTemperature(0.2);
+    $ai->postPrompt('prompt2');
+    $this->assertEquals($response->__toString(), "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<Response><Connect><AI engine=\"gcloud\"><Prompt temperature=\"0.2\">prompt1</Prompt><PostPrompt>prompt2</PostPrompt></AI></Connect></Response>\n");
   }
 
   public function testMessageResponseLaMLMatch(): void {
