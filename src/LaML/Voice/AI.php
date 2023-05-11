@@ -77,6 +77,14 @@ class AI extends TwiML {
     public function postPrompt($value, $attributes = []): PostPrompt {
         return $this->nest(new PostPrompt($value, $attributes));
     }
+
+    public function languages($attributes = []): Languages {
+        return $this->nest(new Languages($attributes));
+    }
+
+    public function swaig($attributes = []): SWAIG {
+        return $this->nest(new SWAIG($attributes));
+    }
 }
 
 class GenericPrompt extends TwiML {
@@ -167,5 +175,213 @@ class PostPrompt extends GenericPrompt {
      */
     public function __construct($value, $attributes = []) {
         parent::__construct('PostPrompt', $value, $attributes);
+    }
+}
+
+class Languages extends TwiML {
+    /**
+     * Languages constructor.
+     *
+     * @param array $attributes Optional attributes
+     */
+    public function __construct($attributes = []) {
+        parent::__construct('Languages', "", $attributes);
+    }
+
+    public function language($attributes = []): Language {
+        return $this->nest(new Language($attributes));
+    }
+}
+
+class Language extends TwiML {
+    /**
+     * Language constructor.
+     *
+     * @param array $attributes Optional attributes
+     */
+    public function __construct($attributes = []) {
+        parent::__construct('Language', "", $attributes);
+    }
+
+    /**
+     * Add code attribute.
+     *
+     * @param string $code 
+     */
+    public function setCode($code): self {
+        return $this->setAttribute('code', $code);
+    }
+
+    /**
+     * Add name attribute.
+     *
+     * @param string $name 
+     */
+    public function setName($name): self {
+        return $this->setAttribute('name', $name);
+    }
+
+    /**
+     * Add voice attribute.
+     *
+     * @param string $voice 
+     */
+    public function setVoice($voice): self {
+        return $this->setAttribute('voice', $voice);
+    }
+}
+
+class SWAIG extends TwiML {
+    /**
+     * SWAIG constructor.
+     *
+     * @param array $attributes Optional attributes
+     */
+    public function __construct($attributes = []) {
+        parent::__construct('SWAIG', "", $attributes);
+    }
+
+    public function defaults($attributes = []): SWAIGDefaults {
+        return $this->nest(new SWAIGDefaults($attributes));
+    }
+
+    public function function($attributes = []): SWAIGFunction {
+        return $this->nest(new SWAIGFunction($attributes));
+    }
+}
+
+class SWAIGDefaults extends TwiML {
+    /**
+     * Function constructor.
+     *
+     * @param array $attributes Optional attributes
+     */
+    public function __construct($attributes = []) {
+        parent::__construct('Defaults', "", $attributes);
+    }
+
+    /**
+     * Add webHookURL attribute.
+     *
+     * @param string $webHookURL 
+     */
+    public function setWebHookURL($webHookURL): self {
+        return $this->setAttribute('webHookURL', $webHookURL);
+    }
+
+    /**
+     * Add webHookAuthUser attribute.
+     *
+     * @param string $webHookAuthUser 
+     */
+    public function setWebHookAuthUser($webHookAuthUser): self {
+        return $this->setAttribute('webHookAuthUser', $webHookAuthUser);
+    }
+
+    /**
+     * Add webHookAuthPass attribute.
+     *
+     * @param string $webHookAuthPass 
+     */
+    public function setWebHookAuthPass($webHookAuthPass): self {
+        return $this->setAttribute('webHookAuthPass', $webHookAuthPass);
+    }
+
+    /**
+     * Add metadata.
+     *
+     * @param string $name
+     * @param string $value 
+     */
+    public function addMetaData($name, $value): self {
+        $this->nest(new TwiML($name, $value, []));
+        return $this;
+    }
+}
+
+class SWAIGFunction extends TwiML {
+    /**
+     * Function constructor.
+     *
+     * @param array $attributes Optional attributes
+     */
+    public function __construct($attributes = []) {
+        parent::__construct('Function', "", $attributes);
+    }
+
+    /**
+     * Add name attribute.
+     *
+     * @param string $name 
+     */
+    public function setName($name): self {
+        return $this->setAttribute('name', $name);
+    }
+
+    /**
+     * Add argument attribute.
+     *
+     * @param string $argument 
+     */
+    public function setArgument($argument): self {
+        return $this->setAttribute('argument', $argument);
+    }
+
+    /**
+     * Add purpose attribute.
+     *
+     * @param string $purpose 
+     */
+    public function setPurpose($purpose): self {
+        return $this->setAttribute('purpose', $purpose);
+    }
+
+    /**
+     * Add webHookURL attribute.
+     *
+     * @param string $webHookURL 
+     */
+    public function setWebHookURL($webHookURL): self {
+        return $this->setAttribute('webHookURL', $webHookURL);
+    }
+
+    /**
+     * Add webHookAuthUser attribute.
+     *
+     * @param string $webHookAuthUser 
+     */
+    public function setWebHookAuthUser($webHookAuthUser): self {
+        return $this->setAttribute('webHookAuthUser', $webHookAuthUser);
+    }
+
+    /**
+     * Add webHookAuthPass attribute.
+     *
+     * @param string $webHookAuthPass 
+     */
+    public function setWebHookAuthPass($webHookAuthPass): self {
+        return $this->setAttribute('webHookAuthPass', $webHookAuthPass);
+    }
+
+    /**
+     * Add metadata.
+     *
+     * @param string $name
+     * @param string $value 
+     */
+    public function addMetaData($name, $value): self {
+        $this->nest(new SWAIGMetadata($name, $value, []));
+        return $this;
+    }
+}
+
+class SWAIGMetadata extends TwiML {
+    /**
+     * SWAIG constructor.
+     *
+     * @param array $attributes Optional attributes
+     */
+    public function __construct($name, $value, $attributes = []) {
+        parent::__construct($name, $value, $attributes);
     }
 }
