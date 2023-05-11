@@ -294,7 +294,7 @@ class SWAIGDefaults extends TwiML {
      * @param string $value 
      */
     public function addMetaData($name, $value): self {
-        $this->nest(new TwiML($name, $value, []));
+        $this->nest(new SWAIGMetadata($name, $value, []));
         return $this;
     }
 }
