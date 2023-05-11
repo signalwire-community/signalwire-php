@@ -252,7 +252,7 @@ class SWAIG extends TwiML {
 
 class SWAIGDefaults extends TwiML {
     /**
-     * Function constructor.
+     * Defaults constructor.
      *
      * @param array $attributes Optional attributes
      */
@@ -377,7 +377,7 @@ class SWAIGFunction extends TwiML {
 
 class SWAIGMetadata extends TwiML {
     /**
-     * SWAIG constructor.
+     * SWAIG Metadata constructor.
      *
      * @param array $attributes Optional attributes
      */
