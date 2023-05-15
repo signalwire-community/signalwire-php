@@ -184,8 +184,8 @@ class Languages extends TwiML {
      *
      * @param array $attributes Optional attributes
      */
-    public function __construct($attributes = []) {
-        parent::__construct('Languages', "", $attributes);
+    public function __construct() {
+        parent::__construct('Languages', "", []);
     }
 
     public function language($attributes = []): Language {
@@ -237,8 +237,8 @@ class SWAIG extends TwiML {
      *
      * @param array $attributes Optional attributes
      */
-    public function __construct($attributes = []) {
-        parent::__construct('SWAIG', "", $attributes);
+    public function __construct() {
+        parent::__construct('SWAIG', "", []);
     }
 
     public function defaults($attributes = []): SWAIGDefaults {
