@@ -137,7 +137,19 @@ class LaMLTest extends TestCase
     $p1 = $ai->prompt('prompt1');
     $p1->setTemperature(0.2);
     $ai->postPrompt('prompt2');
-    $this->assertEquals($response->__toString(), "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<Response><Connect><AI engine=\"gcloud\"><Prompt temperature=\"0.2\">prompt1</Prompt><PostPrompt>prompt2</PostPrompt></AI></Connect></Response>\n");
+    $swaig = $ai->swaig();
+    $swaig->defaults([ 'webHookURL' => "https://user:pass@server.com/commands.cgi"]);
+    $fn = $swaig->function();
+    $fn->setName('fn1');
+    $fn->setArgument('no argument');
+    $fn->setPurpose('to do something');
+    $fn = $swaig->function();
+    $fn->setName('fn2');
+    $fn->setArgument('no argument');
+    $fn->setPurpose('to do something');
+    $fn->addMetaData("AAA", "111");
+    $fn->addMetaData("BBB", "222");
+    $this->assertEquals($response->__toString(), "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<Response><Connect><AI engine=\"gcloud\"><Prompt temperature=\"0.2\">prompt1</Prompt><PostPrompt>prompt2</PostPrompt><SWAIG><Defaults webHookURL=\"https://user:pass@server.com/commands.cgi\"></Defaults><Function name=\"fn1\" argument=\"no argument\" purpose=\"to do something\"></Function><Function name=\"fn2\" argument=\"no argument\" purpose=\"to do something\"><AAA>111</AAA><BBB>222</BBB></Function></SWAIG></AI></Connect></Response>\n");
   }
 
   public function testMessageResponseLaMLMatch(): void {
