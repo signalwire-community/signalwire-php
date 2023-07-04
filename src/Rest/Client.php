@@ -47,6 +47,10 @@ class Client extends \Twilio\Rest\Client {
     }
     return false;
   }
+
+  protected function getCalls(): \Twilio\Rest\Api\V2010\Account\CallList {
+    return $this->_api->v2010->account->calls;
+  }
 }
 
 class Fax extends \Twilio\Rest\Fax {
